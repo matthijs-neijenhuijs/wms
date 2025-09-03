@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+         
+        'reference_code',
+        'ean',
+        'description',
+        'tax_rate_id',
+        'brand_id',
+        'product_category_id'
+    ];
+
+
+        public function warehouse(){
+            return $this->belongsTo(Warehouse::class);
+        }
+
+        public function productCategory(){
+            return $this->belongsTo(ProductCategory::class);
+        }
+
+        public function brand()
+        {
+            return $this->belongsTo(Brand::class);
+        }
+
+        public function taxRate()
+        {
+            return $this->belongsTo(TaxRate::class);
+        }
+
+
+}
