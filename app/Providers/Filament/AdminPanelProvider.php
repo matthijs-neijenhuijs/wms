@@ -20,6 +20,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Models\Warehouse;
 use Filament\Navigation\NavigationGroup;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -29,10 +30,14 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+                ->profile()
+
+     ->multiFactorAuthentication([
+            AppAuthentication::make(),
+        ])
+
             ->spa()
             ->tenant(Warehouse::class, ownershipRelationship: 'warehouse')
-
-            
             ->login()
             ->colors([
                 'primary' => Color::Amber,
