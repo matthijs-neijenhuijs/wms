@@ -25,14 +25,18 @@ class ProductForm
                 Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
-Select::make('tax_rate_id')
-    ->relationship(name: 'taxRate', titleAttribute: 'name'),
+                Select::make('tax_rate_id')
+                    ->relationship(name: 'taxRate', titleAttribute: 'name'),
 
-Select::make('brand_id')
-    ->relationship(name: 'brand', titleAttribute: 'name'),
+                Select::make('brand_id')
+                    ->relationship(name: 'brand', titleAttribute: 'name'),
 
-Select::make('product_category_id')
-    ->relationship(name: 'productCategory', titleAttribute: 'name')
+                Select::make('product_category_id')
+                    ->relationship(
+                        name: 'productCategory',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn ($query) => $query->where('active', true)
+                    )
 
 
             ]);

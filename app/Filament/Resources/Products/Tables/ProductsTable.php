@@ -6,9 +6,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
+use Filament\Tables\Columns\ToggleColumn;
 
 class ProductsTable
 {
@@ -16,8 +19,7 @@ class ProductsTable
     {
         return $table
             ->columns([
-                IconColumn::make('active')
-                    ->boolean(),
+                ToggleColumn::make('active'),
                 TextColumn::make('reference_code')
                     ->searchable(),
                 TextColumn::make('ean')

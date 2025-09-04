@@ -30,9 +30,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-                ->profile()
-
-     ->multiFactorAuthentication([
+            ->profile()
+            ->multiFactorAuthentication([
             AppAuthentication::make(),
         ])
 
