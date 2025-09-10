@@ -15,7 +15,8 @@ class OrderProduct extends Model
         'order_id',
         'product_id',
         'name',
-        'amount'
+        'amount',
+        'reference_code'
     ];
 
 

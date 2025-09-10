@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Orders\RelationManagers;
 
-
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -12,17 +11,17 @@ use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Select;
 
 class OrderProductRelationManager extends RelationManager
 {
     protected static string $relationship = 'products';
 
-        public function form(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
@@ -31,7 +30,8 @@ class OrderProductRelationManager extends RelationManager
                     ->required()
                     ->searchable()
                     ->preload(),
-                TextInput::make('quantity')
+
+                TextInput::make('amount')
                     ->numeric()
                     ->minValue(1)
                     ->default(1)
@@ -46,21 +46,25 @@ class OrderProductRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('amount'),
+                TextColumn::make('reference_code'),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->beforeFormFilled(function (array $data) {
+                    ->mutateFormDataUsing(function (array $data): array {
                         if (isset($data['product_id'])) {
                             $product = \App\Models\Product::find($data['product_id']);
                             if ($product) {
                                 $data['name'] = $product->name;
+                                $data['reference_code'] = $product->reference_code;
                             }
                         }
+
                         return $data;
-                    })
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -68,7 +72,7 @@ class OrderProductRelationManager extends RelationManager
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
