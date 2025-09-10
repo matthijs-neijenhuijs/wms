@@ -36,8 +36,15 @@ class ProductForm
                         name: 'productCategory',
                         titleAttribute: 'name',
                         modifyQueryUsing: fn ($query) => $query->where('active', true)
-                    )
+                    ),
 
+                Select::make('attributes')
+                    ->multiple()
+                    ->relationship('attributes', titleAttribute: 'name')
+                    ->preload()
+                    ->searchable()
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->attributeGroup->name}: {$record->name}")
+                    ->columnSpanFull()
 
             ]);
     }

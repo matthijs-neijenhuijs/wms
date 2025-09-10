@@ -41,5 +41,14 @@ class Product extends Model
             return $this->belongsTo(TaxRate::class);
         }
 
+        public function productAttributes()
+        {
+            return $this->hasMany(ProductAttribute::class);
+        }
+
+        public function attributes()
+        {
+            return $this->belongsToMany(Attribute::class, 'product_attributes');
+        }
 
 }

@@ -81,6 +81,8 @@ class Order extends Model
         return $this->belongsTo(Client::class);
     }
 
-
+        public function products(){
+            return $this->hasMany(OrderProduct::class);
+        }
 
 }
