@@ -10,6 +10,7 @@
         "filament/filament": "^4.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "rebing/graphql-laravel": "^9.10",
         "stancl/tenancy": "^3.9"
     },
     "require-dev": {
