@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-                $table->text('app_authentication_secret')->nullable();
-                $table->text('app_authentication_recovery_codes')->nullable();
-                $table->boolean('has_email_authentication')->default(false);
+            $table->text('app_authentication_secret')->nullable();
+            $table->text('app_authentication_recovery_codes')->nullable();
+            $table->boolean('has_email_authentication')->default(false);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

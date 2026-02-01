@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('picklists', function(Blueprint $table) {     
+        Schema::create('picklists', function (Blueprint $table) {
             $table->increments('id');
             $table->foreignId('order_id')->constrained('orders')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE'); 
-            $table->boolean('completed')->default(false); 
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->boolean('completed')->default(false);
             $table->boolean('back_order')->default(false);
             $table->text('comments')->nullable();
             $table->integer('generated_year_picklist_id');
@@ -25,23 +25,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('picklists_products', function(Blueprint $table) {     
+        Schema::create('picklists_products', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('picklist_id')->unsigned();
-            $table->foreign('picklist_id')->references('id')->on('picklists')->onDelete('cascade'); 
+            $table->foreign('picklist_id')->references('id')->on('picklists')->onDelete('cascade');
             $table->boolean('show_for_supplier')->default(false);
             $table->string('ean_code');
             $table->string('reference_code')->nullable();
             $table->string('color')->nullable();
             $table->string('size')->nullable();
             $table->string('product_title');
-            $table->boolean('scanned')->default(false); 
+            $table->boolean('scanned')->default(false);
             $table->timestamps();
         });
     }
-
-
-
 
     /**
      * Reverse the migrations.

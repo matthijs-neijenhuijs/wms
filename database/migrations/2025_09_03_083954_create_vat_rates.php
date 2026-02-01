@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tax_rates', function (Blueprint $table) {
+        Schema::create('vat_rates', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-			$table->decimal('rate', 12, 4)->unique();
+            $table->decimal('rate', 12, 4)->unique();
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->timestamps();
         });
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tax_rates');
+        Schema::dropIfExists('vat_rates');
     }
 };

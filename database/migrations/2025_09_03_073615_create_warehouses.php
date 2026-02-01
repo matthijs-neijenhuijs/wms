@@ -17,13 +17,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('user_warehouses', function (Blueprint $table){
+        Schema::create('user_warehouses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('SET NULL')->onDelete('CASCADE');
             $table->foreignId('warehouse_id')->nullable()->constrained('warehouses')->onUpdate('SET NULL')->onDelete('CASCADE');
             $table->timestamps();
         });
-
 
     }
 

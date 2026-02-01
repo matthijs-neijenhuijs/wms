@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Models;
-use Carbon\Carbon;
 
+use App\OrderStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
@@ -16,11 +17,16 @@ class Order extends Model
         'price_with_tax',
         'price_without_tax',
         'total_discount',
-        'client_id'
-
+        'client_id',
+        'status',
     ];
 
-
+    protected function casts(): array
+    {
+        return [
+            'status' => OrderStatus::class,
+        ];
+    }
 
     public static function boot()
     {
@@ -54,35 +60,29 @@ class Order extends Model
                 }
             }
 
-
-            if ($model->collection_id AND $model->collection) {
+            if ($model->collection_id and $model->collection) {
 
                 $model->expected_delivery_date = $model->collection->expected_delivery_date;
 
             }
 
-
         });
-
-
-
 
         parent::boot();
     }
 
-
-    public function warehouse(){
+    public function warehouse()
+    {
         return $this->belongsTo(Warehouse::class);
     }
 
-
-
-    public function client(){
+    public function client()
+    {
         return $this->belongsTo(Client::class);
     }
 
-        public function products(){
-            return $this->hasMany(OrderProduct::class);
-        }
-
+    public function products()
+    {
+        return $this->hasMany(OrderProduct::class);
+    }
 }

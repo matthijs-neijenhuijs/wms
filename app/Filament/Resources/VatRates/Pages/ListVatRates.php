@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\TaxRates\Pages;
+namespace App\Filament\Resources\VatRates\Pages;
 
-use App\Filament\Resources\TaxRates\TaxRateResource;
+use App\Filament\Resources\VatRates\VatRateResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
-class ListTaxRates extends ListRecords
+class ListVatRates extends ListRecords
 {
-    protected static string $resource = TaxRateResource::class;
+    protected static string $resource = VatRateResource::class;
 
     protected function getHeaderActions(): array
     {

@@ -27,11 +27,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-		Schema::create('client_addresses', function(Blueprint $table) {		
-		 	$table->increments('id');
+        Schema::create('client_addresses', function (Blueprint $table) {
+            $table->increments('id');
             $table->foreignId('client_id')->constrained('clients')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->string('company')->nullable();
-			$table->enum('gender', array('male', 'female'));
+            $table->enum('gender', ['male', 'female']);
             $table->string('initials')->nullable();
             $table->string('firstname')->nullable();
             $table->string('lastname')->nullable();
@@ -45,13 +45,12 @@ return new class extends Migration
             $table->string('mobile')->nullable();
             $table->string('email')->nullable();
             $table->timestamps();
-		});
+        });
 
-		Schema::table('clients', function(Blueprint $table) {
-       		$table->foreign('delivery_client_address_id')->references('id')->on('client_addresses')->onDelete('set null');
-       		$table->foreign('bill_client_address_id')->references('id')->on('client_addresses')->onDelete('set null');
-		});
-
+        Schema::table('clients', function (Blueprint $table) {
+            $table->foreign('delivery_client_address_id')->references('id')->on('client_addresses')->onDelete('set null');
+            $table->foreign('bill_client_address_id')->references('id')->on('client_addresses')->onDelete('set null');
+        });
 
     }
 

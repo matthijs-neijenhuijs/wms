@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateAttributeGroup extends CreateRecord
 {
     protected static string $resource = AttributeGroupResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

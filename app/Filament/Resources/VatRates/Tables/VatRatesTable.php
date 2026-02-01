@@ -1,30 +1,30 @@
 <?php
 
-namespace App\Filament\Resources\TaxRates\Tables;
+namespace App\Filament\Resources\VatRates\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class TaxRatesTable
+class VatRatesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                       TextColumn::make('name'),
-                                TextColumn::make(name: 'rate')
-        
+                TextColumn::make('name'),
+                TextColumn::make(name: 'rate'),
+
             ])
             ->filters([
                 //
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make()
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

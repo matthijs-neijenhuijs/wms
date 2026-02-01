@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class ProductForm
@@ -14,7 +14,7 @@ class ProductForm
     {
         return $schema
             ->components([
-                 Toggle::make('active')->inline(false)
+                Toggle::make('active')->inline(false)
                     ->required()->columnSpan(2),
                 TextInput::make('reference_code')
                     ->required(),
@@ -25,8 +25,8 @@ class ProductForm
                 Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
-                Select::make('tax_rate_id')
-                    ->relationship(name: 'taxRate', titleAttribute: 'name'),
+                Select::make('vat_rate_id')
+                    ->relationship(name: 'vatRate', titleAttribute: 'name'),
 
                 Select::make('brand_id')
                     ->relationship(name: 'brand', titleAttribute: 'name'),
@@ -44,7 +44,7 @@ class ProductForm
                     ->preload()
                     ->searchable()
                     ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->attributeGroup->name}: {$record->name}")
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
 
             ]);
     }

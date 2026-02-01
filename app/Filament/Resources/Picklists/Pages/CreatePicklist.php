@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePicklist extends CreateRecord
 {
     protected static string $resource = PicklistResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

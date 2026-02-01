@@ -5,8 +5,8 @@ namespace App\Filament\Resources\Orders\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class OrdersTable
 {
@@ -14,15 +14,19 @@ class OrdersTable
     {
         return $table
             ->columns([
-
                 TextColumn::make('generated_custom_order_id')->label('id')
                     ->searchable(),
+
+                TextColumn::make('status')
+                    ->badge()
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('price_with_tax')->label('price')
                     ->searchable(),
                 TextColumn::make('client.email')
                     ->numeric()
                     ->sortable(),
-
 
                 //
             ])

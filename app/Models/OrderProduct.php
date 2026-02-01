@@ -14,18 +14,24 @@ class OrderProduct extends Model
     protected $fillable = [
         'order_id',
         'product_id',
+        'vat_rate_id',
         'name',
         'amount',
-        'reference_code'
+        'reference_code',
     ];
 
-
-    public function order(){
+    public function order()
+    {
         return $this->belongsTo(Order::class);
     }
-    public function product(){
+
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
 
-
+    public function vatRate()
+    {
+        return $this->belongsTo(VatRate::class);
+    }
 }
