@@ -15,13 +15,13 @@ class ClientAddresses extends Model
         'firstname',
         'client_id',
         'lastname',
-        'street'
+        'street',
     ];
 
-
-        public function client(){
-            return $this->belongsTo(Client::class);
-        }
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 
     public function isBillingAddress()
     {
@@ -32,5 +32,4 @@ class ClientAddresses extends Model
     {
         return $this->belongsTo(Client::class, 'id', 'delivery_client_address_id');
     }
-
 }

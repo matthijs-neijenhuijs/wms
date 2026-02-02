@@ -18,7 +18,7 @@ class ProductForm
                     ->required()->columnSpan(2),
                 TextInput::make('reference_code')
                     ->required(),
-                TextInput::make('ean')
+                TextInput::make('barcode')
                     ->required(),
                 TextInput::make('name')
                     ->required()->columnSpan(2),
@@ -31,19 +31,12 @@ class ProductForm
                 Select::make('brand_id')
                     ->relationship(name: 'brand', titleAttribute: 'name'),
 
-                Select::make('product_category_id')
-                    ->relationship(
-                        name: 'productCategory',
-                        titleAttribute: 'name',
-                        modifyQueryUsing: fn ($query) => $query->where('active', true)
-                    ),
-
                 Select::make('attributes')
                     ->multiple()
                     ->relationship('attributes', titleAttribute: 'name')
                     ->preload()
                     ->searchable()
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->attributeGroup->name}: {$record->name}")
+                    ->getOptionLabelFromRecordUsing(fn ($record) => sprintf('%s: %s', $record->attributeGroup?->name ?? 'Ungrouped', $record->name))
                     ->columnSpanFull(),
 
             ]);

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('warehouses', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('subdomain_id')->constrained('subdomains')->cascadeOnDelete();
             $table->string('name');
             $table->timestamps();
         });

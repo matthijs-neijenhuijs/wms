@@ -15,16 +15,21 @@ return new class extends Migration
             $table->id();
             $table->boolean('active')->default(false);
             $table->string('email');
-            $table->string('vat_number')->nullable()->unique();
-            $table->string('coc_number')->nullable()->unique();
-            $table->string('debtor_number')->nullable()->unique();
-            $table->string('iban_number')->nullable()->unique();
+            $table->string('vat_number')->nullable();
+            $table->string('coc_number')->nullable();
+            $table->string('debtor_number')->nullable();
+            $table->string('iban_number')->nullable();
             $table->text('comments')->nullable();
             $table->string('company')->nullable();
             $table->integer('delivery_client_address_id')->unsigned()->nullable();
             $table->integer('bill_client_address_id')->unsigned()->nullable();
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->timestamps();
+
+            $table->unique(['warehouse_id', 'vat_number']);
+            $table->unique(['warehouse_id', 'coc_number']);
+            $table->unique(['warehouse_id', 'debtor_number']);
+            $table->unique(['warehouse_id', 'iban_number']);
         });
 
         Schema::create('client_addresses', function (Blueprint $table) {

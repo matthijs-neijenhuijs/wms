@@ -30,13 +30,12 @@ class OrderResource extends Resource
         return OrdersTable::configure($table);
     }
 
-public static function getRelations(): array
-{
-    return [
-      RelationManagers\OrderProductRelationManager::class,
-    ];
-}
-
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\OrderProductRelationManager::class,
+        ];
+    }
 
     public static function getPages(): array
     {

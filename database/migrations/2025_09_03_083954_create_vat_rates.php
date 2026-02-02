@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('vat_rates', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->decimal('rate', 12, 4)->unique();
+            $table->string('name');
+            $table->decimal('rate', 12, 4);
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->timestamps();
+
+            $table->unique(['warehouse_id', 'name']);
+            $table->unique(['warehouse_id', 'rate']);
         });
     }
 

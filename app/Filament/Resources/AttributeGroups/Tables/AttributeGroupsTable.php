@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\AttributeGroups\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class AttributeGroupsTable
 {
@@ -15,7 +15,7 @@ class AttributeGroupsTable
     {
         return $table
             ->columns([
-                 TextColumn::make('name'),
+                TextColumn::make('name'),
             ])
             ->filters([
                 //

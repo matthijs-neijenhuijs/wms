@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\GraphQL\Queries\Student;
-
 
 use App\Models\Product;
 use GraphQL\Type\Definition\Type;
@@ -25,4 +23,3 @@ class ProductsQuery extends Query
         return Product::all();
     }
 }
-

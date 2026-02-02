@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\GraphQL\Queries\Student;
-
 
 use App\Models\Product;
 use GraphQL\Type\Definition\Type;
@@ -26,8 +24,8 @@ class ProductQuery extends Query
             'id' => [
                 'name' => 'id',
                 'type' => Type::int(),
-                'rules' => ['required']
-            ]
+                'rules' => ['required'],
+            ],
         ];
     }
 

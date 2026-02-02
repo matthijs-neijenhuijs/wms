@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 
 class VatRate extends Model
 {
+    use BelongsToWarehouse;
+
     protected $table = 'vat_rates';
 
     /**

@@ -2,19 +2,32 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    use BelongsToWarehouse;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'warehouse_id',
+        'active',
         'reference_code',
-        'ean',
+        'price',
+        'product_code',
+        'stock_unlimited',
+        'barcode',
+        'name',
+        'weight',
+        'height',
+        'length',
+        'hs_code',
+        'country_of_origin',
         'description',
         'vat_rate_id',
         'brand_id',

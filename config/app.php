@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Central Domain
+    |--------------------------------------------------------------------------
+    |
+    | The central domain is used to identify subdomain requests.
+    | Example: if central_domain is 'wms.test', subdomain1.wms.test will be recognized.
+    |
+    */
+
+    'central_domain' => env('CENTRAL_DOMAIN', 'wms.test'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

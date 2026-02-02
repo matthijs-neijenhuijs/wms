@@ -3,16 +3,13 @@
 namespace App\Filament\Resources\Products\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TagsColumn;
-use Filament\Tables\Table;
-use Filament\Notifications\Notification;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Table;
 
 class ProductsTable
 {
@@ -28,28 +25,24 @@ class ProductsTable
                 TextColumn::make('name')
                     ->searchable(),
 
-
                 TextColumn::make('brand.name')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('productCategory.name')
-                    ->numeric()
-                    ->sortable(),
-                    
+
                 TagsColumn::make('attributes')
                     ->getStateUsing(function ($record) {
                         return $record->attributes->map(function ($attribute) {
                             return "{$attribute->attributeGroup->name}: {$attribute->name}";
                         });
                     })
-                    ->searchable()
+                    ->searchable(),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make()
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

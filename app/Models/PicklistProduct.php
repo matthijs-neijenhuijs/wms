@@ -15,13 +15,11 @@ class PicklistProduct extends Model
         'order_id',
         'name',
         'amount',
-        'reference_code'
+        'reference_code',
     ];
 
-
-    public function order(){
+    public function order()
+    {
         return $this->belongsTo(Order::class);
     }
-
-
 }

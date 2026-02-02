@@ -3,20 +3,21 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasTenants;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TenantScope;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Auth\MultiFactor\Email\Contracts\HasEmailAuthentication;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 
-class User extends Authenticatable implements FilamentUser, HasTenants, HasAppAuthentication, HasAppAuthenticationRecovery, HasEmailAuthentication, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasEmailAuthentication, HasTenants, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -27,6 +28,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, HasAppAu
      * @var list<string>
      */
     protected $fillable = [
+        'subdomain_id',
         'name',
         'email',
         'password',
@@ -53,69 +55,90 @@ class User extends Authenticatable implements FilamentUser, HasTenants, HasAppAu
     {
         return [
             'email_verified_at' => 'datetime',
-                'password' => 'hashed',
-                'app_authentication_secret' => 'encrypted',
-                'app_authentication_recovery_codes' => 'encrypted:array',
-                'has_email_authentication' => 'boolean',
+            'password' => 'hashed',
+            'app_authentication_secret' => 'encrypted',
+            'app_authentication_recovery_codes' => 'encrypted:array',
+            'has_email_authentication' => 'boolean',
         ];
     }
 
-        public function getAppAuthenticationSecret(): ?string
-        {
-            return $this->app_authentication_secret;
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantScope);
+
+        static::creating(function (User $user) {
+            if (! $user->subdomain_id && app()->has('current_subdomain')) {
+                $user->subdomain_id = app('current_subdomain')->id;
+            }
+        });
+    }
+
+    public function getAppAuthenticationSecret(): ?string
+    {
+        return $this->app_authentication_secret;
+    }
+
+    public function saveAppAuthenticationSecret(?string $secret): void
+    {
+        $this->app_authentication_secret = $secret;
+        $this->save();
+    }
+
+    public function getAppAuthenticationHolderName(): string
+    {
+        return $this->email;
+    }
+
+    public function getAppAuthenticationRecoveryCodes(): ?array
+    {
+        return $this->app_authentication_recovery_codes;
+    }
+
+    public function saveAppAuthenticationRecoveryCodes(?array $codes): void
+    {
+        $this->app_authentication_recovery_codes = $codes;
+        $this->save();
+    }
+
+    public function hasEmailAuthentication(): bool
+    {
+        return $this->has_email_authentication;
+    }
+
+    public function toggleEmailAuthentication(bool $condition): void
+    {
+        $this->has_email_authentication = $condition;
+        $this->save();
+    }
+
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        // Allow all authenticated users to access the panel. Adjust logic as needed.
+        return true;
+    }
+
+    public function subdomain()
+    {
+        return $this->belongsTo(Subdomain::class, 'subdomain_id');
+    }
+
+    public function warehouses()
+    {
+        return $this->belongsToMany(Warehouse::class, 'user_warehouses');
+    }
+
+    public function getTenants(Panel $panel): Collection
+    {
+        // Only return warehouses for the current subdomain
+        if (app()->has('current_subdomain')) {
+            return $this->warehouses()->where('warehouses.subdomain_id', app('current_subdomain')->id)->get();
         }
 
-        public function saveAppAuthenticationSecret(?string $secret): void
-        {
-            $this->app_authentication_secret = $secret;
-            $this->save();
-        }
+        return $this->warehouses()->get();
+    }
 
-        public function getAppAuthenticationHolderName(): string
-        {
-            return $this->email;
-        }
-
-        public function getAppAuthenticationRecoveryCodes(): ?array
-        {
-            return $this->app_authentication_recovery_codes;
-        }
-
-        public function saveAppAuthenticationRecoveryCodes(?array $codes): void
-        {
-            $this->app_authentication_recovery_codes = $codes;
-            $this->save();
-        }
-
-        public function hasEmailAuthentication(): bool
-        {
-            return $this->has_email_authentication;
-        }
-
-        public function toggleEmailAuthentication(bool $condition): void
-        {
-            $this->has_email_authentication = $condition;
-            $this->save();
-        }
-        public function canAccessPanel(\Filament\Panel $panel): bool
-        {
-            // Allow all authenticated users to access the panel. Adjust logic as needed.
-            return true;
-        }
-
-        public function warehouses(){
-            return $this->belongsToMany(Warehouse::class, 'user_warehouses');
-        }
-
-        public function getTenants(Panel $panel): Collection
-        {
-            return $this->warehouses;
-        }
-
-        public function canAccessTenant(Model $tenant): bool
-        {
-            return $this->warehouses()->whereKey($tenant)->exists();
-        }
-
-
+    public function canAccessTenant(Model $tenant): bool
+    {
+        return $this->warehouses()->whereKey($tenant)->exists();
+    }
 }

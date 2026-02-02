@@ -12,14 +12,11 @@ class Attribute extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'name'
+        'name',
     ];
 
-
-        public function attributeGroup(){
-            return $this->belongsTo(AttributeGroup::class);
-        }
-
-
-
+    public function attributeGroup()
+    {
+        return $this->belongsTo(AttributeGroup::class);
+    }
 }

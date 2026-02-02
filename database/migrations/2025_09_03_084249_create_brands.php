@@ -14,11 +14,14 @@ return new class extends Migration
         Schema::create('brands', function (Blueprint $table) {
             $table->id();
             $table->boolean('active')->default(false);
-            $table->string('reference_code')->unique();
-            $table->string('name')->unique();
+            $table->string('reference_code');
+            $table->string('name');
             $table->text('description');
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->timestamps();
+
+            $table->unique(['warehouse_id', 'reference_code']);
+            $table->unique(['warehouse_id', 'name']);
         });
 
     }

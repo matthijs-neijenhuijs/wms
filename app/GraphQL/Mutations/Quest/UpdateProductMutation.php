@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\GraphQL\Mutations\Quest;
 
 use App\Models\Product;
@@ -12,7 +11,7 @@ class UpdateProductMutation extends Mutation
 {
     protected $attributes = [
         'name' => 'updateProduct',
-        'description' => 'Updates a Product'
+        'description' => 'Updates a Product',
     ];
 
     public function type(): Type
@@ -25,12 +24,12 @@ class UpdateProductMutation extends Mutation
         return [
             'id' => [
                 'name' => 'id',
-                'type' =>  Type::nonNull(Type::int()),
+                'type' => Type::nonNull(Type::int()),
             ],
             'name' => [
                 'name' => 'name',
-                'type' =>  Type::nonNull(Type::string()),
-            ]
+                'type' => Type::nonNull(Type::string()),
+            ],
         ];
     }
 

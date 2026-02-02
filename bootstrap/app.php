@@ -1,18 +1,97 @@
 <?php
 
+use App\Models\Warehouse;
+use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::middleware('web')
+                ->domain(config('app.central_domain'))
+                ->group(base_path('routes/web.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->web(append: [
+            \App\Http\Middleware\IdentifySubdomain::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (ModelNotFoundException $exception, Request $request) {
+            if ($exception->getModel() !== Warehouse::class) {
+                return null;
+            }
+
+            if (! auth()->check()) {
+                return null;
+            }
+
+            $panel = Filament::getCurrentPanel() ?? Filament::getPanel('admin');
+
+            if (! $panel) {
+                return null;
+            }
+
+            $tenant = auth()->user()->getTenants($panel)->first();
+
+            if (! $tenant) {
+                return null;
+            }
+
+            return redirect()->to($panel->getUrl($tenant));
+        });
+
+        $exceptions->render(function (NotFoundHttpException $exception, Request $request) {
+            if (! auth()->check()) {
+                return null;
+            }
+
+            if (! $request->isMethod('get') && ! $request->isMethod('head')) {
+                return null;
+            }
+
+            $panel = Filament::getCurrentPanel() ?? Filament::getPanel('admin');
+
+            if (! $panel) {
+                return null;
+            }
+
+            $segment = $request->segment(1);
+
+            if (! $segment) {
+                return null;
+            }
+
+            if (in_array($segment, ['login', 'logout', 'register', 'password-reset', 'email-verification'], true)) {
+                return null;
+            }
+
+            $tenants = auth()->user()->getTenants($panel);
+
+            if ($tenants->isEmpty()) {
+                return null;
+            }
+
+            $slugAttribute = $panel->getTenantSlugAttribute();
+
+            $tenantKeys = $slugAttribute
+                ? $tenants->pluck($slugAttribute)
+                : $tenants->modelKeys();
+
+            if ($tenantKeys->contains($segment)) {
+                return null;
+            }
+
+            return redirect()->to($panel->getUrl($tenants->first()));
+        });
     })->create();

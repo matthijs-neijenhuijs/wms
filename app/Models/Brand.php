@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 
 class Brand extends Model
 {
+    use BelongsToWarehouse;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -15,15 +18,16 @@ class Brand extends Model
         'active',
         'name',
         'reference_code',
-        'description'
+        'description',
     ];
 
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
 
-        public function warehouse(){
-            return $this->belongsTo(Warehouse::class);
-        }
-        public function products(){
-            return $this->hasMany(Product::class);
-        }
-
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

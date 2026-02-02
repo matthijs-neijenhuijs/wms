@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
+    use BelongsToWarehouse;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -15,13 +18,16 @@ class Client extends Model
         'active',
         'email',
         'bill_client_address_id',
-        'delivery_client_address_id'
+        'delivery_client_address_id',
     ];
 
-    public function warehouse(){
+    public function warehouse()
+    {
         return $this->belongsTo(Warehouse::class);
     }
-    public function addresses(){
+
+    public function addresses()
+    {
         return $this->hasMany(ClientAddresses::class);
     }
 
@@ -34,10 +40,4 @@ class Client extends Model
     {
         return $this->belongsTo(ClientAddresses::class, 'bill_client_address_id');
     }
-
-
-    
-
-
-
 }

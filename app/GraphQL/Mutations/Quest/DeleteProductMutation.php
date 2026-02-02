@@ -10,7 +10,7 @@ class DeleteProductMutation extends Mutation
 {
     protected $attributes = [
         'name' => 'deleteProduct',
-        'description' => 'Deletes a Product'
+        'description' => 'Deletes a Product',
     ];
 
     public function type(): Type
@@ -24,8 +24,8 @@ class DeleteProductMutation extends Mutation
             'id' => [
                 'name' => 'id',
                 'type' => Type::nonNull(Type::int()),
-                'rules' => ['exists:quests']
-            ]
+                'rules' => ['exists:quests'],
+            ],
         ];
     }
 
@@ -33,6 +33,6 @@ class DeleteProductMutation extends Mutation
     {
         $student = Product::findOrFail($args['id']);
 
-        return  $student->delete() ? true : false;
+        return $student->delete() ? true : false;
     }
 }

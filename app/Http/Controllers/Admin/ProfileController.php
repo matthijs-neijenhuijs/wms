@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -41,9 +42,9 @@ class ProfileController extends Controller
 
         $user = Auth::user();
 
-    // Toggle email 2FA (User model provides toggleEmailAuthentication)
-    $enableEmail = (bool) $request->input('enable_email_2fa', false);
-    $user->toggleEmailAuthentication($enableEmail);
+        // Toggle email 2FA (User model provides toggleEmailAuthentication)
+        $enableEmail = (bool) $request->input('enable_email_2fa', false);
+        $user->toggleEmailAuthentication($enableEmail);
 
         // Handle app-based secret generation or clearing
         $action = $request->input('action');

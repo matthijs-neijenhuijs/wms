@@ -1,18 +1,17 @@
 <?php
 
-
 namespace App\GraphQL\Mutations\Quest;
 
 use App\Models\Product;
-use Rebing\GraphQL\Support\Mutation;
 use GraphQL\Type\Definition\Type;
 use Rebing\GraphQL\Support\Facades\GraphQL;
+use Rebing\GraphQL\Support\Mutation;
 
 class CreateProductMutation extends Mutation
 {
     protected $attributes = [
         'name' => 'createProduct',
-        'description' => 'Creates a Product'
+        'description' => 'Creates a Product',
     ];
 
     public function type(): Type
@@ -25,14 +24,14 @@ class CreateProductMutation extends Mutation
         return [
             'name' => [
                 'name' => 'name',
-                'type' =>  Type::nonNull(Type::string()),
-            ]
+                'type' => Type::nonNull(Type::string()),
+            ],
         ];
     }
 
     public function resolve($root, $args)
     {
-        $student = new Product();
+        $student = new Product;
         $student->fill($args);
         $student->save();
 

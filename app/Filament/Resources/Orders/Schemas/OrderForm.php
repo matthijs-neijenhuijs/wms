@@ -18,11 +18,18 @@ class OrderForm
                     ->required()
                     ->default(OrderStatus::Concept),
 
-                TextInput::make('price_with_tax')
-                    ->required(),
 
                 Select::make('client_id')
-                    ->relationship(name: 'client', titleAttribute: 'id'),
+                    ->relationship(
+                        name: 'client',
+                        modifyQueryUsing: fn ($query) => $query
+                            ->join('client_addresses', 'clients.id', '=', 'client_addresses.client_id')
+                            ->select('clients.*')
+                            ->distinct(),
+                    )
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->clientDeliveryAddress?->firstname . ' ' . $record->clientDeliveryAddress?->lastname ?? 'Unknown')
+                    ->searchable()
+                    ->preload(),
             ]);
     }
 }

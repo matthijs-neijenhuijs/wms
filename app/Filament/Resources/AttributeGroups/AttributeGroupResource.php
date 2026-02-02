@@ -8,10 +8,8 @@ use App\Filament\Resources\AttributeGroups\Pages\ListAttributeGroups;
 use App\Filament\Resources\AttributeGroups\Schemas\AttributeGroupForm;
 use App\Filament\Resources\AttributeGroups\Tables\AttributeGroupsTable;
 use App\Models\AttributeGroup;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -19,10 +17,7 @@ class AttributeGroupResource extends Resource
 {
     protected static ?string $model = AttributeGroup::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
-
-
-
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -36,7 +31,6 @@ class AttributeGroupResource extends Resource
         return AttributeGroupsTable::configure($table);
     }
 
-
     public static function getPages(): array
     {
         return [
@@ -46,11 +40,10 @@ class AttributeGroupResource extends Resource
         ];
     }
 
-public static function getRelations(): array
-{
-    return [
-        RelationManagers\AttributesRelationManager::class,
-    ];
-}
-
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\AttributesRelationManager::class,
+        ];
+    }
 }

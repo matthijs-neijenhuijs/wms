@@ -16,8 +16,15 @@ return new class extends Migration
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreignId('client_id')->nullable()->constrained('clients')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->enum('status', ['concept', 'confirmed', 'shipped', 'delivered'])->default('concept');
+            $table->integer('generated_year_order_id');
+            $table->index('generated_year_order_id');
+            $table->string('generated_custom_order_id')->nullable()->unique();
+            $table->index('generated_custom_order_id');
+
+
+
             $table->decimal('discount', 12, 4)->nullable();
-            $table->string('custom_order_id')->nullable()->unique();        
+            $table->string('custom_order_id')->nullable();
             $table->string('invoice_initials')->nullable();
             $table->string('invoice_name')->nullable();
             $table->string('invoice_street')->nullable();
@@ -38,6 +45,8 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('customer_remarks')->nullable();
             $table->timestamps();
+
+            $table->unique(['warehouse_id', 'custom_order_id']);
         });
 
         Schema::create('order_products', function (Blueprint $table) {
@@ -51,10 +60,16 @@ return new class extends Migration
             $table->decimal('price', 12, 4)->nullable();
             $table->decimal('vat_rate', 12, 4)->nullable();
             $table->string('reference_code')->nullable();
-            $table->string('reference_code')->nullable();
+            $table->string('barcode')->nullable();
             $table->string('product_code')->nullable();
             $table->string('product_attribute_title')->nullable();
             $table->timestamps();
+
+            $table->unique(['warehouse_id', 'product_code']);
+            $table->unique(['warehouse_id', 'barcode']);
+            $table->unique(['warehouse_id', 'name']);
+
+
         });
     }
 

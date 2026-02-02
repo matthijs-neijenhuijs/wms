@@ -20,9 +20,11 @@ return new class extends Migration
             $table->text('comments')->nullable();
             $table->integer('generated_year_picklist_id');
             $table->index('generated_year_picklist_id');
-            $table->string('generated_custom_picklist_id')->nullable()->unique();
+            $table->string('generated_custom_picklist_id')->nullable();
             $table->index('generated_custom_picklist_id');
             $table->timestamps();
+
+            $table->unique(['warehouse_id', 'generated_custom_picklist_id']);
         });
 
         Schema::create('picklists_products', function (Blueprint $table) {
