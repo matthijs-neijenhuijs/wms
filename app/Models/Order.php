@@ -20,6 +20,7 @@ class Order extends Model
         'price_with_tax',
         'price_without_tax',
         'total_discount',
+        'total_price',
         'client_id',
         'status',
     ];
@@ -87,5 +88,13 @@ class Order extends Model
     public function products()
     {
         return $this->hasMany(OrderProduct::class);
+    }
+
+    public function updateTotalPrice(): void
+    {
+        $this->total_price = $this->products->sum(function ($product) {
+            return ($product->price ?? 0) * ($product->quantity ?? 0);
+        });
+        $this->saveQuietly();
     }
 }

@@ -15,8 +15,15 @@ class Client extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'warehouse_id',
         'active',
         'email',
+        'vat_number',
+        'coc_number',
+        'debtor_number',
+        'iban_number',
+        'comments',
+        'company',
         'bill_client_address_id',
         'delivery_client_address_id',
     ];
@@ -39,5 +46,10 @@ class Client extends Model
     public function clientBillAddress()
     {
         return $this->belongsTo(ClientAddresses::class, 'bill_client_address_id');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

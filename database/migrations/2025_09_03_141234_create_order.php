@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreignId('client_id')->nullable()->constrained('clients')->onUpdate('CASCADE')->onDelete('SET NULL');
-            $table->enum('status', ['concept', 'confirmed', 'shipped', 'delivered'])->default('concept');
+            $table->enum('status', ['concept', 'confirmed', 'shipped', 'delivered', 'cancelled'])->default('concept');
             $table->integer('generated_year_order_id');
             $table->index('generated_year_order_id');
             $table->string('generated_custom_order_id')->nullable()->unique();
             $table->index('generated_custom_order_id');
 
-
+            $table->decimal('total_price', 12, 4)->nullable();
 
             $table->decimal('discount', 12, 4)->nullable();
             $table->string('custom_order_id')->nullable();
@@ -55,21 +55,16 @@ return new class extends Migration
             $table->foreignId('product_id')->nullable()->constrained('products')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->foreignId('vat_rate_id')->nullable()->constrained('vat_rates')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->string('name');
-            $table->bigInteger('amount')->nullable();
+            $table->bigInteger('quantity')->nullable();
+
             $table->bigInteger('weight')->nullable();
             $table->decimal('price', 12, 4)->nullable();
             $table->decimal('vat_rate', 12, 4)->nullable();
-            $table->string('reference_code')->nullable();
             $table->string('barcode')->nullable();
-            $table->string('product_code')->nullable();
+            $table->string('reference_code')->nullable();
             $table->string('product_attribute_title')->nullable();
+
             $table->timestamps();
-
-            $table->unique(['warehouse_id', 'product_code']);
-            $table->unique(['warehouse_id', 'barcode']);
-            $table->unique(['warehouse_id', 'name']);
-
-
         });
     }
 

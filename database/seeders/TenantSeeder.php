@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Attribute;
 use App\Models\AttributeGroup;
 use App\Models\Brand;
+use App\Models\Client;
+use App\Models\ClientAddresses;
 use App\Models\Product;
 use App\Models\Subdomain;
 use App\Models\User;
@@ -47,6 +49,7 @@ class TenantSeeder extends Seeder
 
         $this->seedVatRates($warehousePhilandphae1);
         $this->seedWarehouseDefaults($warehousePhilandphae1);
+        $this->seedClients($warehousePhilandphae1);
 
         // Create phaewomen subdomain
         $phaewomen = Subdomain::firstOrCreate(
@@ -81,6 +84,8 @@ class TenantSeeder extends Seeder
         $this->seedVatRates($warehousePhae2);
         $this->seedWarehouseDefaults($warehousePhae1);
         $this->seedWarehouseDefaults($warehousePhae2);
+        $this->seedClients($warehousePhae1);
+        $this->seedClients($warehousePhae2);
 
         $this->command->info('Successfully seeded subdomains, users, and warehouses.');
         $this->command->info('');
@@ -208,6 +213,175 @@ class TenantSeeder extends Seeder
             $blue->id,
             $small->id,
             $medium->id,
+        ]);
+    }
+
+    private function seedClients(Warehouse $warehouse): void
+    {
+        // Client 1: John Doe
+        $client1 = Client::query()->firstOrCreate(
+            [
+                'warehouse_id' => $warehouse->id,
+                'email' => 'john.doe@example.com',
+            ],
+            [
+                'active' => true,
+                'vat_number' => 'NL123456789B01',
+                'coc_number' => '12345678',
+                'debtor_number' => 'DEB-001',
+                'iban_number' => 'NL91ABNA0417164300',
+                'company' => 'Doe Enterprises',
+                'comments' => 'VIP customer',
+            ]
+        );
+
+        $deliveryAddress1 = ClientAddresses::query()->firstOrCreate(
+            [
+                'client_id' => $client1->id,
+                'email' => 'john.doe@example.com',
+            ],
+            [
+                'company' => 'Doe Enterprises',
+                'gender' => 'male',
+                'initials' => 'J.',
+                'firstname' => 'John',
+                'lastname' => 'Doe',
+                'street' => 'Main Street',
+                'housenumber' => 123,
+                'housenumber_suffix' => 'A',
+                'zipcode' => '1234AB',
+                'city' => 'Amsterdam',
+                'country' => 'Netherlands',
+                'phone' => '+31201234567',
+                'mobile' => '+31612345678',
+            ]
+        );
+
+        $billAddress1 = ClientAddresses::query()->firstOrCreate(
+            [
+                'client_id' => $client1->id,
+                'email' => 'billing@doe-enterprises.com',
+            ],
+            [
+                'company' => 'Doe Enterprises',
+                'gender' => 'male',
+                'initials' => 'J.',
+                'firstname' => 'John',
+                'lastname' => 'Doe',
+                'street' => 'Business Park',
+                'housenumber' => 456,
+                'zipcode' => '5678CD',
+                'city' => 'Rotterdam',
+                'country' => 'Netherlands',
+                'phone' => '+31102345678',
+                'mobile' => '+31612345678',
+            ]
+        );
+
+        $client1->update([
+            'delivery_client_address_id' => $deliveryAddress1->id,
+            'bill_client_address_id' => $billAddress1->id,
+        ]);
+
+        // Client 2: Jane Smith
+        $client2 = Client::query()->firstOrCreate(
+            [
+                'warehouse_id' => $warehouse->id,
+                'email' => 'jane.smith@example.com',
+            ],
+            [
+                'active' => true,
+                'vat_number' => 'NL987654321B01',
+                'coc_number' => '87654321',
+                'debtor_number' => 'DEB-002',
+                'iban_number' => 'NL20INGB0001234567',
+                'company' => 'Smith & Co',
+                'comments' => 'Regular customer',
+            ]
+        );
+
+        $deliveryAddress2 = ClientAddresses::query()->firstOrCreate(
+            [
+                'client_id' => $client2->id,
+                'email' => 'jane.smith@example.com',
+            ],
+            [
+                'company' => 'Smith & Co',
+                'gender' => 'female',
+                'initials' => 'J.',
+                'firstname' => 'Jane',
+                'lastname' => 'Smith',
+                'street' => 'High Street',
+                'housenumber' => 789,
+                'zipcode' => '9012EF',
+                'city' => 'Utrecht',
+                'country' => 'Netherlands',
+                'phone' => '+31301234567',
+                'mobile' => '+31687654321',
+            ]
+        );
+
+        $billAddress2 = ClientAddresses::query()->firstOrCreate(
+            [
+                'client_id' => $client2->id,
+                'email' => 'accounting@smith-co.com',
+            ],
+            [
+                'company' => 'Smith & Co',
+                'gender' => 'female',
+                'initials' => 'J.',
+                'firstname' => 'Jane',
+                'lastname' => 'Smith',
+                'street' => 'Commerce Road',
+                'housenumber' => 321,
+                'zipcode' => '3456GH',
+                'city' => 'The Hague',
+                'country' => 'Netherlands',
+                'phone' => '+31703456789',
+                'mobile' => '+31687654321',
+            ]
+        );
+
+        $client2->update([
+            'delivery_client_address_id' => $deliveryAddress2->id,
+            'bill_client_address_id' => $billAddress2->id,
+        ]);
+
+        // Client 3: Bob Johnson (Private individual)
+        $client3 = Client::query()->firstOrCreate(
+            [
+                'warehouse_id' => $warehouse->id,
+                'email' => 'bob.johnson@personal.com',
+            ],
+            [
+                'active' => true,
+                'debtor_number' => 'DEB-003',
+                'comments' => 'Private customer - no VAT',
+            ]
+        );
+
+        $address3 = ClientAddresses::query()->firstOrCreate(
+            [
+                'client_id' => $client3->id,
+                'email' => 'bob.johnson@personal.com',
+            ],
+            [
+                'gender' => 'male',
+                'initials' => 'B.',
+                'firstname' => 'Bob',
+                'lastname' => 'Johnson',
+                'street' => 'Elm Avenue',
+                'housenumber' => 42,
+                'zipcode' => '6789IJ',
+                'city' => 'Eindhoven',
+                'country' => 'Netherlands',
+                'mobile' => '+31623456789',
+            ]
+        );
+
+        $client3->update([
+            'delivery_client_address_id' => $address3->id,
+            'bill_client_address_id' => $address3->id,
         ]);
     }
 }

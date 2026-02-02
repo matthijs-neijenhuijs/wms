@@ -14,9 +14,15 @@ class OrderForm
         return $schema
             ->components([
                 Select::make('status')
-                    ->options(OrderStatus::class)
+                    ->options([
+                        'concept' => 'Concept',
+                        'confirmed' => 'Confirmed',
+                        'shipped' => 'Shipped',
+                        'delivered' => 'Delivered',
+                        'cancelled' => 'Cancelled',
+                    ])
                     ->required()
-                    ->default(OrderStatus::Concept),
+                    ->default('concept'),
 
 
                 Select::make('client_id')

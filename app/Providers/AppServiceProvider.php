@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Auth\SubdomainUserProvider;
+use App\Models\OrderProduct;
+use App\Observers\OrderProductObserver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,5 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Auth::provider('subdomain', function ($app, array $config) {
             return new SubdomainUserProvider($app['hash'], $config['model']);
         });
+
+        OrderProduct::observe(OrderProductObserver::class);
     }
 }

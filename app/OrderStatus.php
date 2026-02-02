@@ -5,9 +5,8 @@ namespace App;
 enum OrderStatus: string
 {
     case Concept = 'concept';
-    case Expected = 'expected';
-    case Processing = 'processing';
-    case Paused = 'paused';
-    case Completed = 'completed';
-    case Cancelled = 'cancelled';
+    case Confirmed = 'confirmed';
+    case Shipped = 'shipped';
+    case Delivered = 'delivered';
+     case Cancelled = 'cancelled';
 }

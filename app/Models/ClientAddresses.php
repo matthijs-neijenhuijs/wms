@@ -12,10 +12,21 @@ class ClientAddresses extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'firstname',
         'client_id',
+        'company',
+        'gender',
+        'initials',
+        'firstname',
         'lastname',
         'street',
+        'housenumber',
+        'housenumber_suffix',
+        'zipcode',
+        'city',
+        'country',
+        'phone',
+        'mobile',
+        'email',
     ];
 
     public function client()

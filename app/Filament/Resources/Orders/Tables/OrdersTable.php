@@ -22,8 +22,17 @@ class OrdersTable
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('price_with_tax')->label('price')
-                    ->searchable(),
+                TextColumn::make('products_sum_quantity')
+                    ->label('Total Quantity')
+                    ->sum('products', 'quantity')
+                    ->sortable(),
+
+                TextColumn::make('total_price')
+                    ->label('Total Price')
+                    ->money('EUR')
+                    ->sortable(),
+
+        
                 TextColumn::make('client.email')
                     ->numeric()
                     ->sortable(),
@@ -34,7 +43,7 @@ class OrdersTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->icon('heroicon-m-eye'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

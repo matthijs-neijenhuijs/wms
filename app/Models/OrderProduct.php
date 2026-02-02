@@ -15,9 +15,15 @@ class OrderProduct extends Model
         'order_id',
         'product_id',
         'vat_rate_id',
+        'vat_rate',
         'name',
+        'quantity',
         'amount',
         'reference_code',
+        'barcode',
+        'price',
+        'weight',
+        'product_attribute_title',
     ];
 
     public function order()
