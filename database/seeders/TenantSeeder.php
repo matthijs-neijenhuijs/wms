@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\Client;
 use App\Models\ClientAddresses;
 use App\Models\Product;
+use App\Models\StockProduct;
 use App\Models\Subdomain;
 use App\Models\User;
 use App\Models\VatRate;
@@ -214,6 +215,16 @@ class TenantSeeder extends Seeder
             $small->id,
             $medium->id,
         ]);
+
+        StockProduct::query()->firstOrCreate(
+            ['product_id' => $product->id],
+            [
+                'on_stock_quantity' => 250,
+                'reserved_quantity' => 20,
+                'reserved_on_picklists' => 10,
+                'free_on_stock_quantity' => 220,
+            ]
+        );
     }
 
     private function seedClients(Warehouse $warehouse): void

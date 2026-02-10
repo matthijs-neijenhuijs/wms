@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
@@ -63,5 +64,10 @@ class Product extends Model
     public function attributes()
     {
         return $this->belongsToMany(Attribute::class, 'product_attributes')->withTimestamps();
+    }
+
+    public function stockProduct(): HasOne
+    {
+        return $this->hasOne(StockProduct::class);
     }
 }

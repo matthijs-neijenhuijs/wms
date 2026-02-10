@@ -11,8 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::create('orders_status', function(Blueprint $table) {     
+            $table->increments('id');
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->string('title');
+            $table->string('color');
+            $table->boolean('is_validated')->default(false);
+            $table->boolean('is_paid')->default(false);              
+            $table->boolean('is_delivered')->default(false);  
+            $table->integer('modified_by_user_id')->unsigned()->nullable();
+            $table->foreign('modified_by_user_id')->references('id')->on('user')->onDelete('set null');
+            $table->timestamps();
+            $table->unique(array('title','warehouse_id'), 'unique_order_status_title'); 
+        });
+
+
+
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('orders_status_id')->nullable()->constrained('orders_status')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreignId('client_id')->nullable()->constrained('clients')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->enum('status', ['concept', 'confirmed', 'shipped', 'delivered', 'cancelled'])->default('concept');
@@ -20,9 +38,7 @@ return new class extends Migration
             $table->index('generated_year_order_id');
             $table->string('generated_custom_order_id')->nullable()->unique();
             $table->index('generated_custom_order_id');
-
             $table->decimal('total_price', 12, 4)->nullable();
-
             $table->decimal('discount', 12, 4)->nullable();
             $table->string('custom_order_id')->nullable();
             $table->string('invoice_initials')->nullable();
@@ -66,6 +82,12 @@ return new class extends Migration
 
             $table->timestamps();
         });
+
+
+
+
+
+
     }
 
     /**
