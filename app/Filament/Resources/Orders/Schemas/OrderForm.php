@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
-use App\OrderStatus;
+use App\Models\OrderStatus;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class OrderForm
@@ -14,16 +13,9 @@ class OrderForm
         return $schema
             ->components([
                 Select::make('status')
-                    ->options([
-                        'concept' => 'Concept',
-                        'confirmed' => 'Confirmed',
-                        'shipped' => 'Shipped',
-                        'delivered' => 'Delivered',
-                        'cancelled' => 'Cancelled',
-                    ])
+                    ->options(OrderStatus::class)
                     ->required()
-                    ->default('concept'),
-
+                    ->default(OrderStatus::Concept),
 
                 Select::make('client_id')
                     ->relationship(
@@ -33,7 +25,7 @@ class OrderForm
                             ->select('clients.*')
                             ->distinct(),
                     )
-                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->clientDeliveryAddress?->firstname . ' ' . $record->clientDeliveryAddress?->lastname ?? 'Unknown')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->clientDeliveryAddress?->firstname.' '.$record->clientDeliveryAddress?->lastname ?? 'Unknown')
                     ->searchable()
                     ->preload(),
             ]);

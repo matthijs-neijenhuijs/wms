@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToWarehouse;
-use App\OrderStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
