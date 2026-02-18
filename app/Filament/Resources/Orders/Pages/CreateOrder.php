@@ -10,7 +10,7 @@ class CreateOrder extends CreateRecord
 {
     protected static string $resource = OrderResource::class;
 
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['warehouse_id'] = Filament::getTenant()?->id ?? $this->record?->warehouse_id;
 

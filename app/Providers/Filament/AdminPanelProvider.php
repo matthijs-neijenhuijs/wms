@@ -56,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Settings'),
             ])
             ->middleware([
+                \App\Http\Middleware\IdentifySubdomain::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,

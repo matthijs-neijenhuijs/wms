@@ -18,23 +18,25 @@ class OrderStatus extends Model
         'warehouse_id',
         'name',
         'color',
-        'order_is_expected',
-        'order_is_concept',
-        'order_is_confirmed',
-        'order_is_shipped',
-        'order_is_delivered',
-        'order_is_cancelled',
+        'generate_picklist',
+        'reserve_stock',
+        'concepted',
+        'completed',
+        'paused',
+        'delivered',
+        'cancelled',
     ];
 
     protected function casts(): array
     {
         return [
-            'order_is_expected' => 'boolean',
-            'order_is_concept' => 'boolean',
-            'order_is_confirmed' => 'boolean',
-            'order_is_shipped' => 'boolean',
-            'order_is_delivered' => 'boolean',
-            'order_is_cancelled' => 'boolean',
+            'generate_picklist' => 'boolean',
+            'reserve_stock' => 'boolean',
+            'concepted' => 'boolean',
+            'completed' => 'boolean',
+            'paused' => 'boolean',
+            'delivered' => 'boolean',
+            'cancelled' => 'boolean',
         ];
     }
 
@@ -48,10 +50,10 @@ class OrderStatus extends Model
      */
     public function canEditOrder(): bool
     {
-        // Once shipped, delivered, or cancelled, orders cannot be edited
-        return ! $this->order_is_shipped
-            && ! $this->order_is_delivered
-            && ! $this->order_is_cancelled;
+        // Once paused, delivered, or cancelled, orders cannot be edited
+        return ! $this->paused
+            && ! $this->delivered
+            && ! $this->cancelled;
     }
 
     /**
@@ -60,7 +62,7 @@ class OrderStatus extends Model
     public function canDeleteOrder(): bool
     {
         // Only concept and expected orders can be deleted
-        return $this->order_is_concept || $this->order_is_expected;
+        return $this->concepted || $this->generate_picklist;
     }
 
     /**
@@ -78,7 +80,7 @@ class OrderStatus extends Model
     public function canChangeStatus(): bool
     {
         // Once delivered or cancelled, status cannot be changed
-        return ! $this->order_is_delivered && ! $this->order_is_cancelled;
+        return ! $this->delivered && ! $this->cancelled;
     }
 
     /**
@@ -94,7 +96,7 @@ class OrderStatus extends Model
      */
     public function requiresConfirmation(): bool
     {
-        return $this->order_is_expected || $this->order_is_concept;
+        return $this->generate_picklist || $this->concepted;
     }
 
     /**
@@ -102,6 +104,6 @@ class OrderStatus extends Model
      */
     public function isFinalState(): bool
     {
-        return $this->order_is_delivered || $this->order_is_cancelled;
+        return $this->delivered || $this->cancelled;
     }
 }

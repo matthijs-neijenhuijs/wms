@@ -28,28 +28,32 @@ class OrderStatusForm
                 Fieldset::make('Status Flags')
                     ->columns(3)
                     ->components([
-                        Toggle::make('order_is_expected')
-                            ->label('Is Expected')
+                        Toggle::make('generate_picklist')
+                            ->label('Generate Picklist')
                             ->default(false),
 
-                        Toggle::make('order_is_concept')
-                            ->label('Is Concept')
+                        Toggle::make('reserve_stock')
+                            ->label('Reserve Stock')
                             ->default(false),
 
-                        Toggle::make('order_is_confirmed')
-                            ->label('Is Confirmed')
+                        Toggle::make('concepted')
+                            ->label('Is Concepted')
                             ->default(false),
 
-                        Toggle::make('order_is_shipped')
-                            ->label('Is Shipped')
+                        Toggle::make('completed')
+                            ->label('Is Completed')
                             ->default(false),
 
-                        Toggle::make('order_is_delivered')
-                            ->label('Is Delivered')
+                        Toggle::make('paused')
+                            ->label('Is Paused')
                             ->default(false),
 
-                        Toggle::make('order_is_cancelled')
-                            ->label('Is Cancelled')
+                        Toggle::make('delivered')
+                            ->label('Delivered')
+                            ->default(false),
+
+                        Toggle::make('cancelled')
+                            ->label('Cancelled')
                             ->default(false),
                     ]),
             ]);

@@ -7,6 +7,9 @@ use App\Models\AttributeGroup;
 use App\Models\Brand;
 use App\Models\Client;
 use App\Models\ClientAddresses;
+use App\Models\Order;
+use App\Models\OrderProduct;
+use App\Models\OrderStatus;
 use App\Models\Product;
 use App\Models\StockProduct;
 use App\Models\Subdomain;
@@ -51,6 +54,8 @@ class TenantSeeder extends Seeder
         $this->seedVatRates($warehousePhilandphae1);
         $this->seedWarehouseDefaults($warehousePhilandphae1);
         $this->seedClients($warehousePhilandphae1);
+        $this->seedOrderStatuses($warehousePhilandphae1);
+        $this->seedOrders($warehousePhilandphae1);
 
         // Create phaewomen subdomain
         $phaewomen = Subdomain::firstOrCreate(
@@ -87,6 +92,10 @@ class TenantSeeder extends Seeder
         $this->seedWarehouseDefaults($warehousePhae2);
         $this->seedClients($warehousePhae1);
         $this->seedClients($warehousePhae2);
+        $this->seedOrderStatuses($warehousePhae1);
+        $this->seedOrderStatuses($warehousePhae2);
+        $this->seedOrders($warehousePhae1);
+        $this->seedOrders($warehousePhae2);
 
         $this->command->info('Successfully seeded subdomains, users, and warehouses.');
         $this->command->info('');
@@ -394,5 +403,323 @@ class TenantSeeder extends Seeder
             'delivery_client_address_id' => $address3->id,
             'bill_client_address_id' => $address3->id,
         ]);
+    }
+
+    private function seedOrderStatuses(Warehouse $warehouse): void
+    {
+        $statuses = [
+            [
+                'name' => 'New',
+                'color' => '#3B82F6',
+                'generate_picklist' => false,
+                'reserve_stock' => false,
+                'concepted' => true,
+                'completed' => false,
+                'paused' => false,
+                'delivered' => false,
+                'cancelled' => false,
+            ],
+            [
+                'name' => 'Confirmed',
+                'color' => '#10B981',
+                'generate_picklist' => true,
+                'reserve_stock' => true,
+                'concepted' => false,
+                'completed' => false,
+                'paused' => false,
+                'delivered' => false,
+                'cancelled' => false,
+            ],
+            [
+                'name' => 'Processing',
+                'color' => '#F59E0B',
+                'generate_picklist' => false,
+                'reserve_stock' => true,
+                'concepted' => false,
+                'completed' => false,
+                'paused' => false,
+                'delivered' => false,
+                'cancelled' => false,
+            ],
+            [
+                'name' => 'Shipped',
+                'color' => '#8B5CF6',
+                'generate_picklist' => false,
+                'reserve_stock' => false,
+                'concepted' => false,
+                'completed' => false,
+                'paused' => false,
+                'delivered' => false,
+                'cancelled' => false,
+            ],
+            [
+                'name' => 'Delivered',
+                'color' => '#059669',
+                'generate_picklist' => false,
+                'reserve_stock' => false,
+                'concepted' => false,
+                'completed' => true,
+                'paused' => false,
+                'delivered' => true,
+                'cancelled' => false,
+            ],
+            [
+                'name' => 'On Hold',
+                'color' => '#6B7280',
+                'generate_picklist' => false,
+                'reserve_stock' => true,
+                'concepted' => false,
+                'completed' => false,
+                'paused' => true,
+                'delivered' => false,
+                'cancelled' => false,
+            ],
+            [
+                'name' => 'Cancelled',
+                'color' => '#EF4444',
+                'generate_picklist' => false,
+                'reserve_stock' => false,
+                'concepted' => false,
+                'completed' => false,
+                'paused' => false,
+                'delivered' => false,
+                'cancelled' => true,
+            ],
+        ];
+
+        foreach ($statuses as $status) {
+            OrderStatus::query()->firstOrCreate(
+                [
+                    'warehouse_id' => $warehouse->id,
+                    'name' => $status['name'],
+                ],
+                $status
+            );
+        }
+    }
+
+    private function seedOrders(Warehouse $warehouse): void
+    {
+        // Get required data
+        $clients = Client::query()->where('warehouse_id', $warehouse->id)->get();
+        $products = Product::query()->where('warehouse_id', $warehouse->id)->get();
+        $statusNew = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'New')->first();
+        $statusConfirmed = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'Confirmed')->first();
+        $statusProcessing = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'Processing')->first();
+        $statusDelivered = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'Delivered')->first();
+
+        if ($clients->isEmpty() || $products->isEmpty() || ! $statusNew) {
+            return;
+        }
+
+        // Order 1: New order from first client
+        $client1 = $clients->first();
+        $deliveryAddress1 = $client1->deliveryAddress;
+
+        if (! $deliveryAddress1) {
+            return;
+        }
+
+        $order1 = Order::query()->firstOrCreate(
+            [
+                'warehouse_id' => $warehouse->id,
+                'custom_order_id' => 'CUST-001',
+            ],
+            [
+                'client_id' => $client1->id,
+                'order_statuses_id' => $statusNew->id,
+                'discount' => 0,
+                'invoice_name' => $client1->company ?? $deliveryAddress1->firstname.' '.$deliveryAddress1->lastname,
+                'invoice_address' => $deliveryAddress1->street.' '.$deliveryAddress1->housenumber,
+                'invoice_zipcode' => $deliveryAddress1->zipcode,
+                'invoice_city' => $deliveryAddress1->city,
+                'invoice_country' => $deliveryAddress1->country,
+                'delivery_name' => $deliveryAddress1->firstname.' '.$deliveryAddress1->lastname,
+                'delivery_address' => $deliveryAddress1->street.' '.$deliveryAddress1->housenumber,
+                'delivery_zipcode' => $deliveryAddress1->zipcode,
+                'delivery_city' => $deliveryAddress1->city,
+                'delivery_country' => $deliveryAddress1->country,
+                'telephone' => $deliveryAddress1->phone,
+                'email' => $client1->email,
+                'comments' => 'First test order - Rush delivery',
+            ]
+        );
+
+        // Add products to order 1
+        if ($products->count() > 0) {
+            $product = $products->first();
+            OrderProduct::query()->firstOrCreate(
+                [
+                    'order_id' => $order1->id,
+                    'product_id' => $product->id,
+                ],
+                [
+                    'vat_rate_id' => $product->vat_rate_id,
+                    'vat_rate' => $product->vatRate?->rate ?? 21,
+                    'name' => $product->name,
+                    'quantity' => 2,
+                    'price' => $product->price,
+                    'weight' => 400,
+                    'reference_code' => $product->reference_code,
+                    'barcode' => $product->barcode,
+                ]
+            );
+        }
+
+        // Order 2: Confirmed order from second client
+        if ($clients->count() > 1) {
+            $client2 = $clients->skip(1)->first();
+            $deliveryAddress2 = $client2->deliveryAddress;
+
+            if ($deliveryAddress2) {
+                $order2 = Order::query()->firstOrCreate(
+                    [
+                        'warehouse_id' => $warehouse->id,
+                        'custom_order_id' => 'CUST-002',
+                    ],
+                    [
+                        'client_id' => $client2->id,
+                        'order_statuses_id' => $statusConfirmed?->id ?? $statusNew->id,
+                        'discount' => 5.00,
+                        'invoice_name' => $client2->company ?? $deliveryAddress2->firstname.' '.$deliveryAddress2->lastname,
+                        'invoice_address' => $deliveryAddress2->street.' '.$deliveryAddress2->housenumber,
+                        'invoice_zipcode' => $deliveryAddress2->zipcode,
+                        'invoice_city' => $deliveryAddress2->city,
+                        'invoice_country' => $deliveryAddress2->country,
+                        'delivery_name' => $deliveryAddress2->firstname.' '.$deliveryAddress2->lastname,
+                        'delivery_address' => $deliveryAddress2->street.' '.$deliveryAddress2->housenumber,
+                        'delivery_zipcode' => $deliveryAddress2->zipcode,
+                        'delivery_city' => $deliveryAddress2->city,
+                        'delivery_country' => $deliveryAddress2->country,
+                        'telephone' => $deliveryAddress2->phone,
+                        'email' => $client2->email,
+                        'comments' => 'Regular customer - 5% discount applied',
+                    ]
+                );
+
+                // Add multiple products to order 2
+                if ($products->count() > 0) {
+                    $product = $products->first();
+                    OrderProduct::query()->firstOrCreate(
+                        [
+                            'order_id' => $order2->id,
+                            'product_id' => $product->id,
+                        ],
+                        [
+                            'vat_rate_id' => $product->vat_rate_id,
+                            'vat_rate' => $product->vatRate?->rate ?? 21,
+                            'name' => $product->name,
+                            'quantity' => 5,
+                            'price' => $product->price,
+                            'weight' => 1000,
+                            'reference_code' => $product->reference_code,
+                            'barcode' => $product->barcode,
+                        ]
+                    );
+                }
+            }
+        }
+
+        // Order 3: Processing order
+        if ($clients->count() > 2) {
+            $client3 = $clients->skip(2)->first();
+            $deliveryAddress3 = $client3->deliveryAddress;
+
+            if ($deliveryAddress3) {
+                $order3 = Order::query()->firstOrCreate(
+                    [
+                        'warehouse_id' => $warehouse->id,
+                        'custom_order_id' => 'CUST-003',
+                    ],
+                    [
+                        'client_id' => $client3->id,
+                        'order_statuses_id' => $statusProcessing?->id ?? $statusNew->id,
+                        'discount' => 0,
+                        'invoice_name' => $deliveryAddress3->firstname.' '.$deliveryAddress3->lastname,
+                        'invoice_address' => $deliveryAddress3->street.' '.$deliveryAddress3->housenumber,
+                        'invoice_zipcode' => $deliveryAddress3->zipcode,
+                        'invoice_city' => $deliveryAddress3->city,
+                        'invoice_country' => $deliveryAddress3->country,
+                        'delivery_name' => $deliveryAddress3->firstname.' '.$deliveryAddress3->lastname,
+                        'delivery_address' => $deliveryAddress3->street.' '.$deliveryAddress3->housenumber,
+                        'delivery_zipcode' => $deliveryAddress3->zipcode,
+                        'delivery_city' => $deliveryAddress3->city,
+                        'delivery_country' => $deliveryAddress3->country,
+                        'telephone' => $deliveryAddress3->mobile,
+                        'email' => $client3->email,
+                        'comments' => 'Private customer - currently being processed',
+                    ]
+                );
+
+                // Add product to order 3
+                if ($products->count() > 0) {
+                    $product = $products->first();
+                    OrderProduct::query()->firstOrCreate(
+                        [
+                            'order_id' => $order3->id,
+                            'product_id' => $product->id,
+                        ],
+                        [
+                            'vat_rate_id' => $product->vat_rate_id,
+                            'vat_rate' => $product->vatRate?->rate ?? 21,
+                            'name' => $product->name,
+                            'quantity' => 1,
+                            'price' => $product->price,
+                            'weight' => 200,
+                            'reference_code' => $product->reference_code,
+                            'barcode' => $product->barcode,
+                        ]
+                    );
+                }
+            }
+        }
+
+        // Order 4: Delivered order (older)
+        $order4 = Order::query()->firstOrCreate(
+            [
+                'warehouse_id' => $warehouse->id,
+                'custom_order_id' => 'CUST-004',
+            ],
+            [
+                'client_id' => $clients->first()->id,
+                'order_statuses_id' => $statusDelivered?->id ?? $statusNew->id,
+                'discount' => 0,
+                'invoice_name' => $clients->first()->company,
+                'invoice_address' => $deliveryAddress1->street.' '.$deliveryAddress1->housenumber,
+                'invoice_zipcode' => $deliveryAddress1->zipcode,
+                'invoice_city' => $deliveryAddress1->city,
+                'invoice_country' => $deliveryAddress1->country,
+                'delivery_name' => $deliveryAddress1->firstname.' '.$deliveryAddress1->lastname,
+                'delivery_address' => $deliveryAddress1->street.' '.$deliveryAddress1->housenumber,
+                'delivery_zipcode' => $deliveryAddress1->zipcode,
+                'delivery_city' => $deliveryAddress1->city,
+                'delivery_country' => $deliveryAddress1->country,
+                'telephone' => $deliveryAddress1->phone,
+                'email' => $clients->first()->email,
+                'comments' => 'Successfully delivered - completed order',
+                'created_at' => now()->subDays(7),
+            ]
+        );
+
+        // Add products to order 4
+        if ($products->count() > 0) {
+            $product = $products->first();
+            OrderProduct::query()->firstOrCreate(
+                [
+                    'order_id' => $order4->id,
+                    'product_id' => $product->id,
+                ],
+                [
+                    'vat_rate_id' => $product->vat_rate_id,
+                    'vat_rate' => $product->vatRate?->rate ?? 21,
+                    'name' => $product->name,
+                    'quantity' => 3,
+                    'price' => $product->price,
+                    'weight' => 600,
+                    'reference_code' => $product->reference_code,
+                    'barcode' => $product->barcode,
+                ]
+            );
+        }
     }
 }

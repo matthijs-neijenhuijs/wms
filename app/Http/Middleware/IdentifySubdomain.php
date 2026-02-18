@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Subdomain;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class IdentifySubdomain
@@ -18,6 +19,12 @@ class IdentifySubdomain
     {
         $host = $request->getHost();
         $centralDomain = config('app.central_domain', 'wms.test');
+
+        // Force the URL to use the current request's scheme and host
+        URL::forceRootUrl($request->getSchemeAndHttpHost());
+
+        // Set asset URL to current scheme and host
+        config(['app.asset_url' => $request->getSchemeAndHttpHost()]);
 
         // Extract subdomain from host
         $subdomain = str_replace('.'.$centralDomain, '', $host);

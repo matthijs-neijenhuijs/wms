@@ -36,6 +36,23 @@ class UserForm
                     ->required(fn (string $context): bool => $context === 'create')
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->dehydrateStateUsing(fn (?string $state): ?string => $state ? Hash::make($state) : null),
+
+                Select::make('warehouses')
+                    ->relationship(
+                        name: 'warehouses',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: function ($query) {
+                            if (app()->has('current_subdomain')) {
+                                return $query->where('subdomain_id', app('current_subdomain')->id);
+                            }
+
+                            return $query;
+                        }
+                    )
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->label('Warehouses'),
             ]);
     }
 }

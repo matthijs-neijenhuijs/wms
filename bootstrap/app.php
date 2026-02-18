@@ -72,7 +72,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            if (in_array($segment, ['login', 'logout', 'register', 'password-reset', 'email-verification'], true)) {
+            if (in_array($segment, ['login', 'logout', 'register', 'password-reset', 'email-verification', 'livewire', 'js', 'css', 'build'], true)) {
                 return null;
             }
 

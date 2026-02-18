@@ -24,32 +24,36 @@ class OrderStatusesTable
 
                 ColorColumn::make('color'),
 
-                IconColumn::make('order_is_expected')
-                    ->label('Expected')
+                IconColumn::make('generate_picklist')
+                    ->label('Generate Picklist')
+                    ->boolean()
+                    ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
+                IconColumn::make('reserve_stock')
+                    ->label('Reserve Stock')
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 
-                IconColumn::make('order_is_concept')
+                IconColumn::make('concepted')
                     ->label('Concept')
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 
-                IconColumn::make('order_is_confirmed')
-                    ->label('Confirmed')
+                IconColumn::make('completed')
+                    ->label('Completed')
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 
-                IconColumn::make('order_is_shipped')
-                    ->label('Shipped')
+                IconColumn::make('paused')
+                    ->label('Paused')
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 
-                IconColumn::make('order_is_delivered')
+                IconColumn::make('delivered')
                     ->label('Delivered')
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 
-                IconColumn::make('order_is_cancelled')
+                IconColumn::make('cancelled')
                     ->label('Cancelled')
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),

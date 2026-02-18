@@ -17,12 +17,13 @@ return new class extends Migration
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->string('name');
             $table->string('color');
-            $table->boolean('order_is_expected')->default(false);
-            $table->boolean('order_is_concept')->default(false);
-            $table->boolean('order_is_confirmed')->default(false);
-            $table->boolean('order_is_shipped')->default(false);
-            $table->boolean('order_is_delivered')->default(false);
-            $table->boolean('order_is_cancelled')->default(false);
+            $table->boolean('generate_picklist')->default(false);
+            $table->boolean('reserve_stock')->default(false);
+            $table->boolean('concepted')->default(false);
+            $table->boolean('completed')->default(false);
+            $table->boolean('paused')->default(false);
+            $table->boolean('delivered')->default(false);
+            $table->boolean('cancelled')->default(false);
             $table->timestamps();
         });
 
