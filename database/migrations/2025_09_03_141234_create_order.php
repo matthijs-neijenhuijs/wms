@@ -11,59 +11,64 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::create('order_statuses', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->string('name');
+            $table->string('color');
+            $table->boolean('order_is_expected')->default(false);
+            $table->boolean('order_is_concept')->default(false);
+            $table->boolean('order_is_confirmed')->default(false);
+            $table->boolean('order_is_shipped')->default(false);
+            $table->boolean('order_is_delivered')->default(false);
+            $table->boolean('order_is_cancelled')->default(false);
+            $table->timestamps();
+        });
+
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreignId('client_id')->nullable()->constrained('clients')->onUpdate('CASCADE')->onDelete('SET NULL');
-            $table->enum('status', ['expected', 'concept', 'confirmed', 'shipped', 'delivered', 'cancelled'])->default('concept');
+            $table->foreignId('order_statuses_id')->nullable()->constrained('order_statuses')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->integer('generated_year_order_id');
             $table->index('generated_year_order_id');
             $table->string('generated_custom_order_id')->nullable()->unique();
             $table->index('generated_custom_order_id');
-
-            $table->decimal('total_price', 12, 4)->nullable();
-
             $table->decimal('discount', 12, 4)->nullable();
             $table->string('custom_order_id')->nullable();
-            $table->string('invoice_initials')->nullable();
             $table->string('invoice_name')->nullable();
-            $table->string('invoice_street')->nullable();
-            $table->bigInteger('invoice_housenumber')->nullable();
-            $table->string('invoice_housenumber_suffix')->nullable();
+            $table->string('invoice_address')->nullable();
             $table->string('invoice_zipcode')->nullable();
+            $table->string('invoice_region')->nullable();
             $table->string('invoice_city')->nullable();
             $table->string('invoice_country')->nullable();
-            $table->string('delivery_initials')->nullable();
             $table->string('delivery_name')->nullable();
-            $table->string('delivery_street')->nullable();
-            $table->bigInteger('delivery_housenumber')->nullable();
-            $table->string('delivery_housenumber_suffix')->nullable();
+            $table->string('delivery_address')->nullable();
             $table->string('delivery_zipcode')->nullable();
+            $table->string('delivery_region')->nullable();
             $table->string('delivery_city')->nullable();
             $table->string('delivery_country')->nullable();
-            $table->string('phone')->nullable();
+            $table->string('telephone')->nullable();
             $table->string('email')->nullable();
-            $table->string('customer_remarks')->nullable();
+            $table->string('comments')->nullable();
             $table->timestamps();
 
             $table->unique(['warehouse_id', 'custom_order_id']);
         });
 
         Schema::create('order_products', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('order_id')->constrained('orders')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreignId('product_id')->nullable()->constrained('products')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->foreignId('vat_rate_id')->nullable()->constrained('vat_rates')->onUpdate('CASCADE')->onDelete('SET NULL');
             $table->string('name');
             $table->bigInteger('quantity')->nullable();
-
             $table->bigInteger('weight')->nullable();
             $table->decimal('price', 12, 4)->nullable();
             $table->decimal('vat_rate', 12, 4)->nullable();
             $table->string('barcode')->nullable();
             $table->string('reference_code')->nullable();
-            $table->string('product_attribute_title')->nullable();
-
             $table->timestamps();
         });
     }

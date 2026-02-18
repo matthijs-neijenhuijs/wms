@@ -13,12 +13,18 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingCart;
+
+    public static function canDelete(Model $record): bool
+    {
+        return $record->orderStatus?->canDeleteOrder() ?? true;
+    }
 
     public static function form(Schema $schema): Schema
     {

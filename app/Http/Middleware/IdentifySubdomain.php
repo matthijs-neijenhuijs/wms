@@ -36,7 +36,7 @@ class IdentifySubdomain
         $subdomainModel = Subdomain::where('subdomain', $subdomain)->first();
 
         if (! $subdomainModel) {
-            abort(404, 'Subdomain not found');
+            return redirect(config('app.url'));
         }
 
         // Store in container as instance

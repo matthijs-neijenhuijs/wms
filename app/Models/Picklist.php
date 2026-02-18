@@ -10,8 +10,7 @@ class Picklist extends Model
 {
     use BelongsToWarehouse;
 
-    // Add the 'avatar' attachment to the fillable array so that it's mass-assignable on this model.
-    protected $fillable = ['id', 'order_id', 'total_quantity', 'completed', 'comments', 'shop_id', 'generated_custom_picklist_id', 'show_for_supplier', 'back_order', 'hide_essentials_supplier'];
+    protected $fillable = ['id', 'order_id', 'warehouse_id', 'completed', 'comments', 'generated_custom_picklist_id', 'back_order'];
 
     public function __construct(array $attributes = [])
     {
@@ -23,8 +22,8 @@ class Picklist extends Model
         static::creating(function ($model) {
 
             if ($model->created_at) {
-                $order = Picklist::where('shop_id', '=', $model->shop_id)->where('created_at', '>=', Carbon::createFromFormat('Y-m-d H:i:s', $model->created_at)->year)->orderBy('id', 'desc')->first();
-                $warehouse = Warehouse::find($model->warehouse_id);
+                $order = Picklist::withoutGlobalScopes()->where('warehouse_id', '=', $model->warehouse_id)->where('created_at', '>=', Carbon::createFromFormat('Y-m-d H:i:s', $model->created_at)->year)->orderBy('id', 'desc')->first();
+                $warehouse = Warehouse::withoutGlobalScopes()->find($model->warehouse_id);
                 $prefix = 'PICKLIST'.strtoupper(substr($warehouse->name, 0, 4));
 
                 if ($order) {
@@ -36,9 +35,9 @@ class Picklist extends Model
                     $model->generated_custom_picklist_id = $prefix.Carbon::createFromFormat('Y-m-d H:i:s', $model->created_at)->format('y').'1';
                 }
             } else {
-                $order = Picklist::where('shop_id', '=', $model->shop_id)->where('created_at', '>=', Carbon::now()->year)->orderBy('id', 'desc')->first();
-                $warehouse = Warehouse::find($model->warehouse_id);
-                $prefix = 'ORDER'.strtoupper(substr($warehouse->name, 0, 4));
+                $order = Picklist::withoutGlobalScopes()->where('warehouse_id', '=', $model->warehouse_id)->where('created_at', '>=', Carbon::now()->year)->orderBy('id', 'desc')->first();
+                $warehouse = Warehouse::withoutGlobalScopes()->find($model->warehouse_id);
+                $prefix = 'PICKLIST'.strtoupper(substr($warehouse->name, 0, 4));
 
                 if ($order) {
                     $model->generated_year_picklist_id = $order->generated_year_picklist_id + 1;

@@ -16,6 +16,7 @@ class Warehouse extends Model
     protected $fillable = [
         'subdomain_id',
         'name',
+        'currency',
     ];
 
     public function subdomain(): BelongsTo

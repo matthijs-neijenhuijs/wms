@@ -53,8 +53,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Settings')
-                    ->icon('heroicon-o-cog-8-tooth'),
+                    ->label('Settings'),
             ])
             ->middleware([
                 EncryptCookies::class,

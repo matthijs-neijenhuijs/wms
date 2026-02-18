@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subdomain_id')->constrained('subdomains')->cascadeOnDelete();
             $table->string('name');
+            $table->string('currency')->default('EUR');
             $table->timestamps();
         });
 

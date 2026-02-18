@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
-use App\Models\OrderStatus;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 
@@ -12,10 +12,13 @@ class OrderForm
     {
         return $schema
             ->components([
-                Select::make('status')
-                    ->options(OrderStatus::class)
+                Hidden::make('warehouse_id'),
+
+                Select::make('order_statuses_id')
+                    ->relationship('orderStatus', 'name')
                     ->required()
-                    ->default(OrderStatus::Concept),
+                    ->searchable()
+                    ->preload(),
 
                 Select::make('client_id')
                     ->relationship(

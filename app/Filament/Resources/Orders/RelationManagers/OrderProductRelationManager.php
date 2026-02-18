@@ -11,7 +11,6 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -66,7 +65,16 @@ class OrderProductRelationManager extends RelationManager
 
                 TextInput::make('price')
                     ->numeric()
-                    ->prefix('€')
+                    ->prefix(fn () => match ($this->getOwnerRecord()->warehouse?->currency ?? 'EUR') {
+                        'USD' => '$',
+                        'GBP' => '£',
+                        'JPY' => '¥',
+                        'CHF' => 'CHF',
+                        'CAD' => 'C$',
+                        'AUD' => 'A$',
+                        'CNY' => '¥',
+                        default => '€',
+                    })
                     ->disabled()
                     ->dehydrated(),
 
@@ -89,7 +97,7 @@ class OrderProductRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('quantity'),
                 TextColumn::make('price')
-                    ->money('EUR'),
+                    ->money(fn () => $this->getOwnerRecord()->warehouse?->currency ?? 'EUR'),
                 TextColumn::make('vat_rate')
                     ->suffix('%'),
                 TextColumn::make('reference_code'),
@@ -98,11 +106,14 @@ class OrderProductRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->visible(fn () => $this->getOwnerRecord()->orderStatus?->canModifyProducts() ?? true),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn () => $this->getOwnerRecord()->orderStatus?->canModifyProducts() ?? true),
+                DeleteAction::make()
+                    ->visible(fn () => $this->getOwnerRecord()->orderStatus?->canModifyProducts() ?? true),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

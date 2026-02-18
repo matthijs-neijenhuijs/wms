@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('picklists', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('order_id')->constrained('orders')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->boolean('completed')->default(false);
@@ -28,9 +28,8 @@ return new class extends Migration
         });
 
         Schema::create('picklists_products', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('picklist_id')->unsigned();
-            $table->foreign('picklist_id')->references('id')->on('picklists')->onDelete('cascade');
+            $table->id();
+            $table->foreignId('picklist_id')->constrained('picklists')->onDelete('cascade');
             $table->boolean('show_for_supplier')->default(false);
             $table->string('ean_code');
             $table->string('reference_code')->nullable();

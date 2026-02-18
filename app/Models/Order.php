@@ -16,20 +16,26 @@ class Order extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'price_with_tax',
-        'price_without_tax',
-        'total_discount',
-        'total_price',
         'client_id',
-        'status',
+        'order_statuses_id',
+        'discount',
+        'custom_order_id',
+        'invoice_name',
+        'invoice_address',
+        'invoice_zipcode',
+        'invoice_region',
+        'invoice_city',
+        'invoice_country',
+        'delivery_name',
+        'delivery_address',
+        'delivery_zipcode',
+        'delivery_region',
+        'delivery_city',
+        'delivery_country',
+        'telephone',
+        'email',
+        'comments',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'status' => OrderStatus::class,
-        ];
-    }
 
     public static function boot()
     {
@@ -84,16 +90,13 @@ class Order extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function orderStatus()
+    {
+        return $this->belongsTo(OrderStatus::class, 'order_statuses_id');
+    }
+
     public function products()
     {
         return $this->hasMany(OrderProduct::class);
-    }
-
-    public function updateTotalPrice(): void
-    {
-        $this->total_price = $this->products->sum(function ($product) {
-            return ($product->price ?? 0) * ($product->quantity ?? 0);
-        });
-        $this->saveQuietly();
     }
 }

@@ -11,7 +11,7 @@ class OrderProductObserver
      */
     public function created(OrderProduct $orderProduct): void
     {
-        $orderProduct->order?->updateTotalPrice();
+        //
     }
 
     /**
@@ -19,7 +19,7 @@ class OrderProductObserver
      */
     public function updated(OrderProduct $orderProduct): void
     {
-        $orderProduct->order?->updateTotalPrice();
+        //
     }
 
     /**
@@ -27,7 +27,7 @@ class OrderProductObserver
      */
     public function deleted(OrderProduct $orderProduct): void
     {
-        $orderProduct->order?->updateTotalPrice();
+        //
     }
 
     /**
@@ -35,7 +35,7 @@ class OrderProductObserver
      */
     public function restored(OrderProduct $orderProduct): void
     {
-        $orderProduct->order?->updateTotalPrice();
+        //
     }
 
     /**
@@ -43,6 +43,6 @@ class OrderProductObserver
      */
     public function forceDeleted(OrderProduct $orderProduct): void
     {
-        $orderProduct->order?->updateTotalPrice();
+        //
     }
 }
