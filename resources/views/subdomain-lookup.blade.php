@@ -19,7 +19,7 @@
                 
                 <div class="mb-6">
                     <label for="subdomain" class="block text-sm font-medium text-gray-700 mb-2">
-                        Workspace Name
+                        Subdomain
                     </label>
                     <div class="relative">
                         <input 
@@ -28,7 +28,7 @@
                             name="subdomain" 
                             value="{{ old('subdomain') }}"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('subdomain') border-red-500 @enderror"
-                            placeholder="your-workspace"
+                            placeholder="your subdomain"
                             required
                             autofocus
                         >
@@ -49,9 +49,7 @@
                 </button>
             </form>
 
-            <div class="mt-6 text-center text-sm text-gray-500">
-                <p>Don't have a workspace? Contact your administrator.</p>
-            </div>
+
         </div>
     </div>
 </body>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ClientAddresses extends Model
 {
@@ -16,30 +17,26 @@ class ClientAddresses extends Model
         'company',
         'gender',
         'initials',
-        'firstname',
-        'lastname',
-        'street',
-        'housenumber',
-        'housenumber_suffix',
+        'name',
+        'address',
         'zipcode',
         'city',
+        'region',
         'country',
-        'phone',
-        'mobile',
-        'email',
+        'telephone_number',
     ];
 
-    public function client()
+    public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
-    public function isBillingAddress()
+    public function isBillingAddress(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'id', 'bill_client_address_id');
     }
 
-    public function isDeliveryAddress()
+    public function isDeliveryAddress(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'id', 'delivery_client_address_id');
     }

@@ -26,6 +26,7 @@ return new class extends Migration
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->timestamps();
 
+            $table->unique(['warehouse_id', 'email']);
             $table->unique(['warehouse_id', 'vat_number']);
             $table->unique(['warehouse_id', 'coc_number']);
             $table->unique(['warehouse_id', 'debtor_number']);
@@ -38,17 +39,13 @@ return new class extends Migration
             $table->string('company')->nullable();
             $table->enum('gender', ['male', 'female']);
             $table->string('initials')->nullable();
-            $table->string('firstname')->nullable();
-            $table->string('lastname')->nullable();
-            $table->string('street')->nullable();
-            $table->bigInteger('housenumber')->nullable();
-            $table->string('housenumber_suffix')->nullable();
+            $table->string('name')->nullable();
+            $table->string('address')->nullable();
             $table->string('zipcode')->nullable();
             $table->string('city')->nullable();
+            $table->string('region')->nullable();
             $table->string('country')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('mobile')->nullable();
-            $table->string('email')->nullable();
+            $table->string('telephone_number')->nullable();
             $table->timestamps();
         });
 

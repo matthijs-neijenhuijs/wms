@@ -26,22 +26,19 @@ class ProductsTable
                     ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('stockProduct.on_stock_quantity')
-                    ->label('On stock')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('stockProduct.reserved_quantity')
-                    ->label('Reserved')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('stockProduct.reserved_on_picklists')
-                    ->label('Reserved on picklists')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('stockProduct.free_on_stock_quantity')
-                    ->label('Free on stock')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('stock_summary')
+                    ->label('Stock')
+                    ->badge()
+                    ->html()
+                    ->state(function ($record): string {
+                        $stock = $record->stockProduct;
+                        $onStock = $stock?->on_stock_quantity ?? 0;
+                        $reserved = $stock?->reserved_quantity ?? 0;
+                        $reservedOnPicklists = $stock?->reserved_on_picklists ?? 0;
+                        $free = $stock?->free_on_stock_quantity ?? 0;
+
+                        return "<span class=\"leading-tight\">OnStock: {$onStock}<br>Reserved: {$reserved}<br>Picked: {$reservedOnPicklists}<br>Free: {$free}</span>";
+                    }),
 
                 TextColumn::make('brand.name')
                     ->numeric()
