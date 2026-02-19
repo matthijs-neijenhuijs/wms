@@ -10,6 +10,8 @@ use App\Models\ClientAddresses;
 use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\OrderStatus;
+use App\Models\Picklist;
+use App\Models\PicklistProduct;
 use App\Models\Product;
 use App\Models\StockProduct;
 use App\Models\Subdomain;
@@ -56,6 +58,7 @@ class TenantSeeder extends Seeder
         $this->seedClients($warehousePhilandphae1);
         $this->seedOrderStatuses($warehousePhilandphae1);
         $this->seedOrders($warehousePhilandphae1);
+        $this->seedPicklists($warehousePhilandphae1);
 
         // Create phaewomen subdomain
         $phaewomen = Subdomain::firstOrCreate(
@@ -96,6 +99,8 @@ class TenantSeeder extends Seeder
         $this->seedOrderStatuses($warehousePhae2);
         $this->seedOrders($warehousePhae1);
         $this->seedOrders($warehousePhae2);
+        $this->seedPicklists($warehousePhae1);
+        $this->seedPicklists($warehousePhae2);
 
         $this->command->info('Successfully seeded subdomains, users, and warehouses.');
         $this->command->info('');
@@ -718,6 +723,73 @@ class TenantSeeder extends Seeder
                     'barcode' => $product->barcode,
                 ]
             );
+        }
+    }
+
+    private function seedPicklists(Warehouse $warehouse): void
+    {
+        $orders = Order::query()->where('warehouse_id', $warehouse->id)->get();
+
+        if ($orders->isEmpty()) {
+            return;
+        }
+
+        $statuses = OrderStatus::query()
+            ->where('warehouse_id', $warehouse->id)
+            ->get()
+            ->keyBy('id');
+
+        foreach ($orders as $order) {
+            $status = $statuses->get($order->order_statuses_id);
+
+            if (! $status?->generate_picklist) {
+                continue;
+            }
+
+            $picklist = Picklist::query()->firstOrCreate(
+                [
+                    'order_id' => $order->id,
+                    'warehouse_id' => $warehouse->id,
+                ],
+                [
+                    'completed' => false,
+                    'back_order' => false,
+                    'comments' => 'Auto-generated picklist for seeded data.',
+                ]
+            );
+
+            if (PicklistProduct::query()->where('picklist_id', $picklist->id)->exists()) {
+                continue;
+            }
+
+            $orderProducts = $order->products;
+
+            if ($orderProducts->isEmpty()) {
+                continue;
+            }
+
+            foreach ($orderProducts as $orderProduct) {
+                $quantity = max(1, (int) $orderProduct->quantity);
+                $eanCode = $orderProduct->barcode
+                    ?? $orderProduct->product?->barcode
+                    ?? $orderProduct->reference_code
+                    ?? 'UNKNOWN';
+                $referenceCode = $orderProduct->reference_code ?? $orderProduct->product?->reference_code;
+                $productTitle = $orderProduct->name ?? $orderProduct->product?->name ?? 'Product';
+
+                for ($i = 0; $i < $quantity; $i++) {
+                    PicklistProduct::query()->create([
+                        'picklist_id' => $picklist->id,
+                        'show_for_supplier' => false,
+                        'ean_code' => $eanCode,
+                        'reference_code' => $referenceCode,
+                        'color' => null,
+                        'size' => null,
+                        'product_title' => $productTitle,
+                        'scanned' => false,
+                    ]);
+                }
+            }
         }
     }
 }
