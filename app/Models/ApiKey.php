@@ -26,6 +26,7 @@ class ApiKey extends Model
         'is_active',
         'last_used_at',
         'expires_at',
+        'allowed_ips',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class ApiKey extends Model
             'is_active' => 'bool',
             'last_used_at' => 'datetime',
             'expires_at' => 'datetime',
+            'allowed_ips' => 'array',
         ];
     }
 

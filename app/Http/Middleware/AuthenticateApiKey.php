@@ -36,6 +36,12 @@ class AuthenticateApiKey
             return response()->json(['message' => 'API key expired.'], Response::HTTP_UNAUTHORIZED);
         }
 
+        $allowedIps = $apiKey->allowed_ips ?? [];
+
+        if ($allowedIps !== [] && ! in_array($request->ip(), $allowedIps, true)) {
+            return response()->json(['message' => 'API key not allowed from this IP.'], Response::HTTP_UNAUTHORIZED);
+        }
+
         /** @var Subdomain|null $currentSubdomain */
         $currentSubdomain = app()->has('current_subdomain') ? app('current_subdomain') : null;
 
