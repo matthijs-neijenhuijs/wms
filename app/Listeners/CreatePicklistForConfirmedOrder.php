@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\OrderConfirmed;
 use App\Models\Picklist;
+use App\Models\PicklistProduct;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -21,21 +22,34 @@ class CreatePicklistForConfirmedOrder implements ShouldQueue
      */
     public function handle(OrderConfirmed $event): void
     {
-        $order = $event->order;
+        $order = $event->order->loadMissing('products');
 
-        // Create picklist from confirmed order
-        $picklist = Picklist::create([
+        $existingPicklist = Picklist::query()
+            ->where('order_id', $order->id)
+            ->first();
+
+        if ($existingPicklist) {
+            return;
+        }
+
+        $picklist = Picklist::query()->create([
             'warehouse_id' => $order->warehouse_id,
             'order_id' => $order->id,
-            'name' => 'Picklist for Order '.$order->generated_custom_order_id,
         ]);
 
-        // Add order products to picklist products
-        foreach ($order->products as $product) {
-            $picklist->products()->attach($product->id, [
-                'quantity' => $product->quantity,
-                'picked_quantity' => 0,
-            ]);
+        foreach ($order->products as $orderProduct) {
+            $quantity = max((int) ($orderProduct->quantity ?? 0), 0);
+
+            for ($index = 0; $index < $quantity; $index++) {
+                PicklistProduct::query()->create([
+                    'picklist_id' => $picklist->id,
+                    'ean_code' => (string) ($orderProduct->barcode ?? ''),
+                    'reference_code' => $orderProduct->reference_code,
+                    'product_title' => (string) $orderProduct->name,
+                    'show_for_supplier' => false,
+                    'scanned' => false,
+                ]);
+            }
         }
     }
 }

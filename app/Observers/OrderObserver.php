@@ -45,14 +45,14 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        // Check if order status changed to confirmed
-        if ($order->isDirty('order_statuses_id')) {
-            $newStatus = $order->orderStatus;
+        if (! $order->wasChanged('order_statuses_id')) {
+            return;
+        }
 
-            // If status is now confirmed, dispatch event
-            if ($newStatus && $newStatus->order_is_confirmed) {
-                OrderConfirmed::dispatch($order);
-            }
+        $newStatus = $order->orderStatus;
+
+        if ($newStatus?->generate_picklist) {
+            OrderConfirmed::dispatch($order);
         }
     }
 }

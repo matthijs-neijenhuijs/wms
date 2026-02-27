@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Models\Client;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderForm
 {
@@ -20,12 +22,15 @@ class OrderForm
                 Select::make('client_id')
                     ->relationship(
                         name: 'client',
-                        modifyQueryUsing: fn ($query) => $query
-                            ->join('client_addresses', 'clients.id', '=', 'client_addresses.client_id')
-                            ->select('clients.*')
-                            ->distinct(),
+                        titleAttribute: 'email',
+                        modifyQueryUsing: fn (Builder $query): Builder => $query
+                            ->with('clientDeliveryAddress')
+                            ->orderBy('company')
+                            ->orderBy('email'),
                     )
-                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->clientDeliveryAddress?->firstname.' '.$record->clientDeliveryAddress?->lastname ?? 'Unknown')
+                    ->getOptionLabelFromRecordUsing(fn (Client $record): string => $record->company
+                        ?: ($record->clientDeliveryAddress?->name ?: $record->email ?: "Client #{$record->id}"))
+                    ->searchable(['company', 'email'])
                     ->searchable()
                     ->preload(),
             ]);
