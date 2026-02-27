@@ -50,7 +50,7 @@ return new class extends Migration
             $table->string('delivery_region')->nullable();
             $table->string('delivery_city')->nullable();
             $table->string('delivery_country')->nullable();
-            $table->string('telephone')->nullable();
+            $table->string('telephone_number')->nullable();
             $table->string('email')->nullable();
             $table->string('comments')->nullable();
             $table->timestamps();
