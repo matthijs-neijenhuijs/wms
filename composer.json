@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "^4.0",
+        "laravel/ai": "^0.2.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "pxlrbt/filament-activity-log": "^2.1",
