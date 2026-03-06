@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c839af39b8452d33e56a6c383bb3180",
+    "content-hash": "d452b7240d5f29e67979e5cedc96be8f",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -4101,6 +4101,76 @@
                 }
             ],
             "time": "2025-09-03T16:03:54+00:00"
+        },
+        {
+            "name": "openwms/filament-ai-autosuggest-field",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/filament-ai-autosuggest-field",
+                "reference": "d1e65c5ad90c7c8ea9a5b746c27eba0ca4b409e4"
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "laravel/ai": "^0.2.5",
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "OpenWms\\FilamentAiAutosuggestField\\AiAutosuggestFieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "OpenWms\\FilamentAiAutosuggestField\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Filament form field plugin for AI autosuggestions with multi-model context.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "openwms/filament-dynamic-ai-charts",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/filament-dynamic-ai-charts",
+                "reference": "6e04efe7ca32ae2be0163b6e71e4b1de72c568b7"
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "laravel/ai": "^0.2.5",
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "OpenWms\\FilamentDynamicAiCharts\\DynamicAiChartsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "OpenWms\\FilamentDynamicAiCharts\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Filament plugin wrapper for Dynamic AI Charts integration.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -12382,7 +12452,10 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "openwms/filament-ai-autosuggest-field": 20,
+        "openwms/filament-dynamic-ai-charts": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

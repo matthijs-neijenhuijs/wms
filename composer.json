@@ -11,6 +11,8 @@
         "laravel/ai": "^0.2.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "openwms/filament-ai-autosuggest-field": "*@dev",
+        "openwms/filament-dynamic-ai-charts": "*@dev",
         "pxlrbt/filament-activity-log": "^2.1",
         "rebing/graphql-laravel": "^9.10"
     },
@@ -68,6 +70,22 @@
             "dont-discover": []
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/filament-dynamic-ai-charts",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/filament-ai-autosuggest-field",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

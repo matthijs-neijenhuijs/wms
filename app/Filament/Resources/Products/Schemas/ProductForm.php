@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\Products\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use OpenWms\FilamentAiAutosuggestField\Forms\Components\AiAutosuggestField;
 
 class ProductForm
 {
@@ -25,15 +25,10 @@ class ProductForm
                     ->required(),
                 TextInput::make('name')
                     ->required()->columnSpan(2),
-                Textarea::make('description')
-                    ->required()
-                    ->columnSpanFull(),
                 Select::make('vat_rate_id')
                     ->relationship(name: 'vatRate', titleAttribute: 'name'),
-
                 Select::make('brand_id')
                     ->relationship(name: 'brand', titleAttribute: 'name'),
-
                 Select::make('attributes')
                     ->multiple()
                     ->relationship('attributes', titleAttribute: 'name')
@@ -41,7 +36,6 @@ class ProductForm
                     ->searchable()
                     ->getOptionLabelFromRecordUsing(fn ($record) => sprintf('%s: %s', $record->attributeGroup?->name ?? 'Ungrouped', $record->name))
                     ->columnSpanFull(),
-
                 Section::make('Stock')
                     ->relationship('stockProduct')
                     ->schema([

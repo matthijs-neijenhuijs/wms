@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Exceptions\AiChartClarificationException;
 use App\Filament\Resources\DynamicAiCharts\DynamicAiChartResource;
 use App\Filament\Widgets\AiChartChatWidget;
 use App\Filament\Widgets\DynamicAiChartWidget;
@@ -19,6 +18,7 @@ use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
+use OpenWms\FilamentDynamicAiCharts\Exceptions\AiChartClarificationException;
 
 class Dashboard extends BaseDashboard
 {
