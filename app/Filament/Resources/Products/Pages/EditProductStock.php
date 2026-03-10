@@ -3,25 +3,26 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
-use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Products\Schemas\ProductStockForm;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
-class EditProduct extends EditRecord
+class EditProductStock extends EditRecord
 {
     protected static string $resource = ProductResource::class;
 
-    protected static ?string $navigationLabel = 'General';
+    protected static ?string $navigationLabel = 'Stock';
+
+    protected static ?string $title = 'Stock';
 
     public static function getNavigationIcon(): string|\BackedEnum|null
     {
         return null;
     }
 
-    protected function getHeaderActions(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            DeleteAction::make(),
-        ];
+        return ProductStockForm::configure($schema);
     }
 
     protected function getRedirectUrl(): string
