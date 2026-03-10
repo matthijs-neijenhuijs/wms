@@ -1,0 +1,25 @@
+{
+    "name": "openwms/filament-dynamic-ai-charts",
+    "description": "Filament plugin wrapper for Dynamic AI Charts integration.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^4.0",
+        "laravel/ai": "^0.2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "OpenWms\\FilamentDynamicAiCharts\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "OpenWms\\FilamentDynamicAiCharts\\DynamicAiChartsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
