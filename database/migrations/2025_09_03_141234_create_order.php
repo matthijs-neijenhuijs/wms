@@ -19,9 +19,10 @@ return new class extends Migration
             $table->string('color');
             $table->boolean('generate_picklist')->default(false);
             $table->boolean('reserve_stock')->default(false);
+            $table->boolean('reduce_stock')->default(false);
             $table->boolean('concepted')->default(false);
             $table->boolean('completed')->default(false);
-            $table->boolean('paused')->default(false);
+            $table->boolean('on_hold')->default(false);
             $table->boolean('delivered')->default(false);
             $table->boolean('cancelled')->default(false);
             $table->timestamps();
@@ -38,6 +39,11 @@ return new class extends Migration
             $table->index('generated_custom_order_id');
             $table->decimal('discount', 12, 4)->nullable();
             $table->string('custom_order_id')->nullable();
+            $table->boolean('completed')->default(false);
+            $table->boolean(column: 'picked')->default(false);
+            $table->boolean(column: 'cancelled')->default(false);
+            $table->boolean(column: 'delivered')->default(false);
+            $table->boolean(column: 'on_hold')->default(false);
             $table->string('invoice_name')->nullable();
             $table->string('invoice_address')->nullable();
             $table->string('invoice_zipcode')->nullable();

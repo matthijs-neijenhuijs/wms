@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -22,7 +23,13 @@ class ProductsTable
                 ToggleColumn::make('active'),
                 TextColumn::make('reference_code')
                     ->searchable(),
-                TextColumn::make('ean')
+                TextColumn::make('barcode')
+                    ->url(fn ($record): ?string => Filament::getTenant()
+                        ? route('products.barcode.download', [
+                            'tenant' => Filament::getTenant()->name,
+                            'product' => $record,
+                        ])
+                        : null)
                     ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),

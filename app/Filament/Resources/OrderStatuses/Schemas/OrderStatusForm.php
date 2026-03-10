@@ -44,8 +44,8 @@ class OrderStatusForm
                             ->label('Is Completed')
                             ->default(false),
 
-                        Toggle::make('paused')
-                            ->label('Is Paused')
+                        Toggle::make('on_hold')
+                            ->label('On Hold')
                             ->default(false),
 
                         Toggle::make('delivered')

@@ -8,6 +8,7 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Hidden;
 use Illuminate\Support\Number;
 
 class ProductImporter extends Importer
@@ -52,33 +53,37 @@ class ProductImporter extends Importer
         return [
             Checkbox::make('updateExisting')
                 ->label('Update existing products (match by product_code)'),
+            Hidden::make('warehouse_id')
+                ->default(fn (): ?int => Filament::getTenant()?->id)
+                ->dehydrated(),
         ];
     }
 
     public function resolveRecord(): ?Product
     {
+        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->id;
+
         if (! ($this->options['updateExisting'] ?? false)) {
             return new Product;
         }
 
-        $tenant = Filament::getTenant();
-
-        if (! $tenant) {
+        if (! $warehouseId) {
             return new Product;
         }
 
         return Product::query()
-            ->where('warehouse_id', $tenant->id)
+            ->withoutGlobalScopes()
+            ->where('warehouse_id', $warehouseId)
             ->where('product_code', $this->data['product_code'] ?? null)
             ->firstOrNew();
     }
 
     protected function beforeSave(): void
     {
-        $tenant = Filament::getTenant();
+        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->id;
 
-        if ($tenant) {
-            $this->record->warehouse_id = $tenant->id;
+        if ($warehouseId) {
+            $this->record->warehouse_id = $warehouseId;
         }
     }
 

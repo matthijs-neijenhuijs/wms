@@ -43,8 +43,8 @@ class OrderStatusesTable
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 
-                IconColumn::make('paused')
-                    ->label('Paused')
+                IconColumn::make('on_hold')
+                    ->label('On Hold')
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 

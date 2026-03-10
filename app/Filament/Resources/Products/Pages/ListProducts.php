@@ -6,6 +6,7 @@ use App\Filament\Actions\ImportWithXlsxAction;
 use App\Filament\Imports\ProductImporter;
 use App\Filament\Resources\Products\ProductResource;
 use Filament\Actions\CreateAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 
 class ListProducts extends ListRecords
@@ -16,7 +17,10 @@ class ListProducts extends ListRecords
     {
         return [
             ImportWithXlsxAction::make()
-                ->importer(ProductImporter::class),
+                ->importer(ProductImporter::class)
+                ->options(fn (): array => [
+                    'warehouse_id' => Filament::getTenant()?->id,
+                ]),
             CreateAction::make(),
         ];
     }
