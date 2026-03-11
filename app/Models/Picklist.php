@@ -28,7 +28,7 @@ class Picklist extends Model
 
     public function products()
     {
-        return $this->hasMany('App\Models\PicklistProduct')->orderBy('ean_code');
+        return $this->hasMany('App\Models\PicklistProduct')->orderBy('barcode');
     }
 
     public function failedProducts()
@@ -38,23 +38,23 @@ class Picklist extends Model
 
     public function productsCombined()
     {
-        $products = $this->hasMany('App\Models\PicklistProduct')->orderBy('ean_code')->get();
+        $products = $this->hasMany('App\Models\PicklistProduct')->orderBy('barcode')->get();
 
         $array = [];
         foreach ($products as $product) {
 
-            if (isset($array[$product->ean_code])) {
-                $array[$product->ean_code]['quantity'] = 1 + $array[$product->ean_code]['quantity'];
+            if (isset($array[$product->barcode])) {
+                $array[$product->barcode]['quantity'] = 1 + $array[$product->barcode]['quantity'];
                 if ($product->scanned) {
-                    $array[$product->ean_code]['total_quantity_scanned'] = $array[$product->ean_code]['total_quantity_scanned'] + 1;
+                    $array[$product->barcode]['total_quantity_scanned'] = $array[$product->barcode]['total_quantity_scanned'] + 1;
                 }
             } else {
-                $array[$product->ean_code] = $product->toArray();
-                $array[$product->ean_code]['quantity'] = 1;
+                $array[$product->barcode] = $product->toArray();
+                $array[$product->barcode]['quantity'] = 1;
                 if ($product->scanned) {
-                    $array[$product->ean_code]['total_quantity_scanned'] = 1;
+                    $array[$product->barcode]['total_quantity_scanned'] = 1;
                 } else {
-                    $array[$product->ean_code]['total_quantity_scanned'] = 0;
+                    $array[$product->barcode]['total_quantity_scanned'] = 0;
                 }
 
             }

@@ -31,7 +31,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('picklist_id')->constrained('picklists')->onDelete('cascade');
             $table->boolean('show_for_supplier')->default(false);
-            $table->string('ean_code');
+            $table->string('barcode');
             $table->string('reference_code')->nullable();
             $table->string('color')->nullable();
             $table->string('size')->nullable();
@@ -39,6 +39,19 @@ return new class extends Migration
             $table->boolean('scanned')->default(false);
             $table->timestamps();
         });
+
+        Schema::create('picklist_failed_products', function (Blueprint $table) {
+            $table->increments('id');
+            $table->foreignId('picklist_id')->constrained('picklists')->onDelete('cascade');
+            $table->string('barcode')->nullable();
+            $table->string('reference_code')->nullable();
+            $table->bigInteger('total_quantity_scanned')->default(0);
+            $table->string('color')->nullable();
+            $table->string('size')->nullable();
+            $table->string('product_title')->nullable();
+            $table->timestamps();
+        });
+
     }
 
     /**

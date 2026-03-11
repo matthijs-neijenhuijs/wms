@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Picklists;
 
+use App\Filament\Infolists\Components\FailedProductsTable;
 use App\Filament\Infolists\Components\ProductsTable;
 use App\Filament\Resources\Picklists\Pages\CreatePicklist;
 use App\Filament\Resources\Picklists\Pages\ListPicklists;
@@ -59,7 +60,7 @@ class PicklistResource extends Resource
                 Section::make('Order Summary')
                     ->schema([
                         TextEntry::make('order.generated_custom_order_id')
-                            ->label('Order ID'),
+                            ->label('Order'),
                         TextEntry::make('order.orderStatus.name')
                             ->label('Order status'),
                         TextEntry::make('order.client.email')
@@ -69,6 +70,11 @@ class PicklistResource extends Resource
                         TextEntry::make('order.delivery_country'),
                     ])
                     ->columns(3),
+                Section::make('Failed Scans')
+                    ->columnSpan('full')
+                    ->schema([
+                        FailedProductsTable::make('failedProducts'),
+                    ]),
                 Section::make('Products')
                     ->columnSpan('full')
                     ->schema([
@@ -84,6 +90,7 @@ class PicklistResource extends Resource
                 'order.orderStatus',
                 'order.client',
                 'products',
+                'failedProducts',
             ])
             ->withCount([
                 'products',

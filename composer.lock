@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a9b653a960fc746b8042c629cd43ba31",
+    "content-hash": "5a44ad857eb8c20599272ae8956cf99a",
     "packages": [
         {
             "name": "ageekdev/laravel-barcode",
@@ -425,6 +425,70 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "chengkangzai/filament-qrcode-scanner-html5",
+            "version": "v2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/chengkangzai/filament-qrcode-scanner-html5.git",
+                "reference": "a83956c2c7e02a364d3dd72a6465c43978a5ec4b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/chengkangzai/filament-qrcode-scanner-html5/zipball/a83956c2c7e02a364d3dd72a6465c43978a5ec4b",
+                "reference": "a83956c2c7e02a364d3dd72a6465c43978a5ec4b",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0|^5.0",
+                "livewire/livewire": "^3.0|^4.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^9.0|^10.0|^11.0",
+                "pestphp/pest": "^2.0|^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "CCK\\FilamentQrcodeScannerHtml5\\BarcodeScannerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "CCK\\FilamentQrcodeScannerHtml5\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "CCK",
+                    "email": "pycck@hotmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Filament form action for scanning barcodes and QR codes using the device camera with html5-qrcode library",
+            "homepage": "https://github.com/chengkangzai/filament-qrcode-scanner-html5",
+            "keywords": [
+                "barcode",
+                "camera",
+                "filament",
+                "html5-qrcode",
+                "laravel",
+                "qrcode",
+                "scanner"
+            ],
+            "support": {
+                "issues": "https://github.com/chengkangzai/filament-qrcode-scanner-html5/issues",
+                "source": "https://github.com/chengkangzai/filament-qrcode-scanner-html5/tree/v2.1.0"
+            },
+            "time": "2026-03-01T16:15:30+00:00"
         },
         {
             "name": "chillerlan/php-qrcode",

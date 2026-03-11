@@ -4,28 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PicklistProduct extends Model
+class PicklistFailedProduct extends Model
 {
-    protected $table = 'picklists_products';
+    protected $table = 'picklist_failed_products';
 
     /**
-     * The attributes that are mass assignable.
-     *
      * @var list<string>
      */
     protected $fillable = [
         'picklist_id',
-        'show_for_supplier',
         'barcode',
         'reference_code',
+        'total_quantity_scanned',
         'color',
         'size',
         'product_title',
-        'scanned',
     ];
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
 }
