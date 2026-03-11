@@ -13,7 +13,7 @@ class IdentifySubdomain
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -43,7 +43,7 @@ class IdentifySubdomain
         $subdomainModel = Subdomain::where('subdomain', $subdomain)->first();
 
         if (! $subdomainModel) {
-            return redirect(config('app.url'));
+            return redirect()->away('http://'.$centralDomain.'/');
         }
 
         // Store in container as instance

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Picklists;
 
+use App\Filament\Infolists\Components\ProductsTable;
 use App\Filament\Resources\Picklists\Pages\CreatePicklist;
 use App\Filament\Resources\Picklists\Pages\ListPicklists;
 use App\Filament\Resources\Picklists\Pages\ViewPicklist;
@@ -10,13 +11,13 @@ use App\Filament\Resources\Picklists\Tables\PicklistsTable;
 use App\Models\Picklist;
 use App\Models\Picklist as PicklistModel;
 use BackedEnum;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PicklistResource extends Resource
 {
@@ -69,54 +70,14 @@ class PicklistResource extends Resource
                     ])
                     ->columns(3),
                 Section::make('Products')
+                    ->columnSpan('full')
                     ->schema([
-                        RepeatableEntry::make('priority_products')
-                            ->label('Priority products (reference starts with 66)')
-                            ->state(fn (PicklistModel $record) => $record->products
-                                ->filter(fn ($product): bool => str_starts_with((string) ($product->reference_code ?? ''), '66'))
-                                ->values()
-                                ->all())
-                            ->schema([
-                                TextEntry::make('product_title')
-                                    ->label('Product'),
-                                TextEntry::make('ean_code')
-                                    ->label('EAN'),
-                                TextEntry::make('reference_code')
-                                    ->label('Reference'),
-                                TextEntry::make('color')
-                                    ->label('Color'),
-                                TextEntry::make('size')
-                                    ->label('Size'),
-                                TextEntry::make('scanned')
-                                    ->formatStateUsing(fn (bool|int|null $state): string => $state ? 'Yes' : 'No'),
-                            ])
-                            ->columns(6),
-                        RepeatableEntry::make('regular_products')
-                            ->label('Other products')
-                            ->state(fn (PicklistModel $record) => $record->products
-                                ->filter(fn ($product): bool => ! str_starts_with((string) ($product->reference_code ?? ''), '66'))
-                                ->values()
-                                ->all())
-                            ->schema([
-                                TextEntry::make('product_title')
-                                    ->label('Product'),
-                                TextEntry::make('ean_code')
-                                    ->label('EAN'),
-                                TextEntry::make('reference_code')
-                                    ->label('Reference'),
-                                TextEntry::make('color')
-                                    ->label('Color'),
-                                TextEntry::make('size')
-                                    ->label('Size'),
-                                TextEntry::make('scanned')
-                                    ->formatStateUsing(fn (bool|int|null $state): string => $state ? 'Yes' : 'No'),
-                            ])
-                            ->columns(6),
+                        ProductsTable::make('products'),
                     ]),
             ]);
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with([
