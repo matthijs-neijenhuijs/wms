@@ -17,6 +17,7 @@ class Warehouse extends Model
         'subdomain_id',
         'name',
         'currency',
+        'order_statuses_id_completed_picklist',
     ];
 
     public function subdomain(): BelongsTo
@@ -27,6 +28,11 @@ class Warehouse extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_warehouses');
+    }
+
+    public function completedPicklistOrderStatus(): BelongsTo
+    {
+        return $this->belongsTo(OrderStatus::class, 'order_statuses_id_completed_picklist');
     }
 
     protected static function booted(): void
