@@ -1,21 +1,30 @@
-# Orders  
-This section provides instructions related to the management of orders within the warehouse management system. It covers various aspects of order processing, including purchase orders, sales orders, and the handling of packages associated with these orders. The instructions are designed to ensure efficient and accurate order fulfillment while maintaining clear communication between different stakeholders involved in the order management process.
+# Orders
+Order flow is driven by two related tables: `orders` and `order_statuses`.
 
-# Order statuses
-Orders in the warehouse management system can have various statuses that indicate their current state in the order processing workflow. These statuses help to track the progress of orders and ensure that they are handled appropriately at each stage. Common order statuses include:  
+## Schema Facts
+- `orders` stores customer/order header data (client, generated IDs, invoice/delivery fields, and flags like `completed`, `picked`, `cancelled`, `delivered`, `on_hold`).
+- `orders.order_statuses_id` links to `order_statuses` and is nullable.
+- `order_products` stores line-item snapshots (`name`, `quantity`, `price`, `vat_rate`, `barcode`, `reference_code`) and optional links to `products` and `vat_rates`.
+- Pick execution is tracked in `picklists`, `picklists_products`, and `picklist_failed_products`.
 
-- **New** — Concept order; no stock reservation and no picklist generation yet.
-- **Confirmed** — Order is approved; stock is reserved and a picklist can be generated.
-- **Processing** — Order is being handled internally; stock remains reserved.
-- **Shipped** — Order has left the warehouse.
-- **Delivered** — Order is completed and marked as delivered.
-- **On Hold** — Order is paused temporarily; stock can remain reserved.
-- **Cancelled** — Order is cancelled and no further fulfillment actions are taken.
+## Status Behavior
+The workflow booleans that trigger business behavior are defined on `order_statuses` (not on `orders`):
+- `generate_picklist`
+- `reserve_stock`
+- `reduce_stock`
+- `concepted`
+- `completed`
+- `on_hold`
+- `delivered`
+- `cancelled`
 
-In order model there are two boolean fields that trigger some jobs/events when they are set to true:
+When implementing status transitions, use `order_statuses` as the source of truth and keep the `orders` boolean flags synchronized with the selected status.
 
-- generate_picklist: when set to true, a picklist will be generated for the order. This typically happens when the order is confirmed and ready for fulfillment.
-- reserve_stock: when set to true, the system will attempt to reserve the necessary stock for
-- concepted: when set to true, the order is in a concept state, meaning it is not yet confirmed and no stock reservation or picklist generation has occurred.
-- completed: when set to true, the order is completed and all necessary fulfillment actions have been taken. Product amounts are reduced from inventory and it will not be reserved.
-- reduce_stock: when set to true, the system will reduce the stock levels for the products associated with the order. This typically happens when the order is completed and the products have been shipped or delivered.
+## Identifier Rules
+- `orders.generated_custom_order_id` is globally unique.
+- `orders.custom_order_id` is unique per warehouse (`unique(warehouse_id, custom_order_id)`).
+
+## Implementation Notes
+- Always scope order queries by `warehouse_id`.
+- Keep all stock-reservation and stock-reduction logic aligned with status booleans and picklist completion.
+- There is no `purchase_orders` migration in this project; do not assume purchase-order persistence exists unless a migration is added first.

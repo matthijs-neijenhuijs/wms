@@ -3,6 +3,11 @@
 
 This instruction file defines AI-powered features and intelligent automation concepts for the warehouse management system. These guidelines should be followed when implementing AI-driven functionality across all modules.
 
+## Current Schema Baseline (Read First)
+- Current operational tables include: `orders`, `order_statuses`, `order_products`, `picklists`, `picklists_products`, `picklist_failed_products`, `products`, `stock_products`, `clients`, and warehouse/tenant tables.
+- Current AI-specific persistence already exists in: `agent_conversations`, `agent_conversation_messages`, and `dynamic_ai_charts`.
+- There is no `purchase_orders`, `returns`, `locations`, or `carriers` table yet. Treat references to those as future-domain concepts that require new migrations before implementation.
+
 ---
 
 ## 1. Intelligent Demand Forecasting & Purchase Advice
@@ -21,7 +26,7 @@ interface PurchaseAdvisor {
     public function calculateOptimalReorderPoint(Product $product): int;
     public function suggestOrderQuantity(Product $product, Carbon $targetDate): int;
     public function predictStockout(Product $product): ?Carbon;
-    public function getSupplierRecommendation(Product $product): Supplier;
+    public function getSupplierRecommendation(Product $product): array;
 }
 ```
 
@@ -78,8 +83,8 @@ The system should continuously analyze product movement and classify inventory:
 ### AI Slotting Recommendations
 ```php
 interface SlottingOptimizer {
-    public function analyzeProductVelocity(Product $product, int $days = 90): VelocityScore;
-    public function suggestOptimalLocation(Product $product): Location;
+    public function analyzeProductVelocity(Product $product, int $days = 90): array;
+    public function suggestOptimalLocation(Product $product): array;
     public function generateRelocationPlan(): Collection;
     public function calculateSlottingImpact(): array; // time savings, efficiency gains
 }
@@ -105,8 +110,8 @@ The system should intelligently allocate stock considering:
 ### Allocation Priority Engine
 ```php
 interface StockAllocator {
-    public function allocateForOrder(Order $order): AllocationResult;
-    public function suggestAllocationStrategy(Product $product): AllocationStrategy;
+    public function allocateForOrder(Order $order): array;
+    public function suggestAllocationStrategy(Product $product): array;
     public function handleStockContention(Collection $orders): Collection;
     public function optimizeReservations(): int; // returns freed stock count
 }
@@ -124,10 +129,10 @@ interface StockAllocator {
 ### AI-Powered Return Handling
 ```php
 interface ReturnProcessor {
-    public function predictReturnCondition(Return $return): ConditionPrediction;
-    public function suggestDisposition(Return $return): Disposition; // restock, refurbish, dispose
-    public function calculateRefurbishmentCost(Return $return): Money;
-    public function detectReturnFraud(Return $return): FraudScore;
+    public function predictReturnCondition(array $returnContext): array;
+    public function suggestDisposition(array $returnContext): string; // restock, refurbish, dispose
+    public function calculateRefurbishmentCost(array $returnContext): float;
+    public function detectReturnFraud(array $returnContext): float;
 }
 ```
 
@@ -149,10 +154,10 @@ interface ReturnProcessor {
 ### Smart Receiving
 ```php
 interface InboundProcessor {
-    public function predictReceiptTiming(PurchaseOrder $po): Carbon;
-    public function suggestPutawayLocations(Receipt $receipt): Collection;
-    public function detectQuantityDiscrepancies(Receipt $receipt): Collection;
-    public function optimizeCrossDocking(Receipt $receipt): ?Collection;
+    public function predictReceiptTiming(array $inboundContext): Carbon;
+    public function suggestPutawayLocations(array $inboundContext): Collection;
+    public function detectQuantityDiscrepancies(array $inboundContext): Collection;
+    public function optimizeCrossDocking(array $inboundContext): ?Collection;
 }
 ```
 
@@ -174,9 +179,9 @@ interface InboundProcessor {
 ```php
 interface CycleCountPlanner {
     public function prioritizeCountLocations(): Collection;
-    public function predictDiscrepancyRisk(Location $location): float;
+    public function predictDiscrepancyRisk(array $locationContext): float;
     public function scheduleOptimalCountTimes(): Collection;
-    public function analyzeCountResults(CycleCount $count): DiscrepancyAnalysis;
+    public function analyzeCountResults(array $countContext): array;
 }
 ```
 
@@ -198,8 +203,8 @@ interface CycleCountPlanner {
 ### Smart Carrier Selection
 ```php
 interface CarrierOptimizer {
-    public function selectOptimalCarrier(Order $order): Carrier;
-    public function predictDeliveryTime(Order $order, Carrier $carrier): Carbon;
+    public function selectOptimalCarrier(Order $order): array;
+    public function predictDeliveryTime(Order $order, array $carrier): Carbon;
     public function calculateShippingCost(Order $order): Collection; // all carrier options
     public function suggestConsolidation(Collection $orders): Collection;
 }
@@ -302,6 +307,8 @@ interface WarehouseAssistant {
 - carrier_performance (carrier_id, date, on_time_rate, damage_rate, avg_cost)
 - slotting_recommendations (product_id, current_location_id, suggested_location_id, impact_score)
 ```
+
+These are future recommendations only; they are not part of the current migration set.
 
 ---
 
