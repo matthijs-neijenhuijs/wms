@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->boolean('completed')->default(false); 
-            $table->boolean('processed')->default(false); 
+            $table->boolean('completed')->default(false);
+            $table->boolean('processed')->default(false);
             $table->text('comments')->nullable();
             $table->date('expected_delivery_date');
             $table->integer('generated_year_purchase_order_id');
@@ -25,7 +24,7 @@ return new class extends Migration
             $table->index('generated_custom_purchase_order_id');
             $table->timestamps();
 
-            $table->unique(['warehouse_id', 'generated_custom_purchase_order_id']);
+            $table->unique(['warehouse_id', 'generated_custom_purchase_order_id'], 'po_wh_gcpoid_uq');
         });
 
         Schema::create('purchase_orders_products', function (Blueprint $table) {
