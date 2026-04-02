@@ -59,6 +59,7 @@ return new class extends Migration
             $table->string('telephone_number')->nullable();
             $table->string('email')->nullable();
             $table->string('comments')->nullable();
+            $table->date('delivery_date')->nullable();
             $table->timestamps();
 
             $table->unique(['warehouse_id', 'custom_order_id']);

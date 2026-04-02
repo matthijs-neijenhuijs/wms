@@ -17,7 +17,7 @@ return new class extends Migration
             $table->boolean('completed')->default(false);
             $table->boolean('processed')->default(false);
             $table->text('comments')->nullable();
-            $table->date('expected_delivery_date');
+            $table->date('delivery_date');
             $table->integer('generated_year_purchase_order_id');
             $table->index('generated_year_purchase_order_id');
             $table->string('generated_custom_purchase_order_id')->nullable();
