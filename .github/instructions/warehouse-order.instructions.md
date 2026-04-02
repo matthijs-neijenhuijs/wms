@@ -1,6 +1,11 @@
 # Orders
 Order flow is driven by two related tables: `orders` and `order_statuses`.
 
+## Description
+Orders are a list of products that a client wants to purchase. Each order has a status that defines the workflow behavior of the order. The status is defined in `order_statuses` and is linked to `orders` via `orders.order_statuses_id`. The `order_statuses` table defines the behavior of the order in terms of stock reservation, picklist generation, and other workflow-related flags.
+
+A order has a relation to clients and client addresses. The order also has a relation to `order_products` which stores the line items of the order. Each line item has a relation to `products` and `vat_rates` for price and tax calculations.
+
 ## Schema Facts
 - `orders` stores customer/order header data (client, generated IDs, invoice/delivery fields, and flags like `completed`, `picked`, `cancelled`, `delivered`, `on_hold`).
 - `orders.order_statuses_id` links to `order_statuses` and is nullable.
