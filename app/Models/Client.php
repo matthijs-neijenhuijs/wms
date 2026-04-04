@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use AlizHarb\ActivityLog\Contracts\HasActivityLogTitle;
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
-class Client extends Model
+class Client extends Model implements HasActivityLogTitle
 {
     use BelongsToWarehouse;
+    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +31,21 @@ class Client extends Model
         'bill_client_address_id',
         'delivery_client_address_id',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('client')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Client {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->company ?: $this->email ?: "Client #{$this->getKey()}");
+    }
 
     public function warehouse()
     {

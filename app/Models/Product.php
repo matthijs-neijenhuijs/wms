@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use AlizHarb\ActivityLog\Contracts\HasActivityLogTitle;
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
-class Product extends Model
+class Product extends Model implements HasActivityLogTitle
 {
     use BelongsToWarehouse;
+    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -35,6 +39,21 @@ class Product extends Model
         'product_category_id',
         'image',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('product')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Product {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->name ?: $this->reference_code ?: "Product #{$this->getKey()}");
+    }
 
     public function warehouse()
     {

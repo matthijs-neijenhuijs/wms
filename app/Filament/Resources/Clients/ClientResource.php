@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Clients;
 
+use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
 use App\Filament\Resources\Clients\Pages\CreateClient;
 use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Filament\Resources\Clients\Pages\ListClients;
@@ -36,7 +37,7 @@ class ClientResource extends Resource
     {
         return [
             RelationManagers\AddressesRelationManager::class,
-
+            ActivitiesRelationManager::class,
         ];
     }
 

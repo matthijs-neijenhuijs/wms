@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use AlizHarb\ActivityLog\ActivityLogPlugin;
 use App\Http\Middleware\IdentifySubdomain;
 use App\Models\Warehouse;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -46,6 +47,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->assets([
                 Js::make('onscan', base_path('node_modules/onscan.js/onscan.min.js')),
+            ])
+            ->plugins([
+                ActivityLogPlugin::make()
+                    ->navigationGroup('Settings'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')

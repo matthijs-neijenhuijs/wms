@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5a44ad857eb8c20599272ae8956cf99a",
+    "content-hash": "483df42c5b13bda85e8f01846ee1f643",
     "packages": [
         {
             "name": "ageekdev/laravel-barcode",
@@ -80,6 +80,93 @@
                 "source": "https://github.com/ageekdev/laravel-barcode/tree/v1.3.0"
             },
             "time": "2025-03-02T06:32:00+00:00"
+        },
+        {
+            "name": "alizharb/filament-activity-log",
+            "version": "v1.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AlizHarb/filament-activity-log.git",
+                "reference": "d194f9d2c2d2d105a6377280a462c5705bb30cdd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AlizHarb/filament-activity-log/zipball/d194f9d2c2d2d105a6377280a462c5705bb30cdd",
+                "reference": "d194f9d2c2d2d105a6377280a462c5705bb30cdd",
+                "shasum": ""
+            },
+            "require": {
+                "filament/actions": "^4.2|^5.0",
+                "filament/filament": "^4.0|^5.0",
+                "filament/tables": "^4.0|^5.0",
+                "phiki/phiki": "^1.1|^2.0",
+                "php": "^8.3",
+                "spatie/laravel-activitylog": "^4.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.0",
+                "orchestra/testbench": "^10.0|^11.0",
+                "pestphp/pest": "^3.0|^4.0",
+                "pestphp/pest-plugin-laravel": "^3.0|^4.0",
+                "pestphp/pest-plugin-livewire": "^3.0|^4.0",
+                "phpstan/phpstan": "^2.0"
+            },
+            "type": "filament-plugin",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AlizHarb\\ActivityLog\\ActivityLogServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AlizHarb\\ActivityLog\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ali Harb",
+                    "email": "harbzali@gmail.com",
+                    "homepage": "https://github.com/alizharb",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A powerful, feature-rich activity logging solution for FilamentPHP v4 & v5 with timeline views, dashboard widgets, and revert actions.",
+            "homepage": "https://github.com/alizharb/filament-activity-log",
+            "keywords": [
+                "activity-log",
+                "activity-tracking",
+                "audit-log",
+                "audit-trail",
+                "dashboard-widget",
+                "filament",
+                "filament-plugin",
+                "filament-v4",
+                "filament-v5",
+                "laravel",
+                "laravel-12",
+                "php",
+                "spatie",
+                "timeline"
+            ],
+            "support": {
+                "docs": "https://github.com/alizharb/filament-activity-log#readme",
+                "issues": "https://github.com/alizharb/filament-activity-log/issues",
+                "source": "https://github.com/alizharb/filament-activity-log"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/alizharb",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-02-07T01:00:28+00:00"
         },
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -4539,6 +4626,80 @@
             "time": "2025-09-24T15:06:41+00:00"
         },
         {
+            "name": "phiki/phiki",
+            "version": "v2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phikiphp/phiki.git",
+                "reference": "24375dbc474dbc484de7d53c6bab0bb9e198f647"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phikiphp/phiki/zipball/24375dbc474dbc484de7d53c6bab0bb9e198f647",
+                "reference": "24375dbc474dbc484de7d53c6bab0bb9e198f647",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^8.2",
+                "psr/simple-cache": "^3.0"
+            },
+            "require-dev": {
+                "illuminate/support": "^11.45",
+                "laravel/pint": "^1.18.1",
+                "league/commonmark": "^2.5.3",
+                "orchestra/testbench": "^9.15",
+                "pestphp/pest": "^3.5.1",
+                "phpstan/extension-installer": "^1.4.3",
+                "phpstan/phpstan": "^2.0",
+                "symfony/var-dumper": "^7.1.6"
+            },
+            "suggest": {
+                "league/commonmark": "Required to use the CommonMark adapter (^2.5.3)"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Phiki\\Adapters\\Laravel\\PhikiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Phiki\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan Chandler",
+                    "email": "support@ryangjchandler.co.uk",
+                    "homepage": "https://ryangjchandler.co.uk",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Syntax highlighting using TextMate grammars in PHP.",
+            "support": {
+                "issues": "https://github.com/phikiphp/phiki/issues",
+                "source": "https://github.com/phikiphp/phiki/tree/v2.2.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/ryangjchandler",
+                    "type": "github"
+                },
+                {
+                    "url": "https://buymeacoffee.com/ryangjchandler",
+                    "type": "other"
+                }
+            ],
+            "time": "2026-04-01T15:56:08+00:00"
+        },
+        {
             "name": "phpoption/phpoption",
             "version": "1.9.5",
             "source": {
@@ -5301,69 +5462,6 @@
                 "source": "https://github.com/bobthecow/psysh/tree/v0.12.22"
             },
             "time": "2026-03-22T23:03:24+00:00"
-        },
-        {
-            "name": "pxlrbt/filament-activity-log",
-            "version": "v2.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pxlrbt/filament-activity-log.git",
-                "reference": "2e7b78918f0869ca1ecf8680ce229311b56a35a2"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pxlrbt/filament-activity-log/zipball/2e7b78918f0869ca1ecf8680ce229311b56a35a2",
-                "reference": "2e7b78918f0869ca1ecf8680ce229311b56a35a2",
-                "shasum": ""
-            },
-            "require": {
-                "filament/filament": "^4.0|^5.0",
-                "php": "^8.0",
-                "spatie/laravel-activitylog": "^4.7"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.5"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "\\pxlrbt\\FilamentActivityLog\\FilamentActivityLogServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "pxlrbt\\FilamentActivityLog\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Dennis Koch",
-                    "email": "info@pixelarbeit.de"
-                }
-            ],
-            "description": "Spatie's Laravel Activity Log integrated into Filament",
-            "keywords": [
-                "activity log",
-                "filament",
-                "laravel-filament"
-            ],
-            "support": {
-                "issues": "https://github.com/pxlrbt/filament-activity-log/issues",
-                "source": "https://github.com/pxlrbt/filament-activity-log/tree/v2.1.1"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/pxlrbt",
-                    "type": "github"
-                }
-            ],
-            "time": "2026-01-20T10:24:38+00:00"
         },
         {
             "name": "ralouphie/getallheaders",

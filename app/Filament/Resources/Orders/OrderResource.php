@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders;
 
+use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
 use App\Filament\Resources\Orders\Pages\CreateOrder;
 use App\Filament\Resources\Orders\Pages\EditOrder;
 use App\Filament\Resources\Orders\Pages\ListOrders;
@@ -40,6 +41,7 @@ class OrderResource extends Resource
     {
         return [
             RelationManagers\OrderProductRelationManager::class,
+            ActivitiesRelationManager::class,
         ];
     }
 
