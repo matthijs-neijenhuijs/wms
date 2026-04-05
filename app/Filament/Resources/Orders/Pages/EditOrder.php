@@ -11,6 +11,13 @@ class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
+    protected static ?string $navigationLabel = 'General';
+
+    public static function getNavigationIcon(): string|\BackedEnum|null
+    {
+        return null;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

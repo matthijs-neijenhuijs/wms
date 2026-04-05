@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Clients\Schemas;
 
+use App\Models\Client;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -36,7 +37,8 @@ class ClientForm
                         Textarea::make('comments')
                             ->rows(3),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->columnSpanFull(),
                 Section::make('Addresses')
                     ->schema([
                         Select::make('bill_client_address_id')
@@ -44,7 +46,7 @@ class ClientForm
                             ->relationship(
                                 name: 'clientBillAddress',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: function (Builder $query, ?\App\Models\Client $record): Builder {
+                                modifyQueryUsing: function (Builder $query, ?Client $record): Builder {
                                     if (! $record) {
                                         return $query->whereNull('id');
                                     }
@@ -57,7 +59,7 @@ class ClientForm
                             ->relationship(
                                 name: 'clientDeliveryAddress',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: function (Builder $query, ?\App\Models\Client $record): Builder {
+                                modifyQueryUsing: function (Builder $query, ?Client $record): Builder {
                                     if (! $record) {
                                         return $query->whereNull('id');
                                     }
@@ -66,7 +68,8 @@ class ClientForm
                                 },
                             ),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->columnSpanFull(),
 
             ]);
     }

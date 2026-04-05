@@ -31,15 +31,15 @@ class ProductsTable
                             ->map(function ($attribute): string {
                                 $label = e("{$attribute->attributeGroup->name}: {$attribute->name}");
 
-                                return '<span class="fi-color fi-color-primary fi-text-color-700 dark:fi-text-color-400 fi-badge fi-size-sm" style="margin-right: 0.5rem; margin-bottom: 0.5rem;">'.$label.'</span>';
+                                return '<span class="fi-color fi-color-primary fi-text-color-700 dark:fi-text-color-400 fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap">'.$label.'</span>';
                             })
-                            ->implode(' ');
+                            ->implode('');
 
                         if ($attributeBadges === '') {
                             return e($nameWithBrand);
                         }
 
-                        return '<div>'.e($nameWithBrand).'</div><div class="mt-1 flex flex-wrap gap-2">'.$attributeBadges.'</div>';
+                        return '<div>'.e($nameWithBrand).'</div><div class="mt-1 flex flex-col items-start gap-1">'.$attributeBadges.'</div>';
                     })
                     ->searchable(),
                 TextColumn::make('stock_summary')
@@ -52,11 +52,11 @@ class ProductsTable
                         $reservedOnPicklists = $stock?->reserved_on_picklists ?? 0;
                         $free = $stock?->free_on_stock_quantity ?? 0;
 
-                        return '<div class="flex flex-col items-start gap-2">'
-                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm" style="color: #000;">OnStock: '.$onStock.'</span> '
-                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm" style="color: #000;">Reserved: '.$reserved.'</span> '
-                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm" style="color: #000;">Picked: '.$reservedOnPicklists.'</span> '
-                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm" style="color: #000;">Free: '.$free.'</span>'
+                        return '<div class="flex flex-col items-start gap-1">'
+                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Stock: '.$onStock.'</span>'
+                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Res: '.$reserved.'</span>'
+                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Pick: '.$reservedOnPicklists.'</span>'
+                            .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Free: '.$free.'</span>'
                             .'</div>';
                     }),
 

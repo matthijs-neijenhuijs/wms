@@ -91,6 +91,11 @@ class Order extends Model implements HasActivityLogTitle
     protected function casts(): array
     {
         return [
+            'completed' => 'boolean',
+            'picked' => 'boolean',
+            'cancelled' => 'boolean',
+            'delivered' => 'boolean',
+            'on_hold' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

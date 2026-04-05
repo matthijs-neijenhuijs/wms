@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Products;
 
-use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\EditProductStock;
 use App\Filament\Resources\Products\Pages\ListProducts;
+use App\Filament\Resources\Products\Pages\ManageProductActivities;
 use App\Filament\Resources\Products\Schemas\ProductForm;
 use App\Filament\Resources\Products\Tables\ProductsTable;
 use App\Models\Product;
@@ -24,13 +24,14 @@ class ProductResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
 
-    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::End;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
             EditProduct::class,
             EditProductStock::class,
+            ManageProductActivities::class,
         ]);
     }
 
@@ -47,7 +48,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ActivitiesRelationManager::class,
+            //
         ];
     }
 
@@ -58,6 +59,7 @@ class ProductResource extends Resource
             'create' => CreateProduct::route('/create'),
             'edit' => EditProduct::route('/{record}/edit'),
             'edit-stock' => EditProductStock::route('/{record}/edit/stock'),
+            'history' => ManageProductActivities::route('/{record}/history'),
         ];
     }
 }

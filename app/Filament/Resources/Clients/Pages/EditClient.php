@@ -10,6 +10,13 @@ class EditClient extends EditRecord
 {
     protected static string $resource = ClientResource::class;
 
+    protected static ?string $navigationLabel = 'General';
+
+    public static function getNavigationIcon(): string|\BackedEnum|null
+    {
+        return null;
+    }
+
     protected function afterSave(): void
     {
         $this->dispatch('refresh-relation-manager', relationship: 'addresses');

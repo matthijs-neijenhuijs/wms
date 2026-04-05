@@ -33,3 +33,19 @@ When implementing status transitions, use `order_statuses` as the source of trut
 - Always scope order queries by `warehouse_id`.
 - Keep all stock-reservation and stock-reduction logic aligned with status booleans and picklist completion.
 - There is no `purchase_orders` migration in this project; do not assume purchase-order persistence exists unless a migration is added first.
+
+
+## Order Statuses events descrtiption
+When an order status is updated, the following events should be triggered based on the boolean flags of the new status:
+- If `generate_picklist` is true, generate a picklist for the order.
+- If `reserve_stock` is true, reserve the stock for the products in the order.
+- If `reduce_stock` is true, reduce the stock for the products in the order.
+- If `concepted` is true, mark the order as concepted.
+- If `completed` is true, mark the order as completed.
+- If `on_hold` is true, mark the order as on hold.
+- If `delivered` is true, mark the order as delivered.
+- If `cancelled` is true, mark the order as cancelled and release any reserved stock for the order. 
+
+Events should be triggered in the order of the boolean flags as listed above. For example, if an order status has `generate_picklist` and `reserve_stock` set to true, the picklist should be generated before reserving the stock. This ensures that the workflow is consistent and predictable based on the defined statuses. When implementing the status update logic, always refer to the `order_statuses` table to determine which events to trigger based on the new status. 
+
+Use Laravel events for every order status change to trigger the corresponding business logic for each boolean flag. This allows for a clean separation of concerns and makes it easier to maintain and extend the order workflow in the future.

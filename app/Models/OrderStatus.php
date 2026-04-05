@@ -20,9 +20,10 @@ class OrderStatus extends Model
         'color',
         'generate_picklist',
         'reserve_stock',
+        'reduce_stock',
         'concepted',
         'completed',
-        'paused',
+        'on_hold',
         'delivered',
         'cancelled',
     ];
@@ -32,9 +33,10 @@ class OrderStatus extends Model
         return [
             'generate_picklist' => 'boolean',
             'reserve_stock' => 'boolean',
+            'reduce_stock' => 'boolean',
             'concepted' => 'boolean',
             'completed' => 'boolean',
-            'paused' => 'boolean',
+            'on_hold' => 'boolean',
             'delivered' => 'boolean',
             'cancelled' => 'boolean',
         ];
@@ -50,8 +52,8 @@ class OrderStatus extends Model
      */
     public function canEditOrder(): bool
     {
-        // Once paused, delivered, or cancelled, orders cannot be edited
-        return ! $this->paused
+        // Once on hold, delivered, or cancelled, orders cannot be edited
+        return ! $this->on_hold
             && ! $this->delivered
             && ! $this->cancelled;
     }

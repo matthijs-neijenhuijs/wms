@@ -2,8 +2,9 @@
 
 namespace App\Observers;
 
-use App\Events\OrderConfirmed;
+use App\Events\OrderStatusChanged;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use App\Models\Warehouse;
 
 class OrderObserver
@@ -49,10 +50,10 @@ class OrderObserver
             return;
         }
 
-        $newStatus = $order->orderStatus;
+        $previousStatusId = $order->getPrevious()['order_statuses_id'] ?? null;
+        $previousStatus = $previousStatusId ? OrderStatus::query()->find($previousStatusId) : null;
+        $newStatus = $order->orderStatus()->first();
 
-        if ($newStatus?->generate_picklist) {
-            OrderConfirmed::dispatch($order);
-        }
+        OrderStatusChanged::dispatch($order->withoutRelations(), $previousStatus, $newStatus);
     }
 }

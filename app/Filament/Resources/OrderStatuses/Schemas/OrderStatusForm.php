@@ -36,6 +36,10 @@ class OrderStatusForm
                             ->label('Reserve Stock')
                             ->default(false),
 
+                        Toggle::make('reduce_stock')
+                            ->label('Reduce Stock')
+                            ->default(false),
+
                         Toggle::make('concepted')
                             ->label('Is Concepted')
                             ->default(false),

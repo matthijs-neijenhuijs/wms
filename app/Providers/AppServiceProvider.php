@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Auth\SubdomainUserProvider;
 use App\Events\OrderConfirmed;
+use App\Events\OrderStatusChanged;
 use App\Listeners\CreatePicklistForConfirmedOrder;
+use App\Listeners\ProcessOrderStatusTransition;
 use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\Picklist;
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(OrderConfirmed::class, CreatePicklistForConfirmedOrder::class);
+        Event::listen(OrderStatusChanged::class, ProcessOrderStatusTransition::class);
 
         Order::observe(OrderObserver::class);
         OrderProduct::observe(OrderProductObserver::class);

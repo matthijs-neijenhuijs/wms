@@ -33,6 +33,11 @@ class OrderStatusesTable
                     ->boolean()
                     ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
 
+                IconColumn::make('reduce_stock')
+                    ->label('Reduce Stock')
+                    ->boolean()
+                    ->icon(fn ($state) => $state ? Heroicon::CheckCircle : Heroicon::XCircle),
+
                 IconColumn::make('concepted')
                     ->label('Concept')
                     ->boolean()
