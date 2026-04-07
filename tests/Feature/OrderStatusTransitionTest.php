@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Resources\Picklists\PicklistResource;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderProduct;
@@ -194,4 +195,9 @@ it('releases reserved stock when the order is moved to a cancelled status', func
         'subject_type' => $order->getMorphClass(),
         'subject_id' => $order->id,
     ]);
+});
+
+it('does not allow manual picklist creation from the resource', function () {
+    expect(PicklistResource::canCreate())->toBeFalse();
+    expect(PicklistResource::getPages())->not->toHaveKey('create');
 });

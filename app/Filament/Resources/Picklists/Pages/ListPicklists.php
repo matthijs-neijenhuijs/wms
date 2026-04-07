@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Picklists\Pages;
 
 use App\Filament\Resources\Picklists\PicklistResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListPicklists extends ListRecords
@@ -12,8 +11,6 @@ class ListPicklists extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            CreateAction::make(),
-        ];
+        return [];
     }
 }

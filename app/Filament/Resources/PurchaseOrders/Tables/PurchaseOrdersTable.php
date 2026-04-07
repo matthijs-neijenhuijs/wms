@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\PurchaseOrders\Tables;
 
-use App\Filament\Resources\Orders\OrderResource;
-use App\Models\PurchaseOrder;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
@@ -18,13 +16,6 @@ class PurchaseOrdersTable
             ->columns([
                 TextColumn::make('generated_custom_purchase_order_id')
                     ->label('id')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('order.generated_custom_order_id')
-                    ->label('order id')
-                    ->url(fn (PurchaseOrder $record): ?string => $record->order
-                        ? OrderResource::getUrl('edit', ['record' => $record->order])
-                        : null)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('products_count')

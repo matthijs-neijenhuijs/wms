@@ -120,9 +120,4 @@ class Order extends Model implements HasActivityLogTitle
     {
         return $this->hasMany(OrderProduct::class);
     }
-
-    public function purchaseOrders(): HasMany
-    {
-        return $this->hasMany(PurchaseOrder::class);
-    }
 }

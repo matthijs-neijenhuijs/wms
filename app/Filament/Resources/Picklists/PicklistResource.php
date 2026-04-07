@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Picklists;
 
 use App\Filament\Infolists\Components\FailedProductsTable;
 use App\Filament\Infolists\Components\ProductsTable;
-use App\Filament\Resources\Picklists\Pages\CreatePicklist;
 use App\Filament\Resources\Picklists\Pages\ListPicklists;
 use App\Filament\Resources\Picklists\Pages\ViewPicklist;
 use App\Filament\Resources\Picklists\Schemas\PicklistForm;
@@ -25,6 +24,11 @@ class PicklistResource extends Resource
     protected static ?string $model = Picklist::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -109,7 +113,6 @@ class PicklistResource extends Resource
     {
         return [
             'index' => ListPicklists::route('/'),
-            'create' => CreatePicklist::route('/create'),
             'view' => ViewPicklist::route('/{record}'),
         ];
     }

@@ -56,19 +56,6 @@ class PurchaseOrderResource extends Resource
                         TextEntry::make('comments'),
                     ])
                     ->columns(2),
-                Section::make('Order Summary')
-                    ->schema([
-                        TextEntry::make('order.generated_custom_order_id')
-                            ->label('Order'),
-                        TextEntry::make('order.orderStatus.name')
-                            ->label('Order status'),
-                        TextEntry::make('order.client.email')
-                            ->label('Client email'),
-                        TextEntry::make('order.delivery_name'),
-                        TextEntry::make('order.delivery_city'),
-                        TextEntry::make('order.delivery_country'),
-                    ])
-                    ->columns(3),
                 Section::make('Failed Scans')
                     ->columnSpan('full')
                     ->schema([
@@ -98,8 +85,6 @@ class PurchaseOrderResource extends Resource
     {
         return parent::getEloquentQuery()
             ->with([
-                'order.orderStatus',
-                'order.client',
                 'products',
                 'failedProducts',
             ])

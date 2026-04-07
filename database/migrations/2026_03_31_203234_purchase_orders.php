@@ -17,7 +17,7 @@ return new class extends Migration
             $table->boolean('completed')->default(false);
             $table->boolean('processed')->default(false);
             $table->text('comments')->nullable();
-            $table->date('delivery_date');
+            $table->date('expected_delivery_date');
             $table->integer('generated_year_purchase_order_id');
             $table->index('generated_year_purchase_order_id');
             $table->string('generated_custom_purchase_order_id')->nullable();
@@ -58,6 +58,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('purchase_order_failed_products');
+        Schema::dropIfExists('purchase_orders_products');
+        Schema::dropIfExists('purchase_orders');
     }
 };
