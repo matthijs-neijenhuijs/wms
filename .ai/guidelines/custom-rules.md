@@ -1,6 +1,6 @@
 ---
-name: dutchbridge
-description: Dutchbridge coding standards for building and maintaining Laravel applications; use for models, controllers, services, and other application code.
+name: custom AI rules
+description: Matthijs Neijenhuijs coding standards for building and maintaining Laravel applications; use for models, controllers, services, and other application code.
 license: MIT
 metadata:
   author: Matthijs Neijenhuijs
