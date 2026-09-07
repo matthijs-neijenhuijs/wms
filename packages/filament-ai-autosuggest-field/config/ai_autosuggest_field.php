@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'provider' => env('AI_AUTOSUGGEST_PROVIDER', env('AI_PROVIDER', 'openai')),
 

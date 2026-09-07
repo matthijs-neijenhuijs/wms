@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Order;
-use App\Models\OrderStatus;
 use App\Models\Picklist;
 use App\Models\PicklistProduct;
 use App\Models\StockProduct;
 use Illuminate\Support\Facades\DB;
+use Modules\Orders\Models\OrderStatus;
 use Spatie\Activitylog\Models\Activity;
 
 class OrderStatusTransitionService
@@ -30,7 +32,6 @@ class OrderStatusTransitionService
                 'status_id' => $newStatus->getKey(),
             ],
         );
-
         if ($newStatus->generate_picklist && ! ($previousStatus?->generate_picklist ?? false)) {
             $this->generatePicklist($order);
         }

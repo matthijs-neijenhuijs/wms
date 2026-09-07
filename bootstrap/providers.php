@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+use App\Providers\AppServiceProvider;
+use App\Providers\Filament\AdminPanelProvider;
+use Rebing\GraphQL\GraphQLServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\Filament\AdminPanelProvider::class,
-    Rebing\GraphQL\GraphQLServiceProvider::class,
+    AppServiceProvider::class,
+    AdminPanelProvider::class,
+    GraphQLServiceProvider::class,
 ];

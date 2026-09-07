@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use AlizHarb\ActivityLog\Contracts\HasActivityLogTitle;
@@ -7,8 +9,8 @@ use Database\Factories\StockProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class StockProduct extends Model implements HasActivityLogTitle
 {
@@ -36,7 +38,7 @@ class StockProduct extends Model implements HasActivityLogTitle
             ->useLogName('stock_product')
             ->logFillable()
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            ->dontLogEmptyChanges()
             ->setDescriptionForEvent(fn (string $eventName): string => "Stock {$eventName}");
     }
 

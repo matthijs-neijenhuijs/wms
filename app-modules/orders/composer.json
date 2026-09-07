@@ -1,0 +1,28 @@
+{
+	"name": "modules/orders",
+	"description": "",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {
+		"filament/filament": "^4.0",
+		"laravel/framework": "^12.0",
+		"spatie/laravel-activitylog": "^5.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Modules\\Orders\\": "src/",
+			"Modules\\Orders\\Tests\\": "tests/",
+			"Modules\\Orders\\Database\\Factories\\": "database/factories/",
+			"Modules\\Orders\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Modules\\Orders\\Providers\\OrdersServiceProvider"
+			]
+		}
+	}
+}

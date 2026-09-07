@@ -1,0 +1,27 @@
+{
+	"name": "modules/brands",
+	"description": "",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {
+		"filament/filament": "^4.0",
+		"laravel/framework": "^12.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Modules\\Brands\\": "src/",
+			"Modules\\Brands\\Tests\\": "tests/",
+			"Modules\\Brands\\Database\\Factories\\": "database/factories/",
+			"Modules\\Brands\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Modules\\Brands\\Providers\\BrandsServiceProvider"
+			]
+		}
+	}
+}

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
-use App\Events\OrderConfirmed;
 use App\Listeners\CreatePicklistForConfirmedOrder;
 use App\Models\Order;
 use App\Models\Picklist;
 use Illuminate\Console\Command;
+use Modules\Orders\Events\OrderConfirmed;
 
 class BackfillPicklistsForConfirmedOrders extends Command
 {

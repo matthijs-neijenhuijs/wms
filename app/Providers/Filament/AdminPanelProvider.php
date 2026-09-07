@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers\Filament;
 
 use AlizHarb\ActivityLog\ActivityLogPlugin;
@@ -53,6 +55,13 @@ class AdminPanelProvider extends PanelProvider
                     ->navigationGroup('Settings'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverResources(in: base_path('app-modules/brands/src/Filament/Resources'), for: 'Modules\Brands\Filament\Resources')
+            ->discoverResources(in: base_path('app-modules/clients/src/Filament/Resources'), for: 'Modules\Clients\Filament\Resources')
+            ->discoverResources(in: base_path('app-modules/orders/src/Filament/Resources'), for: 'Modules\Orders\Filament\Resources')
+            ->discoverResources(in: base_path('app-modules/picklists/src/Filament/Resources'), for: 'Modules\Picklists\Filament\Resources')
+            ->discoverResources(in: base_path('app-modules/products/src/Filament/Resources'), for: 'Modules\Products\Filament\Resources')
+            ->discoverResources(in: base_path('app-modules/settings/src/Filament/Resources'), for: 'Modules\Settings\Filament\Resources')
+            ->discoverResources(in: base_path('app-modules/users/src/Filament/Resources'), for: 'Modules\Users\Filament\Resources')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,

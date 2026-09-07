@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenWms\FilamentAiAutosuggestField;
 
 use Filament\Contracts\Plugin;

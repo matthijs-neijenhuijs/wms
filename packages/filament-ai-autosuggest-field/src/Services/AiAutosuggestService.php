@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenWms\FilamentAiAutosuggestField\Services;
 
 use Filament\Facades\Filament;

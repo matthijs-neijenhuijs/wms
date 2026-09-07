@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenWms\FilamentDynamicAiCharts\Ai\Agents;
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;

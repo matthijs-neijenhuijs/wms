@@ -1,0 +1,27 @@
+{
+	"name": "modules/clients",
+	"description": "",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {
+		"filament/filament": "^4.0",
+		"laravel/framework": "^12.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Modules\\Clients\\": "src/",
+			"Modules\\Clients\\Tests\\": "tests/",
+			"Modules\\Clients\\Database\\Factories\\": "database/factories/",
+			"Modules\\Clients\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Modules\\Clients\\Providers\\ClientsServiceProvider"
+			]
+		}
+	}
+}

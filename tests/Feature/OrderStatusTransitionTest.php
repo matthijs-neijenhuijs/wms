@@ -1,6 +1,7 @@
 <?php
 
-use App\Filament\Resources\Picklists\PicklistResource;
+declare(strict_types=1);
+
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderProduct;
@@ -11,6 +12,7 @@ use App\Models\StockProduct;
 use App\Models\Subdomain;
 use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Picklists\Filament\Resources\Picklists\PicklistResource;
 
 uses(RefreshDatabase::class);
 

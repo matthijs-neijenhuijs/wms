@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
-use App\Events\OrderStatusChanged;
 use App\Services\OrderStatusTransitionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Modules\Orders\Events\OrderStatusChanged;
 
 class ProcessOrderStatusTransition implements ShouldQueue
 {

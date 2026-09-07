@@ -1,40 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Orders\Models\PurchaseOrderProduct as ModulePurchaseOrderProduct;
 
-class PurchaseOrderProduct extends Model
-{
-    protected $table = 'purchase_orders_products';
-
-    /**
-     * @var list<string>
-     */
-    protected $fillable = [
-        'purchase_order_id',
-        'show_for_supplier',
-        'barcode',
-        'reference_code',
-        'color',
-        'size',
-        'product_title',
-        'scanned',
-    ];
-
-    protected function casts(): array
-    {
-        return [
-            'show_for_supplier' => 'boolean',
-            'scanned' => 'boolean',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
-
-    public function purchaseOrder(): BelongsTo
-    {
-        return $this->belongsTo(PurchaseOrder::class);
-    }
-}
+class PurchaseOrderProduct extends ModulePurchaseOrderProduct {}

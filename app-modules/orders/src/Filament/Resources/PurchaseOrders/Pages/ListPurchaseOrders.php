@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Orders\Filament\Resources\PurchaseOrders\Pages;
+
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Modules\Orders\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
+
+class ListPurchaseOrders extends ListRecords
+{
+    protected static string $resource = PurchaseOrderResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
+}

@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Filament\RelationManagers\HistoryRelationManager;
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
-use App\Filament\Resources\Clients\ClientResource;
-use App\Filament\Resources\Clients\Pages\ManageClientActivities;
-use App\Filament\Resources\Orders\OrderResource;
-use App\Filament\Resources\Orders\Pages\ManageOrderActivities;
-use App\Filament\Resources\Products\Pages\ManageProductActivities;
-use App\Filament\Resources\Products\ProductResource;
 use App\Models\Subdomain;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Clients\Filament\Resources\Clients\ClientResource;
+use Modules\Clients\Filament\Resources\Clients\Pages\ManageClientActivities;
+use Modules\Orders\Filament\Resources\Orders\OrderResource;
+use Modules\Orders\Filament\Resources\Orders\Pages\ManageOrderActivities;
+use Modules\Products\Filament\Resources\Products\Pages\ManageProductActivities;
+use Modules\Products\Filament\Resources\Products\ProductResource;
 use Spatie\Activitylog\Models\Activity;
 
 uses(RefreshDatabase::class);

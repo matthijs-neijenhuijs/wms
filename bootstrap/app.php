@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Http\Middleware\AuthenticateApiKey;
+use App\Http\Middleware\IdentifySubdomain;
 use App\Models\Warehouse;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -24,15 +28,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \App\Http\Middleware\IdentifySubdomain::class,
+            IdentifySubdomain::class,
         ]);
 
         $middleware->api(append: [
-            \App\Http\Middleware\IdentifySubdomain::class,
+            IdentifySubdomain::class,
         ]);
 
         $middleware->alias([
-            'api.key' => \App\Http\Middleware\AuthenticateApiKey::class,
+            'api.key' => AuthenticateApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

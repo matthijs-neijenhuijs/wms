@@ -2,16 +2,25 @@
     "agents": [
         "copilot"
     ],
+    "cloud": false,
     "guidelines": true,
-    "herd_mcp": false,
     "mcp": true,
-    "nightwatch_mcp": false,
+    "nightwatch": false,
     "packages": [
-        "filament/filament"
+        "filament/filament",
+        "alizharb/filament-activity-log",
+        "internachi/modular",
+        "spatie/laravel-activitylog",
+        "spatie/laravel-pdf"
     ],
     "sail": false,
     "skills": [
-        "pest-testing",
-        "tailwindcss-development"
+        "infer-conventions",
+        "ai-sdk-development",
+        "laravel-best-practices",
+        "testing-best-practices",
+        "tailwindcss-development",
+        "modular",
+        "laravel-pdf"
     ]
 }

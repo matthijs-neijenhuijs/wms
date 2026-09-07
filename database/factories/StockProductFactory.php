@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Brand;
 use App\Models\Product;
+use App\Models\StockProduct;
 use App\Models\Subdomain;
 use App\Models\VatRate;
 use App\Models\Warehouse;
@@ -11,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\StockProduct>
+ * @extends Factory<StockProduct>
  */
 class StockProductFactory extends Factory
 {

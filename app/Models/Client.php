@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use AlizHarb\ActivityLog\Contracts\HasActivityLogTitle;
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
-class Client extends Model implements HasActivityLogTitle
+class Client extends Model
 {
     use BelongsToWarehouse;
     use LogsActivity;
@@ -38,7 +39,7 @@ class Client extends Model implements HasActivityLogTitle
             ->useLogName('client')
             ->logFillable()
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            ->dontLogEmptyChanges()
             ->setDescriptionForEvent(fn (string $eventName): string => "Client {$eventName}");
     }
 

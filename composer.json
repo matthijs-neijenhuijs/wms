@@ -3,7 +3,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
@@ -12,17 +15,28 @@
         "chengkangzai/filament-qrcode-scanner-html5": "^2.1",
         "dompdf/dompdf": "^3.1",
         "filament/filament": "^4.0",
+        "internachi/modular": "^3.0",
         "laravel/ai": "^0.2.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "modules/ai": "*",
+        "modules/brands": "*",
+        "modules/clients": "*",
+        "modules/orders": "*",
+        "modules/picklists": "*",
+        "modules/platform": "*",
+        "modules/products": "*",
+        "modules/settings": "*",
+        "modules/users": "*",
         "openwms/filament-ai-autosuggest-field": "*@dev",
         "openwms/filament-dynamic-ai-charts": "*@dev",
         "rebing/graphql-laravel": "^9.10",
+        "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-pdf": "^2.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "laravel/boost": "^2.0",
+        "laravel/boost": "^2.7",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
         "laravel/sail": "^1.41",
@@ -85,6 +99,13 @@
         {
             "type": "path",
             "url": "packages/filament-ai-autosuggest-field",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "app-modules/*",
             "options": {
                 "symlink": true
             }
