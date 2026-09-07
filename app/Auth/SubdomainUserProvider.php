@@ -9,30 +9,36 @@ use Illuminate\Contracts\Auth\Authenticatable;
 
 class SubdomainUserProvider extends EloquentUserProvider
 {
-    public function retrieveByCredentials(array $credentials)
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    public function retrieveByCredentials(array $credentials): ?Authenticatable
     {
         $query = $this->newModelQuery();
 
-        // Add subdomain filtering
         $currentSubdomain = app('current_subdomain');
         if ($currentSubdomain) {
             $query->where('subdomain_id', $currentSubdomain->id);
         }
 
         foreach ($credentials as $key => $value) {
-            if (! str_contains($key, 'password')) {
+            if (! is_string($key) || ! str_contains($key, 'password')) {
                 $query->where($key, $value);
             }
         }
 
-        return $query->first();
+        $user = $query->first();
+
+        return $user instanceof Authenticatable ? $user : null;
     }
 
-    public function validateCredentials(Authenticatable $user, array $credentials)
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    public function validateCredentials(Authenticatable $user, array $credentials): bool
     {
-        // Verify user belongs to current subdomain
         $currentSubdomain = app('current_subdomain');
-        if ($currentSubdomain && $user->subdomain_id !== $currentSubdomain->id) {
+        if ($currentSubdomain && isset($user->subdomain_id) && $user->subdomain_id !== $currentSubdomain->id) {
             return false;
         }
 

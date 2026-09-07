@@ -6,7 +6,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Activitylog\Models\Activity;
 
+/** @mixin Activity */
 class ActivityLogResource extends JsonResource
 {
     /**

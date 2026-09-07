@@ -14,11 +14,17 @@ class Subdomain extends Model
         'name',
     ];
 
+    /**
+     * @return HasMany<User, $this>
+     */
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'subdomain_id');
     }
 
+    /**
+     * @return HasMany<Warehouse, $this>
+     */
     public function warehouses(): HasMany
     {
         return $this->hasMany(Warehouse::class, 'subdomain_id');

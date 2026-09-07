@@ -38,7 +38,7 @@ class ProductForm
                             ->relationship('attributes', titleAttribute: 'name')
                             ->preload()
                             ->searchable()
-                            ->getOptionLabelFromRecordUsing(fn ($record) => sprintf('%s: %s', $record->attributeGroup?->name ?? 'Ungrouped', $record->name))
+                            ->getOptionLabelFromRecordUsing(fn ($record): string => sprintf('%s: %s', optional($record->attributeGroup)->name ?? 'Ungrouped', $record->name))
                             ->columnSpanFull(),
                     ])
                     ->columns(2)

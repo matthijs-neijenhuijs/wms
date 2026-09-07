@@ -412,7 +412,7 @@ class TenantSeeder extends Seeder
                 'reserve_stock' => false,
                 'concepted' => true,
                 'completed' => false,
-                'paused' => false,
+                'on_hold' => false,
                 'delivered' => false,
                 'cancelled' => false,
             ],
@@ -423,7 +423,7 @@ class TenantSeeder extends Seeder
                 'reserve_stock' => true,
                 'concepted' => false,
                 'completed' => false,
-                'paused' => false,
+                'on_hold' => false,
                 'delivered' => false,
                 'cancelled' => false,
             ],
@@ -434,7 +434,7 @@ class TenantSeeder extends Seeder
                 'reserve_stock' => true,
                 'concepted' => false,
                 'completed' => false,
-                'paused' => false,
+                'on_hold' => false,
                 'delivered' => false,
                 'cancelled' => false,
             ],
@@ -445,7 +445,7 @@ class TenantSeeder extends Seeder
                 'reserve_stock' => false,
                 'concepted' => false,
                 'completed' => false,
-                'paused' => false,
+                'on_hold' => false,
                 'delivered' => false,
                 'cancelled' => false,
             ],
@@ -456,7 +456,7 @@ class TenantSeeder extends Seeder
                 'reserve_stock' => false,
                 'concepted' => false,
                 'completed' => true,
-                'paused' => false,
+                'on_hold' => false,
                 'delivered' => true,
                 'cancelled' => false,
             ],
@@ -467,7 +467,7 @@ class TenantSeeder extends Seeder
                 'reserve_stock' => true,
                 'concepted' => false,
                 'completed' => false,
-                'paused' => true,
+                'on_hold' => true,
                 'delivered' => false,
                 'cancelled' => false,
             ],
@@ -478,7 +478,7 @@ class TenantSeeder extends Seeder
                 'reserve_stock' => false,
                 'concepted' => false,
                 'completed' => false,
-                'paused' => false,
+                'on_hold' => false,
                 'delivered' => false,
                 'cancelled' => true,
             ],
@@ -501,19 +501,29 @@ class TenantSeeder extends Seeder
         $clients = Client::query()->where('warehouse_id', $warehouse->id)->get();
         $products = Product::query()->where('warehouse_id', $warehouse->id)->get();
         $statusNew = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'New')->first();
+
+        if ($clients->isEmpty() || $products->isEmpty() || ! $statusNew instanceof OrderStatus) {
+            return;
+        }
+
         $statusConfirmed = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'Confirmed')->first();
         $statusProcessing = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'Processing')->first();
         $statusDelivered = OrderStatus::query()->where('warehouse_id', $warehouse->id)->where('name', 'Delivered')->first();
 
-        if ($clients->isEmpty() || $products->isEmpty() || ! $statusNew) {
-            return;
-        }
+        $statusConfirmedId = $statusConfirmed instanceof OrderStatus ? $statusConfirmed->id : $statusNew->id;
+        $statusProcessingId = $statusProcessing instanceof OrderStatus ? $statusProcessing->id : $statusNew->id;
+        $statusDeliveredId = $statusDelivered instanceof OrderStatus ? $statusDelivered->id : $statusNew->id;
 
         // Order 1: New order from first client
         $client1 = $clients->first();
-        $deliveryAddress1 = $client1->deliveryAddress;
 
-        if (! $deliveryAddress1) {
+        if (! $client1 instanceof Client) {
+            return;
+        }
+
+        $deliveryAddress1 = $client1->clientDeliveryAddress;
+
+        if (! $deliveryAddress1 instanceof ClientAddresses) {
             return;
         }
 
@@ -554,7 +564,7 @@ class TenantSeeder extends Seeder
                 ],
                 [
                     'vat_rate_id' => $product->vat_rate_id,
-                    'vat_rate' => $product->vatRate?->rate ?? 21,
+                    'vat_rate' => $product->vatRate->rate ?? 21,
                     'name' => $product->name,
                     'quantity' => 2,
                     'price' => $product->price,
@@ -568,9 +578,14 @@ class TenantSeeder extends Seeder
         // Order 2: Confirmed order from second client
         if ($clients->count() > 1) {
             $client2 = $clients->skip(1)->first();
-            $deliveryAddress2 = $client2->deliveryAddress;
 
-            if ($deliveryAddress2) {
+            if (! $client2 instanceof Client) {
+                return;
+            }
+
+            $deliveryAddress2 = $client2->clientDeliveryAddress;
+
+            if ($deliveryAddress2 instanceof ClientAddresses) {
                 $order2 = Order::query()->firstOrCreate(
                     [
                         'warehouse_id' => $warehouse->id,
@@ -578,7 +593,7 @@ class TenantSeeder extends Seeder
                     ],
                     [
                         'client_id' => $client2->id,
-                        'order_statuses_id' => $statusConfirmed?->id ?? $statusNew->id,
+                        'order_statuses_id' => $statusConfirmedId,
                         'discount' => 5.00,
                         'invoice_name' => $client2->company ?? $deliveryAddress2->name,
                         'invoice_address' => $deliveryAddress2->address,
@@ -608,7 +623,7 @@ class TenantSeeder extends Seeder
                         ],
                         [
                             'vat_rate_id' => $product->vat_rate_id,
-                            'vat_rate' => $product->vatRate?->rate ?? 21,
+                            'vat_rate' => $product->vatRate->rate ?? 21,
                             'name' => $product->name,
                             'quantity' => 5,
                             'price' => $product->price,
@@ -624,9 +639,14 @@ class TenantSeeder extends Seeder
         // Order 3: Processing order
         if ($clients->count() > 2) {
             $client3 = $clients->skip(2)->first();
-            $deliveryAddress3 = $client3->deliveryAddress;
 
-            if ($deliveryAddress3) {
+            if (! $client3 instanceof Client) {
+                return;
+            }
+
+            $deliveryAddress3 = $client3->clientDeliveryAddress;
+
+            if ($deliveryAddress3 instanceof ClientAddresses) {
                 $order3 = Order::query()->firstOrCreate(
                     [
                         'warehouse_id' => $warehouse->id,
@@ -634,7 +654,7 @@ class TenantSeeder extends Seeder
                     ],
                     [
                         'client_id' => $client3->id,
-                        'order_statuses_id' => $statusProcessing?->id ?? $statusNew->id,
+                        'order_statuses_id' => $statusProcessingId,
                         'discount' => 0,
                         'invoice_name' => $deliveryAddress3->name,
                         'invoice_address' => $deliveryAddress3->address,
@@ -664,7 +684,7 @@ class TenantSeeder extends Seeder
                         ],
                         [
                             'vat_rate_id' => $product->vat_rate_id,
-                            'vat_rate' => $product->vatRate?->rate ?? 21,
+                            'vat_rate' => $product->vatRate->rate ?? 21,
                             'name' => $product->name,
                             'quantity' => 1,
                             'price' => $product->price,
@@ -684,10 +704,10 @@ class TenantSeeder extends Seeder
                 'custom_order_id' => 'CUST-004',
             ],
             [
-                'client_id' => $clients->first()->id,
-                'order_statuses_id' => $statusDelivered?->id ?? $statusNew->id,
+                'client_id' => $client1->id,
+                'order_statuses_id' => $statusDeliveredId,
                 'discount' => 0,
-                'invoice_name' => $clients->first()->company ?? $deliveryAddress1->name,
+                'invoice_name' => $client1->company ?? $deliveryAddress1->name,
                 'invoice_address' => $deliveryAddress1->address,
                 'invoice_zipcode' => $deliveryAddress1->zipcode,
                 'invoice_region' => $deliveryAddress1->region,
@@ -700,7 +720,7 @@ class TenantSeeder extends Seeder
                 'delivery_city' => $deliveryAddress1->city,
                 'delivery_country' => $deliveryAddress1->country,
                 'telephone_number' => $deliveryAddress1->telephone_number,
-                'email' => $clients->first()->email,
+                'email' => $client1->email,
                 'comments' => 'Successfully delivered - completed order',
                 'created_at' => now()->subDays(7),
             ]
@@ -716,7 +736,7 @@ class TenantSeeder extends Seeder
                 ],
                 [
                     'vat_rate_id' => $product->vat_rate_id,
-                    'vat_rate' => $product->vatRate?->rate ?? 21,
+                    'vat_rate' => $product->vatRate->rate ?? 21,
                     'name' => $product->name,
                     'quantity' => 3,
                     'price' => $product->price,
@@ -744,7 +764,7 @@ class TenantSeeder extends Seeder
         foreach ($orders as $order) {
             $status = $statuses->get($order->order_statuses_id);
 
-            if (! $status?->generate_picklist) {
+            if (! $status instanceof OrderStatus || ! $status->generate_picklist) {
                 continue;
             }
 
@@ -771,19 +791,24 @@ class TenantSeeder extends Seeder
             }
 
             foreach ($orderProducts as $orderProduct) {
+                if (! $orderProduct instanceof OrderProduct) {
+                    continue;
+                }
+
                 $quantity = max(1, (int) $orderProduct->quantity);
-                $eanCode = $orderProduct->barcode
-                    ?? $orderProduct->product?->barcode
+                $orderProductSource = $orderProduct->product;
+                $barcode = $orderProduct->barcode
+                    ?? $orderProductSource?->barcode
                     ?? $orderProduct->reference_code
                     ?? 'UNKNOWN';
-                $referenceCode = $orderProduct->reference_code ?? $orderProduct->product?->reference_code;
-                $productTitle = $orderProduct->name ?? $orderProduct->product?->name ?? 'Product';
+                $referenceCode = $orderProduct->reference_code ?? $orderProductSource?->reference_code;
+                $productTitle = $orderProduct->name ?? $orderProductSource?->name ?? 'Product';
 
                 for ($i = 0; $i < $quantity; $i++) {
                     PicklistProduct::query()->create([
                         'picklist_id' => $picklist->id,
                         'show_for_supplier' => false,
-                        'ean_code' => $eanCode,
+                        'barcode' => $barcode,
                         'reference_code' => $referenceCode,
                         'color' => null,
                         'size' => null,

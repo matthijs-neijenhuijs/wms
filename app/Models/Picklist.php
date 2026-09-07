@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Picklist extends Model
 {
@@ -13,54 +15,64 @@ class Picklist extends Model
 
     protected $fillable = ['id', 'order_id', 'warehouse_id', 'completed', 'comments', 'generated_custom_picklist_id', 'back_order'];
 
-    public function productsQuantity()
+    public function productsQuantity(): int
     {
-        return $this->hasMany('App\Models\PicklistProduct')->get()->sum('scanned');
+        return (int) $this->hasMany(PicklistProduct::class)->sum('scanned');
     }
 
-    public function order()
+    /**
+     * @return BelongsTo<Order, $this>
+     */
+    public function order(): BelongsTo
     {
-        return $this->belongsTo('App\Models\Order');
+        return $this->belongsTo(Order::class);
     }
 
-    public function warehouse()
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
-    public function products()
+    /**
+     * @return HasMany<PicklistProduct, $this>
+     */
+    public function products(): HasMany
     {
-        return $this->hasMany('App\Models\PicklistProduct')->orderBy('barcode');
+        return $this->hasMany(PicklistProduct::class)->orderBy('barcode');
     }
 
-    public function failedProducts()
+    /**
+     * @return HasMany<PicklistFailedProduct, $this>
+     */
+    public function failedProducts(): HasMany
     {
-        return $this->hasMany('App\Models\PicklistFailedProduct');
+        return $this->hasMany(PicklistFailedProduct::class);
     }
 
-    public function productsCombined()
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function productsCombined(): array
     {
-        $products = $this->hasMany('App\Models\PicklistProduct')->orderBy('barcode')->get();
+        $products = $this->hasMany(PicklistProduct::class)->orderBy('barcode')->get();
 
         $array = [];
         foreach ($products as $product) {
+            $barcode = (string) $product->barcode;
 
-            if (isset($array[$product->barcode])) {
-                $array[$product->barcode]['quantity'] = 1 + $array[$product->barcode]['quantity'];
+            if (isset($array[$barcode])) {
+                $array[$barcode]['quantity'] = (int) $array[$barcode]['quantity'] + 1;
                 if ($product->scanned) {
-                    $array[$product->barcode]['total_quantity_scanned'] = $array[$product->barcode]['total_quantity_scanned'] + 1;
+                    $array[$barcode]['total_quantity_scanned'] = (int) $array[$barcode]['total_quantity_scanned'] + 1;
                 }
             } else {
-                $array[$product->barcode] = $product->toArray();
-                $array[$product->barcode]['quantity'] = 1;
-                if ($product->scanned) {
-                    $array[$product->barcode]['total_quantity_scanned'] = 1;
-                } else {
-                    $array[$product->barcode]['total_quantity_scanned'] = 0;
-                }
-
+                $array[$barcode] = $product->toArray();
+                $array[$barcode]['quantity'] = 1;
+                $array[$barcode]['total_quantity_scanned'] = $product->scanned ? 1 : 0;
             }
-
         }
 
         return $array;

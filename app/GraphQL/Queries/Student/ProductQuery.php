@@ -31,8 +31,12 @@ class ProductQuery extends Query
         ];
     }
 
-    public function resolve($root, $args)
+    /**
+     * @param mixed $root
+     * @param array<string, mixed> $args
+     */
+    public function resolve(mixed $root, array $args): Product
     {
-        return Product::findOrFail($args['id']);
+        return Product::query()->findOrFail((int) $args['id']);
     }
 }

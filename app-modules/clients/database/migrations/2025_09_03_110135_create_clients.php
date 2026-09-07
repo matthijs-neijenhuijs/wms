@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('company')->nullable();
             $table->integer('delivery_client_address_id')->unsigned()->nullable();
             $table->integer('bill_client_address_id')->unsigned()->nullable();
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
 
             $table->unique(['warehouse_id', 'email']);
@@ -37,7 +37,7 @@ return new class extends Migration
 
         Schema::create('client_addresses', function (Blueprint $table) {
             $table->increments('id');
-            $table->foreignId('client_id')->constrained('clients')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreignId('client_id')->constrained('clients')->onUpdate('cascade')->onDelete('cascade');
             $table->string('company')->nullable();
             $table->enum('gender', ['male', 'female']);
             $table->string('initials')->nullable();

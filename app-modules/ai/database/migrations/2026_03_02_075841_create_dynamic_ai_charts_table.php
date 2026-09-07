@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('dynamic_ai_charts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('SET NULL')->onDelete('SET NULL');
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('set null')->onDelete('set null');
             $table->string('title');
             $table->text('question');
             $table->string('chart_type', 50);

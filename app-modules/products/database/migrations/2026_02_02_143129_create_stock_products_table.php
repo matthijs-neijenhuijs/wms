@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('stock_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained('products')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreignId('product_id')->constrained('products')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('on_stock_quantity')->default(0);
             $table->integer('reserved_quantity')->default(0);
             $table->integer('reserved_on_picklists')->default(0);

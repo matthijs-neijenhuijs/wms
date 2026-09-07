@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('warehouses', function (Blueprint $table) {
-            $table->foreignId('order_statuses_id_completed_picklist')->nullable()->constrained('order_statuses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreignId('order_statuses_id_completed_picklist')->nullable()->constrained('order_statuses')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

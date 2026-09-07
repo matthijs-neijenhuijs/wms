@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
-use App\Filament\Resources\DynamicAiCharts\DynamicAiChartResource;
-use App\Filament\Widgets\AiChartChatWidget;
-use App\Filament\Widgets\DynamicAiChartWidget;
 use App\Models\DynamicAiChart;
 use App\Models\User;
-use App\Services\AiCharts\DynamicChartGenerator;
+use App\Models\Warehouse;
 use DomainException;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -21,6 +18,9 @@ use Filament\Widgets\FilamentInfoWidget;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
 use OpenWms\FilamentDynamicAiCharts\Exceptions\AiChartClarificationException;
+use OpenWms\FilamentDynamicAiCharts\Filament\Widgets\AiChartChatWidget;
+use OpenWms\FilamentDynamicAiCharts\Filament\Widgets\DynamicAiChartWidget;
+use OpenWms\FilamentDynamicAiCharts\Services\AiCharts\DynamicChartGenerator;
 
 class Dashboard extends BaseDashboard
 {
@@ -53,7 +53,7 @@ class Dashboard extends BaseDashboard
 
                     $warehouse = Filament::getTenant();
 
-                    if (! $warehouse) {
+                    if (! $warehouse instanceof Warehouse) {
                         Notification::make()
                             ->title('No active warehouse found.')
                             ->danger()
@@ -90,7 +90,7 @@ class Dashboard extends BaseDashboard
             Action::make('manageAiCharts')
                 ->label('Manage AI charts')
                 ->icon('heroicon-o-chart-bar')
-                ->url(fn (): string => DynamicAiChartResource::getUrl()),
+                ->url(fn (): string => url('/')),
         ];
     }
 

@@ -44,7 +44,13 @@ class StockProduct extends Model implements HasActivityLogTitle
 
     public function getActivityLogTitle(): string
     {
-        $productName = $this->product?->name ?? $this->product?->reference_code;
+        $product = $this->product;
+
+        if ($product !== null) {
+            $productName = $product->name ?? $product->reference_code;
+        } else {
+            $productName = null;
+        }
 
         return (string) ($productName ? "Stock for {$productName}" : "Stock #{$this->getKey()}");
     }
@@ -54,6 +60,9 @@ class StockProduct extends Model implements HasActivityLogTitle
         return $this->product;
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

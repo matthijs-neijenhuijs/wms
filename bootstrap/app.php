@@ -45,7 +45,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            if (! auth()->check()) {
+            $user = $request->user();
+
+            if (! $user) {
                 return null;
             }
 
@@ -55,17 +57,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            $tenant = auth()->user()->getTenants($panel)->first();
+            $tenant = $user->getTenants($panel)->first();
 
             if (! $tenant) {
                 return null;
             }
 
-            return redirect()->to($panel->getUrl($tenant));
+            return redirect()->to((string) $panel->getUrl($tenant));
         });
 
         $exceptions->render(function (NotFoundHttpException $exception, Request $request) {
-            if (! auth()->check()) {
+            $user = $request->user();
+
+            if (! $user) {
                 return null;
             }
 
@@ -89,7 +93,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            $tenants = auth()->user()->getTenants($panel);
+            $tenants = $user->getTenants($panel);
 
             if ($tenants->isEmpty()) {
                 return null;
@@ -99,12 +103,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $tenantKeys = $slugAttribute
                 ? $tenants->pluck($slugAttribute)
-                : $tenants->modelKeys();
+                : $tenants->pluck($panel->getTenantSlugAttribute() ?? 'id');
 
             if ($tenantKeys->contains($segment)) {
                 return null;
             }
 
-            return redirect()->to($panel->getUrl($tenants->first()));
+            return redirect()->to((string) $panel->getUrl($tenants->first()));
         });
     })->create();

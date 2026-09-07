@@ -28,16 +28,25 @@ class ClientAddresses extends Model
         'telephone_number',
     ];
 
+    /**
+     * @return BelongsTo<Client, $this>
+     */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
+    /**
+     * @return BelongsTo<Client, $this>
+     */
     public function isBillingAddress(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'id', 'bill_client_address_id');
     }
 
+    /**
+     * @return BelongsTo<Client, $this>
+     */
     public function isDeliveryAddress(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'id', 'delivery_client_address_id');

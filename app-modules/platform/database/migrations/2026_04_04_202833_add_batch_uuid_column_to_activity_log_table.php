@@ -8,17 +8,25 @@ use Illuminate\Support\Facades\Schema;
 
 class AddBatchUuidColumnToActivityLogTable extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::connection(config('activitylog.database_connection'))->table(config('activitylog.table_name'), function (Blueprint $table) {
-            $table->uuid('batch_uuid')->nullable()->after('properties');
-        });
+        $connection = config('activitylog.database_connection');
+        $tableName = config('activitylog.table_name');
+
+        Schema::connection(is_string($connection) || $connection === null ? $connection : null)
+            ->table((string) $tableName, function (Blueprint $table): void {
+                $table->uuid('batch_uuid')->nullable()->after('properties');
+            });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::connection(config('activitylog.database_connection'))->table(config('activitylog.table_name'), function (Blueprint $table) {
-            $table->dropColumn('batch_uuid');
-        });
+        $connection = config('activitylog.database_connection');
+        $tableName = config('activitylog.table_name');
+
+        Schema::connection(is_string($connection) || $connection === null ? $connection : null)
+            ->table((string) $tableName, function (Blueprint $table): void {
+                $table->dropColumn('batch_uuid');
+            });
     }
 }

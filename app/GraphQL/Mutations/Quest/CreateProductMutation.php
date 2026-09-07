@@ -31,12 +31,16 @@ class CreateProductMutation extends Mutation
         ];
     }
 
-    public function resolve($root, $args)
+    /**
+     * @param mixed $root
+     * @param array<string, mixed> $args
+     */
+    public function resolve(mixed $root, array $args): Product
     {
-        $student = new Product;
-        $student->fill($args);
-        $student->save();
+        $product = new Product;
+        $product->fill($args);
+        $product->save();
 
-        return $student;
+        return $product;
     }
 }

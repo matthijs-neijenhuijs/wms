@@ -28,9 +28,9 @@ return new class extends Migration
             $table->string('hs_code')->nullable();
             $table->string('country_of_origin')->nullable();
             $table->text('description');
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreignId('vat_rate_id')->nullable()->constrained('vat_rates')->onUpdate('CASCADE')->onDelete('SET NULL');
-            $table->foreignId('brand_id')->nullable()->constrained('brands')->onUpdate('CASCADE')->onDelete('SET NULL');
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('vat_rate_id')->nullable()->constrained('vat_rates')->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('brand_id')->nullable()->constrained('brands')->onUpdate('cascade')->onDelete('set null');
 
             $table->timestamps();
 

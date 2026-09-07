@@ -6,7 +6,11 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -56,36 +60,57 @@ class Product extends Model
         return (string) ($this->name ?: $this->reference_code ?: "Product #{$this->getKey()}");
     }
 
-    public function warehouse()
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
-    public function productCategory()
+    /**
+     * @return BelongsTo<ProductCategory, $this>
+     */
+    public function productCategory(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class);
     }
 
-    public function brand()
+    /**
+     * @return BelongsTo<Brand, $this>
+     */
+    public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
-    public function vatRate()
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
+    public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
     }
 
-    public function productAttributes()
+    /**
+     * @return HasMany<ProductAttribute, $this>
+     */
+    public function productAttributes(): HasMany
     {
         return $this->hasMany(ProductAttribute::class);
     }
 
-    public function attributes()
+    /**
+     * @return BelongsToMany<Attribute, $this, Pivot, 'pivot'>
+     */
+    public function attributes(): BelongsToMany
     {
         return $this->belongsToMany(Attribute::class, 'product_attributes')->withTimestamps();
     }
 
+    /**
+     * @return HasOne<StockProduct, $this>
+     */
     public function stockProduct(): HasOne
     {
         return $this->hasOne(StockProduct::class);

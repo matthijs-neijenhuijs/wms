@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('attribute_groups', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('warehouse_id')->nullable()->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreignId('warehouse_id')->nullable()->constrained('warehouses')->onUpdate('cascade')->onDelete('cascade');
 
             $table->timestamps();
         });

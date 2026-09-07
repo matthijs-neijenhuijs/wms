@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -48,27 +50,42 @@ class Client extends Model
         return (string) ($this->company ?: $this->email ?: "Client #{$this->getKey()}");
     }
 
-    public function warehouse()
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
-    public function addresses()
+    /**
+     * @return HasMany<ClientAddresses, $this>
+     */
+    public function addresses(): HasMany
     {
         return $this->hasMany(ClientAddresses::class);
     }
 
-    public function clientDeliveryAddress()
+    /**
+     * @return BelongsTo<ClientAddresses, $this>
+     */
+    public function clientDeliveryAddress(): BelongsTo
     {
         return $this->belongsTo(ClientAddresses::class, 'delivery_client_address_id');
     }
 
-    public function clientBillAddress()
+    /**
+     * @return BelongsTo<ClientAddresses, $this>
+     */
+    public function clientBillAddress(): BelongsTo
     {
         return $this->belongsTo(ClientAddresses::class, 'bill_client_address_id');
     }
 
-    public function orders()
+    /**
+     * @return HasMany<Order, $this>
+     */
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }

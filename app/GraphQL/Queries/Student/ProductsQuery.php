@@ -20,8 +20,13 @@ class ProductsQuery extends Query
         return Type::listOf(GraphQL::type('Product'));
     }
 
-    public function resolve($root, $args)
+    /**
+     * @param mixed $root
+     * @param array<string, mixed> $args
+     * @return \Illuminate\Database\Eloquent\Collection<int, Product>
+     */
+    public function resolve(mixed $root, array $args): \Illuminate\Database\Eloquent\Collection
     {
-        return Product::all();
+        return Product::query()->get();
     }
 }

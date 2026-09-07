@@ -31,7 +31,8 @@ class ProductsTable
 
                         $attributeBadges = $record->attributes
                             ->map(function ($attribute): string {
-                                $label = e("{$attribute->attributeGroup->name}: {$attribute->name}");
+                                $groupName = optional($attribute->attributeGroup)->name ?? 'Ungrouped';
+                                $label = e("{$groupName}: {$attribute->name}");
 
                                 return '<span class="fi-color fi-color-primary fi-text-color-700 dark:fi-text-color-400 fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap">'.$label.'</span>';
                             })
@@ -49,10 +50,10 @@ class ProductsTable
                     ->html()
                     ->state(function ($record): string {
                         $stock = $record->stockProduct;
-                        $onStock = $stock?->on_stock_quantity ?? 0;
-                        $reserved = $stock?->reserved_quantity ?? 0;
-                        $reservedOnPicklists = $stock?->reserved_on_picklists ?? 0;
-                        $free = $stock?->free_on_stock_quantity ?? 0;
+                        $onStock = $stock !== null && $stock->on_stock_quantity !== null ? $stock->on_stock_quantity : 0;
+                        $reserved = $stock !== null && $stock->reserved_quantity !== null ? $stock->reserved_quantity : 0;
+                        $reservedOnPicklists = $stock !== null && $stock->reserved_on_picklists !== null ? $stock->reserved_on_picklists : 0;
+                        $free = $stock !== null && $stock->free_on_stock_quantity !== null ? $stock->free_on_stock_quantity : 0;
 
                         return '<div class="flex flex-col items-start gap-1">'
                             .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Stock: '.$onStock.'</span>'

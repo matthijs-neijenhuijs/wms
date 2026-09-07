@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('reference_code');
             $table->string('name');
             $table->text('description');
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
 
             $table->unique(['warehouse_id', 'reference_code']);

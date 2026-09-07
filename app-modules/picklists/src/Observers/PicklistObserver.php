@@ -26,7 +26,7 @@ class PicklistObserver
             ? $picklist->warehouse
             : Warehouse::query()->find($picklist->warehouse_id);
 
-        $prefix = strtoupper(substr((string) ($warehouse?->name ?? ''), 0, 4));
+        $prefix = strtoupper(substr((string) ($warehouse->name ?? ''), 0, 4));
         $year = now()->format('y');
 
         $maxGeneratedYearPicklistId = Picklist::query()

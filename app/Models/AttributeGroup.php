@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AttributeGroup extends Model
 {
@@ -20,12 +22,18 @@ class AttributeGroup extends Model
         'name',
     ];
 
-    public function warehouse()
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
-    public function attributes()
+    /**
+     * @return HasMany<Attribute, $this>
+     */
+    public function attributes(): HasMany
     {
         return $this->hasMany(Attribute::class);
     }

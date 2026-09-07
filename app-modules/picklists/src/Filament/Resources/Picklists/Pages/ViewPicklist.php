@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Picklists\Filament\Resources\Picklists\Pages;
 
+use App\Models\Picklist;
 use App\Models\PicklistFailedProduct;
 use App\Models\PicklistProduct;
 use Filament\Notifications\Notification;
@@ -23,6 +24,12 @@ class ViewPicklist extends ViewRecord
 
     public function scanProductBarcode(string $barcode): void
     {
+        $record = $this->record;
+
+        if (! $record instanceof Picklist) {
+            return;
+        }
+
         $barcode = trim($barcode);
 
         if ($barcode === '') {
@@ -35,7 +42,7 @@ class ViewPicklist extends ViewRecord
         }
 
         $picklistProduct = PicklistProduct::query()
-            ->where('picklist_id', $this->record->getKey())
+            ->where('picklist_id', $record->getKey())
             ->where('barcode', $barcode)
             ->orderBy('scanned')
             ->first();
@@ -50,7 +57,7 @@ class ViewPicklist extends ViewRecord
                 $failedProduct->increment('total_quantity_scanned');
             } else {
                 PicklistFailedProduct::create([
-                    'picklist_id' => $this->record->getKey(),
+                    'picklist_id' => $record->getKey(),
                     'barcode' => $barcode,
                     'total_quantity_scanned' => 1,
                 ]);
@@ -61,8 +68,8 @@ class ViewPicklist extends ViewRecord
                 ->danger()
                 ->send();
 
-            $this->record->unsetRelation('failedProducts');
-            $this->record->load('failedProducts');
+            $record->unsetRelation('failedProducts');
+            $record->load('failedProducts');
 
             return;
         }
@@ -77,7 +84,7 @@ class ViewPicklist extends ViewRecord
                 $failedProduct->increment('total_quantity_scanned');
             } else {
                 PicklistFailedProduct::create([
-                    'picklist_id' => $this->record->getKey(),
+                    'picklist_id' => $record->getKey(),
                     'barcode' => $barcode,
                     'reference_code' => $picklistProduct->reference_code,
                     'color' => $picklistProduct->color,
@@ -92,8 +99,8 @@ class ViewPicklist extends ViewRecord
                 ->warning()
                 ->send();
 
-            $this->record->unsetRelation('failedProducts');
-            $this->record->load('failedProducts');
+            $record->unsetRelation('failedProducts');
+            $record->load('failedProducts');
 
             return;
         }
@@ -102,8 +109,8 @@ class ViewPicklist extends ViewRecord
             'scanned' => 1,
         ]);
 
-        if ($this->record->relationLoaded('products')) {
-            $loadedProduct = $this->record->products->firstWhere('id', $picklistProduct->id);
+        if ($record->relationLoaded('products')) {
+            $loadedProduct = $record->products->firstWhere('id', $picklistProduct->id);
 
             if ($loadedProduct) {
                 $loadedProduct->scanned = 1;

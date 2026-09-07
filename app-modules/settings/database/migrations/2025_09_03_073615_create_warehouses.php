@@ -23,8 +23,8 @@ return new class extends Migration
 
         Schema::create('user_warehouses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('SET NULL')->onDelete('CASCADE');
-            $table->foreignId('warehouse_id')->nullable()->constrained('warehouses')->onUpdate('SET NULL')->onDelete('CASCADE');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('set null')->onDelete('cascade');
+            $table->foreignId('warehouse_id')->nullable()->constrained('warehouses')->onUpdate('set null')->onDelete('cascade');
             $table->timestamps();
         });
 

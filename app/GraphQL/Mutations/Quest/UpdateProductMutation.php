@@ -35,12 +35,16 @@ class UpdateProductMutation extends Mutation
         ];
     }
 
-    public function resolve($root, $args)
+    /**
+     * @param mixed $root
+     * @param array<string, mixed> $args
+     */
+    public function resolve(mixed $root, array $args): Product
     {
-        $student = Product::findOrFail($args['id']);
-        $student->fill($args);
-        $student->save();
+        $product = Product::query()->findOrFail((int) $args['id']);
+        $product->fill($args);
+        $product->save();
 
-        return $student;
+        return $product;
     }
 }

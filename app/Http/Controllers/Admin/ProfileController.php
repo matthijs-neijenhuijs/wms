@@ -5,25 +5,33 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function show()
+    public function show(Request $request): View
     {
-        return view('admin.profile');
+        return view('admin.profile', [
+            'user' => $request->user(),
+        ]);
     }
 
-    public function updatePassword(Request $request)
+    public function updatePassword(Request $request): RedirectResponse
     {
         $request->validate([
             'current_password' => ['required', 'string'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = Auth::user();
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            return back()->withErrors(['current_password' => 'Authentication required.']);
+        }
 
         if (! Hash::check($request->input('current_password'), $user->password)) {
             return back()->withErrors(['current_password' => 'Current password does not match our records.']);
@@ -35,23 +43,24 @@ class ProfileController extends Controller
         return back()->with('status', 'Password updated successfully.');
     }
 
-    public function updateTwoFactor(Request $request)
+    public function updateTwoFactor(Request $request): RedirectResponse
     {
         $request->validate([
             'enable_email_2fa' => ['nullable', 'boolean'],
             'action' => ['nullable', 'in:generate,clear'],
         ]);
 
-        $user = Auth::user();
+        $user = $request->user();
 
-        // Toggle email 2FA (User model provides toggleEmailAuthentication)
+        if (! $user instanceof User) {
+            return back()->withErrors(['current_password' => 'Authentication required.']);
+        }
+
         $enableEmail = (bool) $request->input('enable_email_2fa', false);
         $user->toggleEmailAuthentication($enableEmail);
 
-        // Handle app-based secret generation or clearing
         $action = $request->input('action');
         if ($action === 'generate') {
-            // Simple secret for example purposes; in real usage use a proper TOTP lib
             $secret = bin2hex(random_bytes(10));
             $user->saveAppAuthenticationSecret($secret);
         } elseif ($action === 'clear') {

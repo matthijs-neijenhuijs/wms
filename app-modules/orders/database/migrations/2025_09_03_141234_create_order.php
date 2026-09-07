@@ -16,7 +16,7 @@ return new class extends Migration
 
         Schema::create('order_statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('cascade')->onDelete('cascade');
             $table->string('name');
             $table->string('color');
             $table->boolean('generate_picklist')->default(false);
@@ -32,9 +32,9 @@ return new class extends Migration
 
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreignId('client_id')->nullable()->constrained('clients')->onUpdate('CASCADE')->onDelete('SET NULL');
-            $table->foreignId('order_statuses_id')->nullable()->constrained('order_statuses')->onUpdate('CASCADE')->onDelete('SET NULL');
+            $table->foreignId('warehouse_id')->constrained('warehouses')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('client_id')->nullable()->constrained('clients')->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('order_statuses_id')->nullable()->constrained('order_statuses')->onUpdate('cascade')->onDelete('set null');
             $table->integer('generated_year_order_id');
             $table->index('generated_year_order_id');
             $table->string('generated_custom_order_id')->nullable()->unique();
@@ -69,9 +69,9 @@ return new class extends Migration
 
         Schema::create('order_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreignId('product_id')->nullable()->constrained('products')->onUpdate('CASCADE')->onDelete('SET NULL');
-            $table->foreignId('vat_rate_id')->nullable()->constrained('vat_rates')->onUpdate('CASCADE')->onDelete('SET NULL');
+            $table->foreignId('order_id')->constrained('orders')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('product_id')->nullable()->constrained('products')->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('vat_rate_id')->nullable()->constrained('vat_rates')->onUpdate('cascade')->onDelete('set null');
             $table->string('name');
             $table->bigInteger('quantity')->nullable();
             $table->bigInteger('weight')->nullable();

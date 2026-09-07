@@ -32,21 +32,21 @@ class OrderStatusTransitionService
                 'status_id' => $newStatus->getKey(),
             ],
         );
-        if ($newStatus->generate_picklist && ! ($previousStatus?->generate_picklist ?? false)) {
+        if ($newStatus->generate_picklist && ! ($previousStatus && $previousStatus->generate_picklist)) {
             $this->generatePicklist($order);
         }
 
-        if ($newStatus->reserve_stock && ! ($previousStatus?->reserve_stock ?? false)) {
+        if ($newStatus->reserve_stock && ! ($previousStatus && $previousStatus->reserve_stock)) {
             $this->reserveStock($order);
         }
 
-        if ($newStatus->reduce_stock && ! ($previousStatus?->reduce_stock ?? false)) {
+        if ($newStatus->reduce_stock && ! ($previousStatus && $previousStatus->reduce_stock)) {
             $this->reduceStock($order);
         }
 
         $this->syncOrderFlags($order, $newStatus);
 
-        if ($newStatus->cancelled && ! ($previousStatus?->cancelled ?? false)) {
+        if ($newStatus->cancelled && ! ($previousStatus && $previousStatus->cancelled)) {
             $this->releaseReservedStock($order);
         }
     }
@@ -79,7 +79,7 @@ class OrderStatusTransitionService
                 PicklistProduct::query()->create([
                     'picklist_id' => $picklist->id,
                     'barcode' => (string) ($orderProduct->barcode ?? ''),
-                    'reference_code' => $orderProduct->reference_code,
+                    'reference_code' => (string) ($orderProduct->reference_code ?? ''),
                     'product_title' => (string) ($orderProduct->name ?? ''),
                     'show_for_supplier' => false,
                     'scanned' => false,
@@ -187,11 +187,11 @@ class OrderStatusTransitionService
     protected function syncOrderFlags(Order $order, ?OrderStatus $newStatus): void
     {
         $order->forceFill([
-            'picked' => (bool) ($newStatus?->reduce_stock ?? false),
-            'completed' => (bool) ($newStatus?->completed ?? false),
-            'on_hold' => (bool) ($newStatus?->on_hold ?? false),
-            'delivered' => (bool) ($newStatus?->delivered ?? false),
-            'cancelled' => (bool) ($newStatus?->cancelled ?? false),
+            'picked' => $newStatus !== null && (bool) $newStatus->reduce_stock,
+            'completed' => $newStatus !== null && (bool) $newStatus->completed,
+            'on_hold' => $newStatus !== null && (bool) $newStatus->on_hold,
+            'delivered' => $newStatus !== null && (bool) $newStatus->delivered,
+            'cancelled' => $newStatus !== null && (bool) $newStatus->cancelled,
         ])->saveQuietly();
     }
 

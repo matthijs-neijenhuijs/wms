@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Brand;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\StockProduct;
+use App\Models\VatRate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Product */
 class ProductResource extends JsonResource
 {
     /**
@@ -31,25 +37,57 @@ class ProductResource extends JsonResource
             'hs_code' => $this->hs_code,
             'country_of_origin' => $this->country_of_origin,
             'description' => $this->description,
-            'brand' => $this->whenLoaded('brand', fn () => [
-                'id' => $this->brand?->id,
-                'name' => $this->brand?->name,
-            ]),
-            'category' => $this->whenLoaded('productCategory', fn () => [
-                'id' => $this->productCategory?->id,
-                'name' => $this->productCategory?->name,
-            ]),
-            'vat_rate' => $this->whenLoaded('vatRate', fn () => [
-                'id' => $this->vatRate?->id,
-                'name' => $this->vatRate?->name,
-                'rate' => $this->vatRate?->rate,
-            ]),
-            'stock' => $this->whenLoaded('stockProduct', fn () => [
-                'quantity_on_stock' => $this->stockProduct?->on_stock_quantity,
-                'reserved_quantity' => $this->stockProduct?->reserved_quantity,
-                'reserved_on_picklists' => $this->stockProduct?->reserved_on_picklists,
-                'free_on_stock_quantity' => $this->stockProduct?->free_on_stock_quantity,
-            ]),
+            'brand' => $this->whenLoaded('brand', function (): ?array {
+                $brand = $this->resource->brand;
+
+                if (! $brand instanceof Brand) {
+                    return null;
+                }
+
+                return [
+                    'id' => $brand->id,
+                    'name' => $brand->name,
+                ];
+            }),
+            'category' => $this->whenLoaded('productCategory', function (): ?array {
+                $category = $this->resource->productCategory;
+
+                if (! $category instanceof ProductCategory) {
+                    return null;
+                }
+
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                ];
+            }),
+            'vat_rate' => $this->whenLoaded('vatRate', function (): ?array {
+                $vatRate = $this->resource->vatRate;
+
+                if (! $vatRate instanceof VatRate) {
+                    return null;
+                }
+
+                return [
+                    'id' => $vatRate->id,
+                    'name' => $vatRate->name,
+                    'rate' => $vatRate->rate,
+                ];
+            }),
+            'stock' => $this->whenLoaded('stockProduct', function (): ?array {
+                $stock = $this->resource->stockProduct;
+
+                if (! $stock instanceof StockProduct) {
+                    return null;
+                }
+
+                return [
+                    'quantity_on_stock' => $stock->on_stock_quantity,
+                    'reserved_quantity' => $stock->reserved_quantity,
+                    'reserved_on_picklists' => $stock->reserved_on_picklists,
+                    'free_on_stock_quantity' => $stock->free_on_stock_quantity,
+                ];
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

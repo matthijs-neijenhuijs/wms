@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attribute extends Model
 {
@@ -17,7 +18,10 @@ class Attribute extends Model
         'name',
     ];
 
-    public function attributeGroup()
+    /**
+     * @return BelongsTo<AttributeGroup, $this>
+     */
+    public function attributeGroup(): BelongsTo
     {
         return $this->belongsTo(AttributeGroup::class);
     }

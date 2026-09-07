@@ -16,6 +16,8 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -120,12 +122,18 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return true;
     }
 
-    public function subdomain()
+    /**
+     * @return BelongsTo<Subdomain, $this>
+     */
+    public function subdomain(): BelongsTo
     {
         return $this->belongsTo(Subdomain::class, 'subdomain_id');
     }
 
-    public function warehouses()
+    /**
+     * @return BelongsToMany<Warehouse, $this>
+     */
+    public function warehouses(): BelongsToMany
     {
         return $this->belongsToMany(Warehouse::class, 'user_warehouses');
     }
