@@ -18,10 +18,6 @@ parameters:
 
 
 
-    # https://phpstan.org/user-guide/ignoring-errors#generate-an-ignoreerrors-entry
-    ignoreErrors:
-        - identifier: missingType.iterableValue
-
     # https://phpstan.org/config-reference#treatphpdoctypesascertain
     treatPhpDocTypesAsCertain: false
 
