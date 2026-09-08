@@ -8,9 +8,10 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use Modules\Brands\Filament\Resources\Brands\Columns\ActiveColumn;
+use Modules\Brands\Filament\Resources\Brands\Columns\NameColumn;
+use Modules\Brands\Filament\Resources\Brands\Columns\ReferenceCodeColumn;
 
 class BrandsTable
 {
@@ -18,11 +19,9 @@ class BrandsTable
     {
         return $table
             ->columns([
-                ToggleColumn::make('active'),
-                TextColumn::make('reference_code')
-                    ->searchable(),
-                TextColumn::make('name')
-                    ->searchable(),
+                ActiveColumn::make(),
+                ReferenceCodeColumn::make(),
+                NameColumn::make(),
             ])
             ->filters([
                 //

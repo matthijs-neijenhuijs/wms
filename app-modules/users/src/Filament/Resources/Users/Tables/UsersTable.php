@@ -7,8 +7,12 @@ namespace Modules\Users\Filament\Resources\Users\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Users\Filament\Resources\Users\Columns\CreatedAtColumn;
+use Modules\Users\Filament\Resources\Users\Columns\EmailColumn;
+use Modules\Users\Filament\Resources\Users\Columns\NameColumn;
+use Modules\Users\Filament\Resources\Users\Columns\SubdomainColumn;
+use Modules\Users\Filament\Resources\Users\Columns\UpdatedAtColumn;
 
 class UsersTable
 {
@@ -16,28 +20,11 @@ class UsersTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('email')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('subdomain.name')
-                    ->label('Subdomain')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                NameColumn::make(),
+                EmailColumn::make(),
+                SubdomainColumn::make(),
+                CreatedAtColumn::make(),
+                UpdatedAtColumn::make(),
             ])
             ->filters([
                 //

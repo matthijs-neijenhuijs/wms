@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Modules\Clients\Filament\Resources\Clients\Schemas;
 
-use App\Models\Client;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
+use Modules\Clients\Filament\Resources\Clients\Inputs\ActiveToggle;
+use Modules\Clients\Filament\Resources\Clients\Inputs\BillAddressSelect;
+use Modules\Clients\Filament\Resources\Clients\Inputs\CocNumberInput;
+use Modules\Clients\Filament\Resources\Clients\Inputs\CommentsInput;
+use Modules\Clients\Filament\Resources\Clients\Inputs\CompanyInput;
+use Modules\Clients\Filament\Resources\Clients\Inputs\DebtorNumberInput;
+use Modules\Clients\Filament\Resources\Clients\Inputs\DeliveryAddressSelect;
+use Modules\Clients\Filament\Resources\Clients\Inputs\EmailInput;
+use Modules\Clients\Filament\Resources\Clients\Inputs\IbanNumberInput;
+use Modules\Clients\Filament\Resources\Clients\Inputs\VatNumberInput;
 
 class ClientForm
 {
@@ -21,54 +25,21 @@ class ClientForm
             ->components([
                 Section::make('Client details')
                     ->schema([
-                        Toggle::make('active')
-                            ->inline(false)
-                            ->required(),
-                        TextInput::make('email')
-                            ->required()
-                            ->email(),
-                        TextInput::make('company'),
-                        TextInput::make('vat_number')
-                            ->label('VAT number'),
-                        TextInput::make('coc_number')
-                            ->label('CoC number'),
-                        TextInput::make('debtor_number')
-                            ->label('Debtor number'),
-                        TextInput::make('iban_number')
-                            ->label('IBAN number'),
-                        Textarea::make('comments')
-                            ->rows(3),
+                        ActiveToggle::make(),
+                        EmailInput::make(),
+                        CompanyInput::make(),
+                        VatNumberInput::make(),
+                        CocNumberInput::make(),
+                        DebtorNumberInput::make(),
+                        IbanNumberInput::make(),
+                        CommentsInput::make(),
                     ])
                     ->columns(2)
                     ->columnSpanFull(),
                 Section::make('Addresses')
                     ->schema([
-                        Select::make('bill_client_address_id')
-                            ->label('Bill address')
-                            ->relationship(
-                                name: 'clientBillAddress',
-                                titleAttribute: 'name',
-                                modifyQueryUsing: function (Builder $query, ?Client $record): Builder {
-                                    if (! $record) {
-                                        return $query->whereNull('id');
-                                    }
-
-                                    return $query->whereRaw('client_id = ?', [$record->getKey()]);
-                                },
-                            ),
-                        Select::make('delivery_client_address_id')
-                            ->label('Delivery address')
-                            ->relationship(
-                                name: 'clientDeliveryAddress',
-                                titleAttribute: 'name',
-                                modifyQueryUsing: function (Builder $query, ?Client $record): Builder {
-                                    if (! $record) {
-                                        return $query->whereNull('id');
-                                    }
-
-                                    return $query->whereRaw('client_id = ?', [$record->getKey()]);
-                                },
-                            ),
+                        BillAddressSelect::make(),
+                        DeliveryAddressSelect::make(),
                     ])
                     ->columns(2)
                     ->columnSpanFull(),

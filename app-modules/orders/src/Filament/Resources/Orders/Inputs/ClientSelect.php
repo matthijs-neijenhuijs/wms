@@ -23,8 +23,6 @@ class ClientSelect
             )
             ->getOptionLabelFromRecordUsing(fn (Client $record): string => $record->company
                 ?: ($record->clientDeliveryAddress?->name ?: $record->email ?: "Client #{$record->id}"))
-            ->searchable(['company', 'email'])
-            ->searchable()
-            ->preload();
+            ->searchable(['company', 'email']);
     }
 }
