@@ -1,0 +1,44 @@
+name: insights
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  insights:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Install Dependencies
+        run: |
+          composer install -q --no-ansi \
+          --no-interaction --no-scripts --no-progress
+
+      - name: Copy Environment File
+        run: |
+          cp .env.example .env
+
+      - name: Generate Application Key
+        run: |
+          php artisan key:generate
+
+      - name: Run PHP Insights
+        run: |
+          php artisan insights --no-interaction \
+          --min-quality=86 --min-complexity=90 \
+          --min-architecture=87 --min-style=89 \
+          --ansi --format=github-action
