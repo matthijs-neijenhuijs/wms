@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\Brand;
-use App\Models\Product;
-use App\Models\ProductCategory;
-use App\Models\StockProduct;
-use App\Models\VatRate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Brands\Models\Brand;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\ProductCategory;
+use Modules\Products\Models\StockProduct;
+use Modules\Settings\Models\VatRate;
 
 /** @mixin Product */
 class ProductResource extends JsonResource

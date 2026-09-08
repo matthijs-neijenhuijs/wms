@@ -37,10 +37,7 @@ class FilamentServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
     /**
      * Bootstrap services.
@@ -191,6 +188,5 @@ class FilamentServiceProvider extends ServiceProvider
             $action
                 ->maxRows(100_000);
         });
-
     }
 }

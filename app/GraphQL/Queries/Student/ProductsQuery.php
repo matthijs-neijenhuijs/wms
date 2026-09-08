@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\GraphQL\Queries\Student;
 
-use App\Models\Product;
 use GraphQL\Type\Definition\Type;
+use Illuminate\Database\Eloquent\Collection;
+use Modules\Products\Models\Product;
 use Rebing\GraphQL\Support\Facades\GraphQL;
 use Rebing\GraphQL\Support\Query;
 
@@ -21,11 +22,10 @@ class ProductsQuery extends Query
     }
 
     /**
-     * @param mixed $root
-     * @param array<string, mixed> $args
-     * @return \Illuminate\Database\Eloquent\Collection<int, Product>
+     * @param  array<string, mixed>  $args
+     * @return Collection<int, Product>
      */
-    public function resolve(mixed $root, array $args): \Illuminate\Database\Eloquent\Collection
+    public function resolve(mixed $root, array $args): Collection
     {
         return Product::query()->get();
     }

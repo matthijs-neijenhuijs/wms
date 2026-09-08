@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Filament\Resources\Orders\Inputs;
 
-use App\Models\Client;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Clients\Models\Client;
 
 class ClientSelect
 {

@@ -20,12 +20,13 @@ class StockSummaryColumn
                 $reservedOnPicklists = $stock !== null && $stock->reserved_on_picklists !== null ? $stock->reserved_on_picklists : 0;
                 $free = $stock !== null && $stock->free_on_stock_quantity !== null ? $stock->free_on_stock_quantity : 0;
 
-                return '<div class="flex flex-col items-start gap-1">'
-                    .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Stock: '.$onStock.'</span>'
-                    .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Res: '.$reserved.'</span>'
-                    .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Pick: '.$reservedOnPicklists.'</span>'
-                    .'<span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Free: '.$free.'</span>'
-                    .'</div>';
+                return sprintf(
+                    '<div class="flex flex-col items-start gap-1"><span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Stock: %d</span><span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Res: %d</span><span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Pick: %d</span><span class="fi-color fi-color-info fi-badge fi-size-sm inline-flex w-fit whitespace-nowrap" style="color: #000;">Free: %d</span></div>',
+                    $onStock,
+                    $reserved,
+                    $reservedOnPicklists,
+                    $free,
+                );
             });
     }
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Clients\Filament\Resources\Clients\Inputs;
 
-use App\Models\Client;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Clients\Models\Client;
 
 class DeliveryAddressSelect
 {

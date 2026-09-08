@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Models;
 
-use App\Models\Product;
-use App\Models\VatRate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Products\Models\Product;
+use Modules\Settings\Models\VatRate;
 
 class OrderProduct extends Model
 {

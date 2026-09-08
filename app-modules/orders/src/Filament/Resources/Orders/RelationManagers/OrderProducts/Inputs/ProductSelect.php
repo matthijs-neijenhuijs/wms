@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Filament\Resources\Orders\RelationManagers\OrderProducts\Inputs;
 
-use App\Models\Product;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Set;
+use Modules\Products\Models\Product;
 
 class ProductSelect
 {
@@ -25,8 +25,7 @@ class ProductSelect
 
                 $product = Product::with('vatRate')->find($state);
 
-                /** @var Product|null $product */
-                if (! $product) {
+                if (! $product instanceof Product) {
                     return;
                 }
 

@@ -26,9 +26,7 @@ class UsersTable
                 CreatedAtColumn::make(),
                 UpdatedAtColumn::make(),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->recordActions([
                 EditAction::make(),
             ])

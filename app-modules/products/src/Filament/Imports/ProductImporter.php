@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Products\Filament\Imports;
 
-use App\Models\Product;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -12,6 +11,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Hidden;
 use Illuminate\Support\Number;
+use Modules\Products\Models\Product;
 
 class ProductImporter extends Importer
 {
@@ -95,7 +95,9 @@ class ProductImporter extends Importer
     {
         $body = 'Your product import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        $failedRowsCount = $import->getFailedRowsCount();
+
+        if ($failedRowsCount) {
             $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 

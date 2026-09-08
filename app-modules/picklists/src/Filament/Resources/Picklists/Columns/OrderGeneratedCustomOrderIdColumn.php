@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Picklists\Filament\Resources\Picklists\Columns;
 
-use App\Models\Picklist;
 use Filament\Tables\Columns\TextColumn;
 use Modules\Orders\Filament\Resources\Orders\OrderResource;
+use Modules\Picklists\Models\Picklist;
 
 class OrderGeneratedCustomOrderIdColumn
 {

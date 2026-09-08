@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Events;
 
-use App\Models\Order;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Modules\Orders\Models\Order;
 
 class OrderConfirmed
 {

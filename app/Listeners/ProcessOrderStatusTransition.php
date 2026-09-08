@@ -6,14 +6,13 @@ namespace App\Listeners;
 
 use App\Services\OrderStatusTransitionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Orders\Events\OrderStatusChanged;
 
-class ProcessOrderStatusTransition implements ShouldQueue
+class ProcessOrderStatusTransition implements ShouldQueue, ShouldQueueAfterCommit
 {
     use InteractsWithQueue;
-
-    public bool $afterCommit = true;
 
     public function __construct(private OrderStatusTransitionService $transitionService) {}
 

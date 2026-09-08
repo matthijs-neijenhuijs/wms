@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\GraphQL\Mutations\Quest;
 
-use App\Models\Product;
 use GraphQL\Type\Definition\Type;
+use Modules\Products\Models\Product;
 use Rebing\GraphQL\Support\Facades\GraphQL;
 use Rebing\GraphQL\Support\Mutation;
 
@@ -32,8 +32,7 @@ class CreateProductMutation extends Mutation
     }
 
     /**
-     * @param mixed $root
-     * @param array<string, mixed> $args
+     * @param  array<string, mixed>  $args
      */
     public function resolve(mixed $root, array $args): Product
     {
