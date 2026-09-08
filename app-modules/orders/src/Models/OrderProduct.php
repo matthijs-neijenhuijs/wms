@@ -31,6 +31,9 @@ class OrderProduct extends Model
         'product_attribute_title',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -76,6 +79,9 @@ class OrderProduct extends Model
         return $this->belongsTo(VatRate::class);
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

@@ -48,6 +48,9 @@ class Order extends Model
         'comments',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -119,6 +122,9 @@ class Order extends Model
         return (string) ($this->generated_custom_order_id ?: $this->custom_order_id ?: "Order #{$this->getKey()}");
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

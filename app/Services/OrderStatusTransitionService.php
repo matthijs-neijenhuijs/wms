@@ -211,6 +211,9 @@ class OrderStatusTransitionService
             ->sum('order_products.quantity');
     }
 
+    /**
+     * @param  array<string, mixed>  $properties
+     */
     protected function logWorkflowStep(Order $order, string $event, string $description, array $properties = []): void
     {
         $alreadyLogged = Activity::query()

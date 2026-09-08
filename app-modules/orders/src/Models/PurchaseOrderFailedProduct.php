@@ -24,6 +24,9 @@ class PurchaseOrderFailedProduct extends Model
         'product_title',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -52,6 +55,9 @@ class PurchaseOrderFailedProduct extends Model
         return $this->belongsTo(PurchaseOrder::class);
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

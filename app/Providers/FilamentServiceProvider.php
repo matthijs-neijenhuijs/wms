@@ -79,7 +79,7 @@ class FilamentServiceProvider extends ServiceProvider
 
             $table
                 ->emptyStateIcon(Heroicon::OutlinedSparkles)
-                ->emptyStateHeading(__('No records yet.'));
+                ->emptyStateHeading('No records yet.');
         });
 
         Column::configureUsing(function (Column $column): void {

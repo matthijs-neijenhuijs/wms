@@ -22,7 +22,7 @@ class BillAddressSelect
                         return $query->whereNull('id');
                     }
 
-                    return $query->where('client_id', $record->getKey());
+                    return $query->whereRaw('client_id = ?', [$record->getKey()]);
                 },
             );
     }
