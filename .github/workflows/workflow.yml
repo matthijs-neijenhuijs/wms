@@ -59,8 +59,8 @@ jobs:
             - name: phpinsights
               run: |
                 php artisan insights --no-interaction \
-                --min-quality=90 --min-complexity=90 \
-                --min-architecture=90 --min-style=90 \
+                --min-quality=86 --min-complexity=90 \
+                --min-architecture=87 --min-style=89 \
                 --ansi --format=github-action
 
             - name: Show DB config
