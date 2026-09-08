@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Settings\Filament\Resources\AttributeGroups;
 
-use App\Models\AttributeGroup;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -13,6 +12,7 @@ use Modules\Settings\Filament\Resources\AttributeGroups\Pages\EditAttributeGroup
 use Modules\Settings\Filament\Resources\AttributeGroups\Pages\ListAttributeGroups;
 use Modules\Settings\Filament\Resources\AttributeGroups\Schemas\AttributeGroupForm;
 use Modules\Settings\Filament\Resources\AttributeGroups\Tables\AttributeGroupsTable;
+use Modules\Settings\Models\AttributeGroup;
 use UnitEnum;
 
 class AttributeGroupResource extends Resource

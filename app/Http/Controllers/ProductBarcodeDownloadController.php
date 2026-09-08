@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use AgeekDev\Barcode\Facades\Barcode;
-use App\Models\Product;
-use App\Models\User;
 use App\Models\Warehouse;
+use Modules\Products\Models\Product;
+use Modules\Users\Models\User;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductBarcodeDownloadController extends Controller

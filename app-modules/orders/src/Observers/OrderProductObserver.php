@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Observers;
 
-use App\Models\OrderProduct;
+use Modules\Orders\Models\OrderProduct;
 
 class OrderProductObserver
 {

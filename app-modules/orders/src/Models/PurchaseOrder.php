@@ -27,6 +27,9 @@ class PurchaseOrder extends Model
         'generated_custom_purchase_order_id',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -71,6 +74,9 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderFailedProduct::class);
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

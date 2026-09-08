@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Picklists\Filament\Resources\Picklists;
 
-use App\Models\Picklist;
-use App\Models\Picklist as PicklistModel;
 use BackedEnum;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
@@ -20,6 +18,7 @@ use Modules\Picklists\Filament\Resources\Picklists\Pages\ListPicklists;
 use Modules\Picklists\Filament\Resources\Picklists\Pages\ViewPicklist;
 use Modules\Picklists\Filament\Resources\Picklists\Schemas\PicklistForm;
 use Modules\Picklists\Filament\Resources\Picklists\Tables\PicklistsTable;
+use Modules\Picklists\Models\Picklist;
 
 class PicklistResource extends Resource
 {
@@ -52,10 +51,10 @@ class PicklistResource extends Resource
                             ->label('ID'),
                         TextEntry::make('products_count')
                             ->label('Products')
-                            ->state(fn (PicklistModel $record): int => $record->products->count()),
+                            ->state(fn (Picklist $record): int => $record->products->count()),
                         TextEntry::make('scanned_count')
                             ->label('Scanned')
-                            ->state(fn (PicklistModel $record): string => $record->products->where('scanned', true)->count().' / '.$record->products->count()),
+                            ->state(fn (Picklist $record): string => $record->products->where('scanned', true)->count().' / '.$record->products->count()),
                         TextEntry::make('completed')
                             ->formatStateUsing(fn (bool|int|null $state): string => $state ? 'Yes' : 'No'),
                         TextEntry::make('created_at')

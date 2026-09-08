@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Attribute;
-use App\Models\AttributeGroup;
-use App\Models\Brand;
-use App\Models\Client;
-use App\Models\ClientAddresses;
-use App\Models\Order;
-use App\Models\OrderProduct;
-use App\Models\OrderStatus;
-use App\Models\Picklist;
-use App\Models\PicklistProduct;
-use App\Models\Product;
-use App\Models\StockProduct;
 use App\Models\Subdomain;
-use App\Models\User;
-use App\Models\VatRate;
 use App\Models\Warehouse;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Modules\Brands\Models\Brand;
+use Modules\Clients\Models\Client;
+use Modules\Clients\Models\ClientAddresses;
+use Modules\Orders\Models\Order;
+use Modules\Orders\Models\OrderProduct;
+use Modules\Orders\Models\OrderStatus;
+use Modules\Picklists\Models\Picklist;
+use Modules\Picklists\Models\PicklistProduct;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
+use Modules\Settings\Models\Attribute;
+use Modules\Settings\Models\AttributeGroup;
+use Modules\Settings\Models\VatRate;
+use Modules\Users\Models\User;
 
 class TenantSeeder extends Seeder
 {

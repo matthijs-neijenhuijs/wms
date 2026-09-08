@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Filament\Resources\Orders\Inputs;
 
-use App\Models\Client;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Clients\Models\Client;
 
 class ClientSelect
 {
@@ -23,8 +23,6 @@ class ClientSelect
             )
             ->getOptionLabelFromRecordUsing(fn (Client $record): string => $record->company
                 ?: ($record->clientDeliveryAddress?->name ?: $record->email ?: "Client #{$record->id}"))
-            ->searchable(['company', 'email'])
-            ->searchable()
-            ->preload();
+            ->searchable(['company', 'email']);
     }
 }

@@ -3,10 +3,12 @@
 declare(strict_types=1);
 use App\Providers\AppServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\FilamentServiceProvider;
 use Rebing\GraphQL\GraphQLServiceProvider;
 
 return [
     AppServiceProvider::class,
+    FilamentServiceProvider::class,
     AdminPanelProvider::class,
     GraphQLServiceProvider::class,
 ];

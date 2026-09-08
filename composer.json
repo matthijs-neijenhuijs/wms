@@ -19,7 +19,6 @@
         "laravel/ai": "^0.2.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "modules/ai": "*",
         "modules/brands": "*",
         "modules/clients": "*",
         "modules/orders": "*",
@@ -28,7 +27,6 @@
         "modules/products": "*",
         "modules/settings": "*",
         "modules/users": "*",
-        "openwms/filament-dynamic-ai-charts": "dev-main",
         "rebing/graphql-laravel": "^9.10",
         "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-pdf": "^2.2",
@@ -93,20 +91,6 @@
         }
     },
     "repositories": [
-        {
-            "type": "path",
-            "url": "packages/filament-dynamic-ai-charts",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/filament-ai-autosuggest-field",
-            "options": {
-                "symlink": true
-            }
-        },
         {
             "type": "path",
             "url": "app-modules/*",

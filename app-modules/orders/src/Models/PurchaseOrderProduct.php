@@ -25,6 +25,9 @@ class PurchaseOrderProduct extends Model
         'scanned',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -55,6 +58,9 @@ class PurchaseOrderProduct extends Model
         return $this->belongsTo(PurchaseOrder::class);
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Product;
-use App\Models\StockProduct;
 use Illuminate\Database\Seeder;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
 
 class StockProductSeeder extends Seeder
 {

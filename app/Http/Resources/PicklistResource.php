@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\Picklist;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Picklists\Models\Picklist;
 
 /** @mixin Picklist */
 class PicklistResource extends JsonResource

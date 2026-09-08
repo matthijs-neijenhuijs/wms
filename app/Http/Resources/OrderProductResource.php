@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\OrderProduct;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Orders\Models\OrderProduct;
 
 /** @mixin OrderProduct */
 class OrderProductResource extends JsonResource
