@@ -32,13 +32,12 @@ class DeleteProductMutation extends Mutation
     }
 
     /**
-     * @param mixed $root
-     * @param array<string, mixed> $args
+     * @param  array<string, mixed>  $args
      */
     public function resolve(mixed $root, array $args): bool
     {
         $product = Product::query()->findOrFail((int) $args['id']);
 
-        return $product->delete();
+        return (bool) $product->delete();
     }
 }

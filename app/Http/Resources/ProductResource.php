@@ -58,7 +58,7 @@ class ProductResource extends JsonResource
 
                 return [
                     'id' => $category->id,
-                    'name' => $category->name,
+                    'name' => $category->getAttribute('name'),
                 ];
             }),
             'vat_rate' => $this->whenLoaded('vatRate', function (): ?array {

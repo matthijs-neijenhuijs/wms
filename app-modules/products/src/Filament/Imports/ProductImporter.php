@@ -56,14 +56,14 @@ class ProductImporter extends Importer
             Checkbox::make('updateExisting')
                 ->label('Update existing products (match by product_code)'),
             Hidden::make('warehouse_id')
-                ->default(fn (): ?int => Filament::getTenant()?->id)
+                ->default(fn (): ?int => Filament::getTenant()?->getKey())
                 ->dehydrated(),
         ];
     }
 
     public function resolveRecord(): ?Product
     {
-        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->id;
+        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->getKey();
 
         if (! ($this->options['updateExisting'] ?? false)) {
             return new Product;
@@ -82,10 +82,12 @@ class ProductImporter extends Importer
 
     protected function beforeSave(): void
     {
-        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->id;
+        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->getKey();
 
         if ($warehouseId) {
-            $this->record->warehouse_id = $warehouseId;
+            /** @var Product $record */
+            $record = $this->record;
+            $record->warehouse_id = $warehouseId;
         }
     }
 

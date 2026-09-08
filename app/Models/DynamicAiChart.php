@@ -53,7 +53,7 @@ class DynamicAiChart extends Model
             $tenant = Filament::getTenant();
 
             if ($tenant) {
-                $chart->warehouse_id = $tenant->id;
+                $chart->warehouse_id = $tenant->getKey();
             }
         });
     }

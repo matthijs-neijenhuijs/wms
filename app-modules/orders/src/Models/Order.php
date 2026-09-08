@@ -141,21 +141,33 @@ class Order extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * @return BelongsTo<Client, $this>
+     */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
+    /**
+     * @return BelongsTo<OrderStatus, $this>
+     */
     public function orderStatus(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class, 'order_statuses_id');
     }
 
+    /**
+     * @return HasMany<OrderProduct, $this>
+     */
     public function products(): HasMany
     {
         return $this->hasMany(OrderProduct::class);

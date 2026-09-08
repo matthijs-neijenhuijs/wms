@@ -53,7 +53,7 @@ class ClientForm
                                         return $query->whereNull('id');
                                     }
 
-                                    return $query->where('client_id', $record->id);
+                                    return $query->whereRaw('client_id = ?', [$record->getKey()]);
                                 },
                             ),
                         Select::make('delivery_client_address_id')
@@ -66,7 +66,7 @@ class ClientForm
                                         return $query->whereNull('id');
                                     }
 
-                                    return $query->where('client_id', $record->id);
+                                    return $query->whereRaw('client_id = ?', [$record->getKey()]);
                                 },
                             ),
                     ])

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Product;
-use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderProduct;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Modules\Orders\Models\PurchaseOrder;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 
 class PurchaseOrderImportService
@@ -43,7 +43,7 @@ class PurchaseOrderImportService
                     'purchase_order_id' => $purchaseOrder->id,
                     'barcode' => $importRow['barcode'],
                     'reference_code' => $product?->reference_code,
-                    'product_title' => $product?->name ?? 'Unknown product',
+                    'product_title' => $product->name ?? 'Unknown product',
                     'show_for_supplier' => false,
                     'scanned' => false,
                 ]);
@@ -98,7 +98,7 @@ class PurchaseOrderImportService
         $rows = [];
 
         while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
-            if ($row === [null] || $row === false) {
+            if ($row === [null]) {
                 continue;
             }
 

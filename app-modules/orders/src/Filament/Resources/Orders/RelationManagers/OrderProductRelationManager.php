@@ -35,6 +35,8 @@ class OrderProductRelationManager extends RelationManager
                     ->afterStateUpdated(function (Set $set, $state) {
                         if ($state) {
                             $product = Product::with('vatRate')->find($state);
+
+                            /** @var Product|null $product */
                             if ($product) {
                                 $set('vat_rate_id', $product->vat_rate_id);
                                 $set('vat_rate', $product->vatRate?->rate);
@@ -67,7 +69,7 @@ class OrderProductRelationManager extends RelationManager
 
                 TextInput::make('price')
                     ->numeric()
-                    ->prefix(fn () => match ($this->getOwnerRecord()->warehouse?->currency ?? 'EUR') {
+                    ->prefix(fn () => match ($this->getOwnerRecord()->warehouse->currency ?? 'EUR') {
                         'USD' => '$',
                         'GBP' => '£',
                         'JPY' => '¥',
@@ -99,7 +101,7 @@ class OrderProductRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('quantity'),
                 TextColumn::make('price')
-                    ->money(fn () => $this->getOwnerRecord()->warehouse?->currency ?? 'EUR'),
+                    ->money(fn () => $this->getOwnerRecord()->warehouse->currency ?? 'EUR'),
                 TextColumn::make('vat_rate')
                     ->suffix('%'),
                 TextColumn::make('reference_code'),

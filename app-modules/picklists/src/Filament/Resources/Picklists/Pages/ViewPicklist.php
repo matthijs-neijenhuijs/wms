@@ -49,7 +49,7 @@ class ViewPicklist extends ViewRecord
 
         if (! $picklistProduct) {
             $failedProduct = PicklistFailedProduct::query()
-                ->where('picklist_id', $this->record->getKey())
+                ->where('picklist_id', $record->getKey())
                 ->where('barcode', $barcode)
                 ->first();
 
@@ -76,7 +76,7 @@ class ViewPicklist extends ViewRecord
 
         if ($picklistProduct->scanned) {
             $failedProduct = PicklistFailedProduct::query()
-                ->where('picklist_id', $this->record->getKey())
+                ->where('picklist_id', $record->getKey())
                 ->where('barcode', $barcode)
                 ->first();
 
@@ -106,14 +106,14 @@ class ViewPicklist extends ViewRecord
         }
 
         $picklistProduct->update([
-            'scanned' => 1,
+            'scanned' => true,
         ]);
 
         if ($record->relationLoaded('products')) {
             $loadedProduct = $record->products->firstWhere('id', $picklistProduct->id);
 
             if ($loadedProduct) {
-                $loadedProduct->scanned = 1;
+                $loadedProduct->scanned = true;
                 $loadedProduct->updated_at = $picklistProduct->updated_at;
             }
         }

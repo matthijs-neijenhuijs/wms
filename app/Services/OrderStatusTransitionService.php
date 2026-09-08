@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\OrderProduct;
 use App\Models\Picklist;
 use App\Models\PicklistProduct;
+use App\Models\Product;
 use App\Models\StockProduct;
 use Illuminate\Support\Facades\DB;
 use Modules\Orders\Models\OrderStatus;
@@ -128,6 +130,8 @@ class OrderStatusTransitionService
         $order->loadMissing('products.product.stockProduct');
 
         foreach ($order->products as $orderProduct) {
+            /** @var OrderProduct $orderProduct */
+            /** @var Product|null $product */
             $product = $orderProduct->product;
 
             if (! $product || ! $product->stockProduct) {

@@ -51,7 +51,7 @@ class UserResource extends Resource
             return $query;
         }
 
-        return $query->where('subdomain_id', $currentSubdomain->id);
+        return $query->whereRaw('subdomain_id = ?', [$currentSubdomain->getKey()]);
     }
 
     private static function resolveSubdomainFromHost(): ?Subdomain

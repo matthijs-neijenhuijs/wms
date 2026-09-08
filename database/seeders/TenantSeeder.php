@@ -517,10 +517,6 @@ class TenantSeeder extends Seeder
         // Order 1: New order from first client
         $client1 = $clients->first();
 
-        if (! $client1 instanceof Client) {
-            return;
-        }
-
         $deliveryAddress1 = $client1->clientDeliveryAddress;
 
         if (! $deliveryAddress1 instanceof ClientAddresses) {
@@ -797,12 +793,19 @@ class TenantSeeder extends Seeder
 
                 $quantity = max(1, (int) $orderProduct->quantity);
                 $orderProductSource = $orderProduct->product;
-                $barcode = $orderProduct->barcode
-                    ?? $orderProductSource?->barcode
-                    ?? $orderProduct->reference_code
-                    ?? 'UNKNOWN';
-                $referenceCode = $orderProduct->reference_code ?? $orderProductSource?->reference_code;
-                $productTitle = $orderProduct->name ?? $orderProductSource?->name ?? 'Product';
+
+                if ($orderProductSource instanceof Product) {
+                    $barcode = $orderProduct->barcode
+                        ?? $orderProductSource->barcode
+                        ?? $orderProduct->reference_code
+                        ?? 'UNKNOWN';
+                    $referenceCode = $orderProduct->reference_code ?? $orderProductSource->reference_code;
+                    $productTitle = $orderProduct->name ?? $orderProductSource->name ?? 'Product';
+                } else {
+                    $barcode = $orderProduct->barcode ?? $orderProduct->reference_code ?? 'UNKNOWN';
+                    $referenceCode = $orderProduct->reference_code;
+                    $productTitle = $orderProduct->name ?? 'Product';
+                }
 
                 for ($i = 0; $i < $quantity; $i++) {
                     PicklistProduct::query()->create([

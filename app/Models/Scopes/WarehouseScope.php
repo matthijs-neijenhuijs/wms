@@ -16,7 +16,7 @@ class WarehouseScope implements Scope
         $currentTenant = Filament::getTenant();
 
         if ($currentTenant && $model->getTable() !== 'warehouses') {
-            $builder->where($model->getTable().'.warehouse_id', $currentTenant->id);
+            $builder->whereRaw($model->qualifyColumn('warehouse_id').' = ?', [$currentTenant->getKey()]);
         }
     }
 }

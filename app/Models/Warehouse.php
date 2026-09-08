@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Modules\Orders\Models\OrderStatus;
 
 class Warehouse extends Model
 {
@@ -22,16 +24,25 @@ class Warehouse extends Model
         'order_statuses_id_completed_picklist',
     ];
 
+    /**
+     * @return BelongsTo<Subdomain, $this>
+     */
     public function subdomain(): BelongsTo
     {
         return $this->belongsTo(Subdomain::class, 'subdomain_id');
     }
 
-    public function users()
+    /**
+     * @return BelongsToMany<User, $this>
+     */
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_warehouses');
     }
 
+    /**
+     * @return BelongsTo<OrderStatus, $this>
+     */
     public function completedPicklistOrderStatus(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class, 'order_statuses_id_completed_picklist');

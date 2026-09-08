@@ -52,16 +52,25 @@ class OrderProduct extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);

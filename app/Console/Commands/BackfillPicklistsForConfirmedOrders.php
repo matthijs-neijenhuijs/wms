@@ -35,7 +35,7 @@ class BackfillPicklistsForConfirmedOrders extends Command
         $orderId = $this->option('order-id');
 
         $query = Order::query()
-            ->whereHas('orderStatus', fn ($query) => $query->where('generate_picklist', true))
+            ->whereHas('orderStatus', fn ($query) => $query->whereRaw('generate_picklist = ?', [true]))
             ->whereNotIn('id', Picklist::query()->select('order_id'))
             ->with('products');
 

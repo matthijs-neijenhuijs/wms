@@ -138,11 +138,14 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->belongsToMany(Warehouse::class, 'user_warehouses');
     }
 
+    /**
+     * @return Collection<int, Warehouse>
+     */
     public function getTenants(Panel $panel): Collection
     {
         // Only return warehouses for the current subdomain
         if (app()->has('current_subdomain')) {
-            return $this->warehouses()->where('warehouses.subdomain_id', app('current_subdomain')->id)->get();
+            return $this->warehouses()->whereRaw('warehouses.subdomain_id = ?', [app('current_subdomain')->id])->get();
         }
 
         return $this->warehouses()->get();

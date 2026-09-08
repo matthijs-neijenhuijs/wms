@@ -13,7 +13,7 @@ class TenantScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (app()->has('current_subdomain')) {
-            $builder->where($model->getTable().'.subdomain_id', app('current_subdomain')->id);
+            $builder->whereRaw($model->qualifyColumn('subdomain_id').' = ?', [app('current_subdomain')->id]);
         }
     }
 }
