@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Picklists\Filament\Resources\Picklists\Pages;
 
-use App\Models\Picklist;
-use App\Models\PicklistFailedProduct;
-use App\Models\PicklistProduct;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Livewire\Attributes\On;
 use Modules\Picklists\Filament\Resources\Picklists\PicklistResource;
+use Modules\Picklists\Models\Picklist;
+use Modules\Picklists\Models\PicklistFailedProduct;
+use Modules\Picklists\Models\PicklistProduct;
 
 class ViewPicklist extends ViewRecord
 {
@@ -49,7 +49,7 @@ class ViewPicklist extends ViewRecord
 
         if (! $picklistProduct) {
             $failedProduct = PicklistFailedProduct::query()
-                ->where('picklist_id', $this->record->getKey())
+                ->where('picklist_id', $record->getKey())
                 ->where('barcode', $barcode)
                 ->first();
 
@@ -76,7 +76,7 @@ class ViewPicklist extends ViewRecord
 
         if ($picklistProduct->scanned) {
             $failedProduct = PicklistFailedProduct::query()
-                ->where('picklist_id', $this->record->getKey())
+                ->where('picklist_id', $record->getKey())
                 ->where('barcode', $barcode)
                 ->first();
 
@@ -106,14 +106,14 @@ class ViewPicklist extends ViewRecord
         }
 
         $picklistProduct->update([
-            'scanned' => 1,
+            'scanned' => true,
         ]);
 
         if ($record->relationLoaded('products')) {
             $loadedProduct = $record->products->firstWhere('id', $picklistProduct->id);
 
             if ($loadedProduct) {
-                $loadedProduct->scanned = 1;
+                $loadedProduct->scanned = true;
                 $loadedProduct->updated_at = $picklistProduct->updated_at;
             }
         }

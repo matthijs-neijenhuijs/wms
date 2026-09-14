@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Order;
-use App\Models\Picklist;
-use App\Models\PicklistProduct;
-use App\Models\StockProduct;
 use Illuminate\Support\Facades\DB;
+use Modules\Orders\Models\Order;
+use Modules\Orders\Models\OrderProduct;
 use Modules\Orders\Models\OrderStatus;
+use Modules\Picklists\Models\Picklist;
+use Modules\Picklists\Models\PicklistProduct;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
 use Spatie\Activitylog\Models\Activity;
 
 class OrderStatusTransitionService
@@ -128,6 +130,8 @@ class OrderStatusTransitionService
         $order->loadMissing('products.product.stockProduct');
 
         foreach ($order->products as $orderProduct) {
+            /** @var OrderProduct $orderProduct */
+            /** @var Product|null $product */
             $product = $orderProduct->product;
 
             if (! $product || ! $product->stockProduct) {
@@ -207,6 +211,9 @@ class OrderStatusTransitionService
             ->sum('order_products.quantity');
     }
 
+    /**
+     * @param  array<string, mixed>  $properties
+     */
     protected function logWorkflowStep(Order $order, string $event, string $description, array $properties = []): void
     {
         $alreadyLogged = Activity::query()

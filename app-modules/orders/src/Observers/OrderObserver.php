@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Observers;
 
-use App\Models\Order;
 use App\Models\Warehouse;
 use Modules\Orders\Events\OrderStatusChanged;
+use Modules\Orders\Models\Order;
 use Modules\Orders\Models\OrderStatus;
 
 class OrderObserver
@@ -28,7 +28,11 @@ class OrderObserver
             ? $order->warehouse
             : Warehouse::query()->find($order->warehouse_id);
 
-        $prefix = strtoupper(substr((string) ($warehouse?->name ?? ''), 0, 4));
+        if (! $warehouse instanceof Warehouse) {
+            return;
+        }
+
+        $prefix = strtoupper(substr((string) $warehouse->name, 0, 4));
         $year = now()->format('y');
 
         $maxGeneratedYearOrderId = Order::query()
@@ -55,6 +59,14 @@ class OrderObserver
         $previousStatusId = $order->getPrevious()['order_statuses_id'] ?? null;
         $previousStatus = $previousStatusId ? OrderStatus::query()->find($previousStatusId) : null;
         $newStatus = $order->orderStatus()->first();
+
+        if (! $previousStatus instanceof OrderStatus) {
+            $previousStatus = null;
+        }
+
+        if (! $newStatus instanceof OrderStatus) {
+            $newStatus = null;
+        }
 
         OrderStatusChanged::dispatch($order->withoutRelations(), $previousStatus, $newStatus);
     }

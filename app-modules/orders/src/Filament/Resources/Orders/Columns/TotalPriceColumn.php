@@ -18,7 +18,7 @@ class TotalPriceColumn
                     return ($product->quantity ?? 0) * ($product->price ?? 0);
                 });
             })
-            ->money(fn (Order $record) => $record->warehouse?->currency ?? 'EUR')
+            ->money(fn (Order $record) => $record->warehouse->currency ?? 'EUR')
             ->sortable();
     }
 }

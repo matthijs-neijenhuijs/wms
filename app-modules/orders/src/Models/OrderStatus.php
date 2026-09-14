@@ -31,6 +31,9 @@ class OrderStatus extends Model
         'cancelled',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -56,6 +59,9 @@ class OrderStatus extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
@@ -123,6 +129,9 @@ class OrderStatus extends Model
         return $this->delivered || $this->cancelled;
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

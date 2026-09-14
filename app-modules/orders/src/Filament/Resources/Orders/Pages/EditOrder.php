@@ -8,6 +8,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Modules\Orders\Filament\Resources\Orders\OrderResource;
+use Modules\Orders\Models\Order;
 
 class EditOrder extends EditRecord
 {
@@ -22,15 +23,20 @@ class EditOrder extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        /** @var Order $order */
+        $order = $this->record;
+
         return [
             DeleteAction::make()
-                ->visible(fn () => $this->record->orderStatus?->canDeleteOrder() ?? true),
+                ->visible(fn () => $order->orderStatus?->canDeleteOrder() ?? true),
         ];
     }
 
     public function form(Schema $schema): Schema
     {
-        $isLocked = ! $this->record->orderStatus?->canEditOrder();
+        /** @var Order $order */
+        $order = $this->record;
+        $isLocked = ! $order->orderStatus?->canEditOrder();
         $baseSchema = parent::form($schema);
 
         if ($isLocked) {

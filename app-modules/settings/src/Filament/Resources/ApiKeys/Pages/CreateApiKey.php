@@ -27,7 +27,7 @@ class CreateApiKey extends CreateRecord
         $token = Str::random(64);
         $this->plainTextKey = $token;
 
-        $data['warehouse_id'] = $tenant->id;
+        $data['warehouse_id'] = $tenant->getKey();
         $data['key_hash'] = hash('sha256', $token);
 
         return $data;

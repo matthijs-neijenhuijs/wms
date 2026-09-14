@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ActivityLogs;
 
 use AlizHarb\ActivityLog\Resources\ActivityLogs\ActivityLogResource as BaseActivityLogResource;
-use App\Models\Client;
-use App\Models\Order;
-use App\Models\Picklist;
-use App\Models\Product;
-use App\Models\PurchaseOrder;
-use App\Models\StockProduct;
 use App\Models\Warehouse;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Clients\Models\Client;
+use Modules\Orders\Models\Order;
+use Modules\Orders\Models\PurchaseOrder;
+use Modules\Picklists\Models\Picklist;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
 
 class ActivityLogResource extends BaseActivityLogResource
 {

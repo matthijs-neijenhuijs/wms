@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Observers;
 
-use App\Models\PurchaseOrder;
 use App\Models\Warehouse;
+use Modules\Orders\Models\PurchaseOrder;
 
 class PurchaseOrderObserver
 {
@@ -26,7 +26,11 @@ class PurchaseOrderObserver
             ? $purchaseOrder->warehouse
             : Warehouse::query()->find($purchaseOrder->warehouse_id);
 
-        $prefix = strtoupper(substr((string) ($warehouse?->name ?? ''), 0, 4));
+        if (! $warehouse instanceof Warehouse) {
+            return;
+        }
+
+        $prefix = strtoupper(substr((string) $warehouse->name, 0, 4));
         $year = now()->format('y');
 
         $maxGeneratedYearPurchaseOrderId = PurchaseOrder::query()

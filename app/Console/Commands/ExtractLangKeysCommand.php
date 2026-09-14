@@ -62,8 +62,9 @@ class ExtractLangKeysCommand extends Command
 
         $searchDirectories = collect(self::DIRECTORIES)
             ->map(fn (string $dir): string => base_path($dir))
+            ->values()
             ->all();
-        $foundKeys = $this->extractKeys($searchDirectories);
+        $foundKeys = $this->extractKeys(array_values($searchDirectories));
 
         $addedKeys = collect($foundKeys)->diff($existingKeys);
         $removedKeys = collect($existingKeys)->diff($foundKeys);
@@ -74,7 +75,7 @@ class ExtractLangKeysCommand extends Command
             ->all();
 
         File::ensureDirectoryExists(dirname($localePath));
-        File::put($localePath, json_encode($keys, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL);
+        File::put($localePath, json_encode($keys, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
 
         table(
             ['Found', 'Added', 'Removed'],
@@ -91,19 +92,30 @@ class ExtractLangKeysCommand extends Command
     }
 
     /**
-     * @param  list<string> $directories
+     * @param  list<string>  $directories
      * @return list<string>
      */
     private function extractKeys(array $directories): array
     {
-        return collect($directories)
-            ->filter(fn (string $dir): bool => File::isDirectory($dir))
-            ->flatMap(fn (string $dir): array => File::allFiles($dir))
-            ->filter(fn (SplFileInfo $file): bool => $file->getExtension() === 'php')
-            ->flatMap(fn (SplFileInfo $file): array => $this->extractKeysFromFile($file->getPathname()))
-            ->unique()
-            ->values()
-            ->all();
+        $keys = [];
+
+        foreach ($directories as $directory) {
+            if (! File::isDirectory($directory)) {
+                continue;
+            }
+
+            foreach (File::allFiles($directory) as $file) {
+                if (! $file instanceof SplFileInfo || $file->getExtension() !== 'php') {
+                    continue;
+                }
+
+                foreach ($this->extractKeysFromFile($file->getPathname()) as $key) {
+                    $keys[$key] = $key;
+                }
+            }
+        }
+
+        return array_values($keys);
     }
 
     /**
@@ -112,11 +124,18 @@ class ExtractLangKeysCommand extends Command
     private function extractKeysFromFile(string $path): array
     {
         $contents = Str::of(File::get($path));
+        $keys = [];
 
-        return collect(self::PATTERNS)
-            ->flatMap(fn (string $pattern): array => $contents->matchAll($pattern)->all())
-            ->reject(fn (string $key): bool => str_contains($key, '::'))
-            ->values()
-            ->all();
+        foreach (self::PATTERNS as $pattern) {
+            foreach ($contents->matchAll($pattern)->all() as $key) {
+                if (str_contains((string) $key, '::')) {
+                    continue;
+                }
+
+                $keys[(string) $key] = (string) $key;
+            }
+        }
+
+        return array_values($keys);
     }
 }

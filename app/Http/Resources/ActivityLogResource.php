@@ -27,7 +27,7 @@ class ActivityLogResource extends JsonResource
             'causer_id' => $this->causer_id,
             'attribute_changes' => $this->attribute_changes,
             'properties' => $this->properties,
-            'batch_uuid' => $this->batch_uuid,
+            'batch_uuid' => $this->resource->getAttribute('batch_uuid'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

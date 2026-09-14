@@ -31,6 +31,10 @@ class AllowedIpsInput
                 }
 
                 $parts = preg_split('/[\n,]+/', (string) $state);
+                if ($parts === false) {
+                    return null;
+                }
+
                 $filtered = array_values(array_filter(array_map('trim', $parts), fn ($value) => $value !== ''));
 
                 return $filtered === [] ? null : $filtered;

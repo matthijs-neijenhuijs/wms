@@ -16,6 +16,7 @@ use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use League\Csv\Reader as CsvReader;
@@ -34,7 +35,7 @@ class ImportWithXlsxAction extends ImportAction
 
         $this->modalHeading(fn (ImportAction $action): string => __('filament-actions::import.modal.heading', ['label' => $action->getTitleCasePluralModelLabel()]));
 
-        $this->modalDescription(fn (ImportAction $action): Htmlable => $action->getModalAction('downloadExample'));
+        $this->modalDescription(fn (ImportAction $action): Htmlable => $action->getModalAction('downloadExample') ?? new HtmlString(''));
 
         $this->modalSubmitActionLabel(__('filament-actions::import.modal.actions.import.label'));
 

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Product;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderProduct;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Modules\Orders\Models\PurchaseOrder;
+use Modules\Orders\Models\PurchaseOrderProduct;
+use Modules\Products\Models\Product;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 
 class PurchaseOrderImportService
@@ -43,7 +43,7 @@ class PurchaseOrderImportService
                     'purchase_order_id' => $purchaseOrder->id,
                     'barcode' => $importRow['barcode'],
                     'reference_code' => $product?->reference_code,
-                    'product_title' => $product?->name ?? 'Unknown product',
+                    'product_title' => $product->name ?? 'Unknown product',
                     'show_for_supplier' => false,
                     'scanned' => false,
                 ]);
@@ -66,21 +66,27 @@ class PurchaseOrderImportService
      */
     protected function readRows(TemporaryUploadedFile|UploadedFile|string $file): array
     {
-        $path = $file instanceof TemporaryUploadedFile || $file instanceof UploadedFile
-            ? $file->getRealPath()
-            : $file;
+        if ($file instanceof TemporaryUploadedFile || $file instanceof UploadedFile) {
+            $path = $file->getRealPath();
+        } else {
+            $path = $file;
+        }
 
         if (! $path) {
             return [];
         }
 
-        $extension = Str::lower($file instanceof TemporaryUploadedFile || $file instanceof UploadedFile
-            ? ($file->getClientOriginalExtension() ?: pathinfo($path, PATHINFO_EXTENSION))
-            : pathinfo($path, PATHINFO_EXTENSION));
+        if ($file instanceof TemporaryUploadedFile || $file instanceof UploadedFile) {
+            $extension = Str::lower($file->getClientOriginalExtension() ?: pathinfo($path, PATHINFO_EXTENSION));
+        } else {
+            $extension = Str::lower(pathinfo($path, PATHINFO_EXTENSION));
+        }
 
-        return $extension === 'xlsx'
-            ? $this->readXlsxRows($path)
-            : $this->readCsvRows($path);
+        if ($extension === 'xlsx') {
+            return $this->readXlsxRows($path);
+        }
+
+        return $this->readCsvRows($path);
     }
 
     /**
@@ -98,7 +104,7 @@ class PurchaseOrderImportService
         $rows = [];
 
         while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
-            if ($row === [null] || $row === false) {
+            if ($row === [null]) {
                 continue;
             }
 

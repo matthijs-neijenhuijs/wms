@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Brands\Filament\Resources\Brands;
 
-use App\Models\Brand;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -13,6 +12,7 @@ use Modules\Brands\Filament\Resources\Brands\Pages\EditBrand;
 use Modules\Brands\Filament\Resources\Brands\Pages\ListBrands;
 use Modules\Brands\Filament\Resources\Brands\Schemas\BrandForm;
 use Modules\Brands\Filament\Resources\Brands\Tables\BrandsTable;
+use Modules\Brands\Models\Brand;
 use UnitEnum;
 
 class BrandResource extends Resource

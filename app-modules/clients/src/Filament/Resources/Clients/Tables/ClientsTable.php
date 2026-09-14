@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Clients\Filament\Resources\Clients\Tables;
 
-use App\Models\Client;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Clients\Filament\Resources\Clients\Columns\BillAddressColumn;
+use Modules\Clients\Filament\Resources\Clients\Columns\DeliveryAddressColumn;
+use Modules\Clients\Filament\Resources\Clients\Columns\EmailColumn;
 
 class ClientsTable
 {
@@ -18,50 +19,9 @@ class ClientsTable
     {
         return $table
             ->columns([
-                TextColumn::make('email')
-                    ->searchable(),
-                TextColumn::make('delivery_address')
-                    ->label('Delivery address')
-                    ->state(function (Client $record): string {
-                        $address = $record->clientDeliveryAddress;
-
-                        if (! $address) {
-                            return 'Not set';
-                        }
-
-                        return $address->name ?? 'Not set';
-                    })
-                    ->badge()
-                    ->description(function (Client $record): ?string {
-                        $address = $record->clientDeliveryAddress;
-
-                        if (! $address) {
-                            return null;
-                        }
-
-                        return trim(sprintf('%s • %s', $address->address, $address->city), " \t\n\r\0\x0B•");
-                    }),
-                TextColumn::make('bill_address')
-                    ->label('Bill address')
-                    ->state(function (Client $record): string {
-                        $address = $record->clientBillAddress;
-
-                        if (! $address) {
-                            return 'Not set';
-                        }
-
-                        return $address->name ?? 'Not set';
-                    })
-                    ->badge()
-                    ->description(function (Client $record): ?string {
-                        $address = $record->clientBillAddress;
-
-                        if (! $address) {
-                            return null;
-                        }
-
-                        return trim(sprintf('%s • %s', $address->address, $address->city), " \t\n\r\0\x0B•");
-                    }),
+                EmailColumn::make(),
+                DeliveryAddressColumn::make(),
+                BillAddressColumn::make(),
                 //
             ])
             ->filters([

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Listeners\CreatePicklistForConfirmedOrder;
-use App\Models\Order;
-use App\Models\Picklist;
 use Illuminate\Console\Command;
 use Modules\Orders\Events\OrderConfirmed;
+use Modules\Orders\Models\Order;
+use Modules\Picklists\Models\Picklist;
 
 class BackfillPicklistsForConfirmedOrders extends Command
 {
@@ -35,7 +35,7 @@ class BackfillPicklistsForConfirmedOrders extends Command
         $orderId = $this->option('order-id');
 
         $query = Order::query()
-            ->whereHas('orderStatus', fn ($query) => $query->where('generate_picklist', true))
+            ->whereHas('orderStatus', fn ($query) => $query->whereRaw('generate_picklist = ?', [true]))
             ->whereNotIn('id', Picklist::query()->select('order_id'))
             ->with('products');
 

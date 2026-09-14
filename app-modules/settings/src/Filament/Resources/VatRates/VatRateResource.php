@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Settings\Filament\Resources\VatRates;
 
-use App\Models\VatRate;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -13,6 +12,7 @@ use Modules\Settings\Filament\Resources\VatRates\Pages\EditVatRate;
 use Modules\Settings\Filament\Resources\VatRates\Pages\ListVatRates;
 use Modules\Settings\Filament\Resources\VatRates\Schemas\VatRateForm;
 use Modules\Settings\Filament\Resources\VatRates\Tables\VatRatesTable;
+use Modules\Settings\Models\VatRate;
 use UnitEnum;
 
 class VatRateResource extends Resource

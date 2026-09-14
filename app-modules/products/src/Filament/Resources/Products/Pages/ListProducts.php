@@ -21,7 +21,7 @@ class ListProducts extends ListRecords
             ImportWithXlsxAction::make()
                 ->importer(ProductImporter::class)
                 ->options(fn (): array => [
-                    'warehouse_id' => Filament::getTenant()?->id,
+                    'warehouse_id' => Filament::getTenant()?->getKey(),
                 ]),
             CreateAction::make(),
         ];

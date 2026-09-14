@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Picklists\Providers;
 
-use App\Models\Picklist;
 use Illuminate\Support\ServiceProvider;
+use Modules\Picklists\Models\Picklist;
 use Modules\Picklists\Observers\PicklistObserver;
 
 class PicklistsServiceProvider extends ServiceProvider

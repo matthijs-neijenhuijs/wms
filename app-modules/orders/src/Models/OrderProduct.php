@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Models;
 
-use App\Models\Product;
-use App\Models\VatRate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Products\Models\Product;
+use Modules\Settings\Models\VatRate;
 
 class OrderProduct extends Model
 {
@@ -31,6 +31,9 @@ class OrderProduct extends Model
         'product_attribute_title',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -52,21 +55,33 @@ class OrderProduct extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

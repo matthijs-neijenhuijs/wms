@@ -18,7 +18,7 @@ class SubdomainUserProvider extends EloquentUserProvider
 
         $currentSubdomain = app('current_subdomain');
         if ($currentSubdomain) {
-            $query->where('subdomain_id', $currentSubdomain->id);
+            $query->whereRaw('subdomain_id = ?', [$currentSubdomain->id]);
         }
 
         foreach ($credentials as $key => $value) {

@@ -4,25 +4,20 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Brand;
-use App\Models\Product;
-use App\Models\StockProduct;
 use App\Models\Subdomain;
-use App\Models\VatRate;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Modules\Brands\Models\Brand;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
+use Modules\Settings\Models\VatRate;
 
 /**
  * @extends Factory<StockProduct>
  */
 class StockProductFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         $subdomain = Subdomain::query()->firstOrCreate(
@@ -72,7 +67,7 @@ class StockProductFactory extends Factory
                 'price' => $this->faker->randomFloat(2, 1, 200),
                 'product_code' => 'SKU-'.$this->faker->unique()->numerify('####'),
                 'stock_unlimited' => false,
-                'barcode' => $this->faker->unique()->ean13,
+                'barcode' => $this->faker->ean13(),
                 'name' => $this->faker->words(3, true),
                 'description' => $this->faker->sentence,
                 'vat_rate_id' => $vatRate->id,

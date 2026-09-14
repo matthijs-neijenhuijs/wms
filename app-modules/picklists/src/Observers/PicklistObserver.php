@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Picklists\Observers;
 
-use App\Models\Picklist;
 use App\Models\Warehouse;
+use Modules\Picklists\Models\Picklist;
 
 class PicklistObserver
 {

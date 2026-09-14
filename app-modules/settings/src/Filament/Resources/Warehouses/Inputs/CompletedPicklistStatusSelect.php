@@ -23,7 +23,7 @@ class CompletedPicklistStatusSelect
                     }
 
                     return $query
-                        ->where('warehouse_id', $record->id)
+                        ->whereRaw('warehouse_id = ?', [$record->getKey()])
                         ->orderBy('name');
                 },
             )

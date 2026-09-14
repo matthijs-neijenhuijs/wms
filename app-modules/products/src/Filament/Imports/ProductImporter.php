@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Products\Filament\Imports;
 
-use App\Models\Product;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -12,6 +11,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Hidden;
 use Illuminate\Support\Number;
+use Modules\Products\Models\Product;
 
 class ProductImporter extends Importer
 {
@@ -56,14 +56,14 @@ class ProductImporter extends Importer
             Checkbox::make('updateExisting')
                 ->label('Update existing products (match by product_code)'),
             Hidden::make('warehouse_id')
-                ->default(fn (): ?int => Filament::getTenant()?->id)
+                ->default(fn (): ?int => Filament::getTenant()?->getKey())
                 ->dehydrated(),
         ];
     }
 
     public function resolveRecord(): ?Product
     {
-        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->id;
+        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->getKey();
 
         if (! ($this->options['updateExisting'] ?? false)) {
             return new Product;
@@ -82,10 +82,12 @@ class ProductImporter extends Importer
 
     protected function beforeSave(): void
     {
-        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->id;
+        $warehouseId = $this->options['warehouse_id'] ?? Filament::getTenant()?->getKey();
 
         if ($warehouseId) {
-            $this->record->warehouse_id = $warehouseId;
+            /** @var Product $record */
+            $record = $this->record;
+            $record->warehouse_id = $warehouseId;
         }
     }
 
@@ -93,7 +95,9 @@ class ProductImporter extends Importer
     {
         $body = 'Your product import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        $failedRowsCount = $import->getFailedRowsCount();
+
+        if ($failedRowsCount) {
             $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Models\Product;
-use App\Models\PurchaseOrder;
 use App\Models\Subdomain;
 use App\Models\Warehouse;
 use App\Services\PurchaseOrderImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Modules\Orders\Models\PurchaseOrder;
+use Modules\Products\Models\Product;
 
 uses(RefreshDatabase::class);
 

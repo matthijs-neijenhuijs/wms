@@ -27,6 +27,9 @@ class PurchaseOrder extends Model
         'generated_custom_purchase_order_id',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -47,21 +50,33 @@ class PurchaseOrder extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * @return HasMany<PurchaseOrderProduct, $this>
+     */
     public function products(): HasMany
     {
         return $this->hasMany(PurchaseOrderProduct::class)->orderBy('barcode');
     }
 
+    /**
+     * @return HasMany<PurchaseOrderFailedProduct, $this>
+     */
     public function failedProducts(): HasMany
     {
         return $this->hasMany(PurchaseOrderFailedProduct::class);
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

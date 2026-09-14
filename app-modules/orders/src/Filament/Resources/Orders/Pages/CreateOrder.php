@@ -14,7 +14,7 @@ class CreateOrder extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['warehouse_id'] = Filament::getTenant()?->id ?? $this->record?->warehouse_id;
+        $data['warehouse_id'] = Filament::getTenant()?->getKey();
 
         return $data;
     }
