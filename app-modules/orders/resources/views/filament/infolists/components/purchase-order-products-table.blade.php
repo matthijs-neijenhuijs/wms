@@ -1,4 +1,68 @@
 <div class="fi-ta">
+    <script>
+        (function initPurchaseOrderScanner(attempt) {
+            if (window.__purchaseOrderScannerAttached) {
+                return;
+            }
+
+            if (!window.onScan) {
+                if (attempt < 30) {
+                    setTimeout(function () {
+                        initPurchaseOrderScanner(attempt + 1);
+                    }, 100);
+                    return;
+                }
+
+                console.error('onScan is not available. Run php artisan filament:assets and reload the page.');
+                return;
+            }
+
+            window.onScan.attachTo(document, {
+                onScan: function (barcode) {
+                    const scannedBarcode = String(barcode ?? '').trim();
+
+                    if (scannedBarcode === '') {
+                        return;
+                    }
+
+                    if (!window.Livewire || typeof window.Livewire.dispatch !== 'function') {
+                        console.error('Livewire is not available for barcode scan dispatch.');
+                        return;
+                    }
+
+                    window.Livewire.dispatch('purchase-order-barcode-scanned', {
+                        barcode: scannedBarcode,
+                    });
+                },
+            });
+
+            window.__purchaseOrderScannerAttached = true;
+
+            Livewire.on('purchase-order-product-scan-success', function (data) {
+                const productId = data && data[0] && data[0].productId ? data[0].productId : null;
+
+                if (!productId) {
+                    return;
+                }
+
+                setTimeout(function () {
+                    const row = document.getElementById('purchase-order-product-row-' + productId);
+
+                    if (!row) {
+                        return;
+                    }
+
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    row.style.transition = 'background-color 0.5s ease';
+                    row.style.backgroundColor = '#bbf7d0';
+
+                    setTimeout(function () {
+                        row.style.backgroundColor = '';
+                    }, 3000);
+                }, 300);
+            });
+        })(0);
+    </script>
     <div class="fi-ta-ctn fi-ta-ctn-with-header">
         <div class="fi-ta-main">
             <div class="fi-ta-content-ctn fi-fixed-positioning-context">
@@ -14,8 +78,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($getState() as $product)
-                                <tr wire:key="purchase-order-product-{{ $product->id }}-{{ (int) $product->scanned }}" @if($product->scanned) style="background-color: #bbf7d0;" @endif>
+                            @forelse(($getState() ?? []) as $product)
+                                <tr
+                                    id="purchase-order-product-row-{{ $product->id }}"
+                                    wire:key="purchase-order-product-{{ $product->id }}-{{ (int) $product->scanned }}"
+                                    @if($product->scanned) style="background-color: #bbf7d0;" @endif
+                                >
                                     <td class="fi-ta-cell">
                                         <div class="fi-ta-col">
                                             <span class="fi-ta-text">{{ $product->reference_code }}</span>

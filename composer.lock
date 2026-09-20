@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f79b94d4b2e942bf98388c8799a34b1f",
+    "content-hash": "c8d5815c9ac853ad644c93aea2c9f287",
     "packages": [
         {
             "name": "ageekdev/laravel-barcode",
@@ -12227,6 +12227,28 @@
                 }
             ],
             "time": "2025-08-14T07:29:31+00:00"
+        },
+        {
+            "name": "filament/blueprint",
+            "version": "v1.4.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://packages.filamentphp.com/composer/10/988/download"
+            },
+            "require": {
+                "filament/support": "^4.0",
+                "laravel/boost": "^2.0"
+            },
+            "type": "library",
+            "license": [
+                "proprietary"
+            ],
+            "description": "Guidelines for AI agents to produce detailed Filament implementation plans.",
+            "homepage": "https://github.com/filamentphp/filament",
+            "support": {
+                "issues": "https://github.com/filamentphp/filament/issues",
+                "source": "https://github.com/filamentphp/filament"
+            }
         },
         {
             "name": "filp/whoops",

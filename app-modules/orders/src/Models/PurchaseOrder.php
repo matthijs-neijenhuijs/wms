@@ -9,10 +9,13 @@ use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class PurchaseOrder extends Model
 {
     use BelongsToWarehouse;
+    use LogsActivity;
 
     /**
      * @var list<string>
@@ -26,6 +29,31 @@ class PurchaseOrder extends Model
         'generated_year_purchase_order_id',
         'generated_custom_purchase_order_id',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('purchase_order')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Purchase order {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->generated_custom_purchase_order_id ?: "Purchase order #{$this->getKey()}");
+    }
+
+    public function isFullyScanned(): bool
+    {
+        return $this->products()->where('scanned', false)->doesntExist();
+    }
+
+    public function canMarkReceived(): bool
+    {
+        return $this->processed && ! $this->completed;
+    }
 
     /**
      * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}

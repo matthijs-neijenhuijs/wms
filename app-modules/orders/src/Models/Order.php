@@ -43,9 +43,10 @@ class Order extends Model
         'delivery_region',
         'delivery_city',
         'delivery_country',
-        'telephone',
+        'telephone_number',
         'email',
         'comments',
+        'delivery_date',
     ];
 
     /**

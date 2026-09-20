@@ -6,6 +6,7 @@ namespace Modules\Orders\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Products\Models\Product;
 
 class PurchaseOrderProduct extends Model
 {
@@ -16,6 +17,7 @@ class PurchaseOrderProduct extends Model
      */
     protected $fillable = [
         'purchase_order_id',
+        'product_id',
         'show_for_supplier',
         'barcode',
         'reference_code',
@@ -56,6 +58,14 @@ class PurchaseOrderProduct extends Model
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    /**
+     * @return BelongsTo<Product, $this>
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     /**

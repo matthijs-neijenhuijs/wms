@@ -15,6 +15,10 @@ use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 
 class PurchaseOrderImportService
 {
+    public function __construct(
+        private readonly OrderStatusTransitionService $orderStatusTransitionService,
+    ) {}
+
     public function import(PurchaseOrder $purchaseOrder, TemporaryUploadedFile|UploadedFile|string|null $file): int
     {
         if (! $file) {
@@ -25,6 +29,7 @@ class PurchaseOrderImportService
 
         $rows = $this->readRows($file);
         $importedRows = 0;
+        $affectedProductIds = [];
 
         foreach ($rows as $row) {
             $importRow = $this->extractImportRow($row);
@@ -38,9 +43,14 @@ class PurchaseOrderImportService
                 ->where('barcode', $importRow['barcode'])
                 ->first();
 
+            if ($product) {
+                $affectedProductIds[] = $product->id;
+            }
+
             for ($index = 0; $index < $importRow['quantity']; $index++) {
                 PurchaseOrderProduct::query()->create([
                     'purchase_order_id' => $purchaseOrder->id,
+                    'product_id' => $product?->id,
                     'barcode' => $importRow['barcode'],
                     'reference_code' => $product?->reference_code,
                     'product_title' => $product->name ?? 'Unknown product',
@@ -56,6 +66,10 @@ class PurchaseOrderImportService
             throw ValidationException::withMessages([
                 'import_file' => 'No valid barcode and quantity rows were found in the uploaded file.',
             ]);
+        }
+
+        if ($affectedProductIds !== []) {
+            $this->orderStatusTransitionService->refreshReservedStockForProductIds($affectedProductIds);
         }
 
         return $importedRows;
