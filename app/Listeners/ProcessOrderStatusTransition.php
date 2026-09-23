@@ -28,6 +28,6 @@ class ProcessOrderStatusTransition implements ShouldQueue, ShouldQueueAfterCommi
             return;
         }
 
-        $this->transitionService->process($order, $event->previousStatus, $event->newStatus);
+        $this->transitionService->process($order, $event->previousStatus, $event->newStatus, $event->causerId);
     }
 }

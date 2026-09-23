@@ -19,5 +19,6 @@ class OrderStatusChanged implements ShouldDispatchAfterCommit
         public Order $order,
         public ?OrderStatus $previousStatus,
         public ?OrderStatus $newStatus,
+        public ?int $causerId = null,
     ) {}
 }

@@ -93,6 +93,8 @@ class OrderObserver
             $newStatus = null;
         }
 
-        OrderStatusChanged::dispatch($order->withoutRelations(), $previousStatus, $newStatus);
+        $causerId = auth()->id();
+
+        OrderStatusChanged::dispatch($order->withoutRelations(), $previousStatus, $newStatus, is_int($causerId) ? $causerId : null);
     }
 }

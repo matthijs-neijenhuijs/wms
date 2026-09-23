@@ -1,4 +1,5 @@
 {
+    ":product reduced by :quantity for order :order": "",
     "Active": "",
     "Allowed IPs": "",
     "Are you sure you want to mark this purchase order as received? This does not change stock.": "",
@@ -38,6 +39,7 @@
     "Settings": "",
     "Status": "",
     "Status Flags": "",
+    "Stock reduced": "",
     "Total Price": "",
     "Total Products": "",
     "Total Quantity": "",

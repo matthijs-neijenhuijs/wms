@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Modules\Orders\Models\Order;
 use Modules\Orders\Models\OrderProduct;
@@ -12,11 +13,12 @@ use Modules\Picklists\Models\Picklist;
 use Modules\Picklists\Models\PicklistProduct;
 use Modules\Products\Models\Product;
 use Modules\Products\Models\StockProduct;
+use Modules\Users\Models\User;
 use Spatie\Activitylog\Models\Activity;
 
 class OrderStatusTransitionService
 {
-    public function process(Order $order, ?OrderStatus $previousStatus, ?OrderStatus $newStatus): void
+    public function process(Order $order, ?OrderStatus $previousStatus, ?OrderStatus $newStatus, ?int $causerId = null): void
     {
         if (! $newStatus) {
             $this->syncOrderFlags($order, null);
@@ -43,7 +45,7 @@ class OrderStatusTransitionService
         }
 
         if ($newStatus->reduce_stock && ! ($previousStatus && $previousStatus->reduce_stock)) {
-            $this->reduceStock($order);
+            $this->reduceStock($order, $causerId);
         }
 
         $this->syncOrderFlags($order, $newStatus);
@@ -97,17 +99,23 @@ class OrderStatusTransitionService
         $this->logWorkflowStep($order, 'stock_reserved', 'Stock reserved for order');
     }
 
-    public function reduceStock(Order $order): void
+    public function reduceStock(Order $order, ?int $causerId = null): void
     {
         if ($order->picked) {
             return;
         }
 
-        $this->adjustStockLevels($order, function (StockProduct $stockProduct, int $quantity): void {
-            $stockProduct->on_stock_quantity = max(0, $stockProduct->on_stock_quantity - $quantity);
-            $stockProduct->reserved_on_picklists = max(0, $stockProduct->reserved_on_picklists - $quantity);
-            $this->recalculateFreeStock($stockProduct);
-        });
+        $this->adjustStockLevels(
+            $order,
+            function (StockProduct $stockProduct, int $quantity): void {
+                $stockProduct->on_stock_quantity = max(0, $stockProduct->on_stock_quantity - $quantity);
+                $stockProduct->reserved_on_picklists = max(0, $stockProduct->reserved_on_picklists - $quantity);
+                $this->recalculateFreeStock($stockProduct);
+            },
+            function (OrderProduct $orderProduct, int $quantity) use ($order, $causerId): void {
+                $this->notifyStockReduced($order, $causerId, $orderProduct->name, $quantity);
+            },
+        );
 
         $order->forceFill([
             'picked' => true,
@@ -125,7 +133,7 @@ class OrderStatusTransitionService
         $this->logWorkflowStep($order, 'stock_released', 'Reserved stock released for cancelled order');
     }
 
-    protected function adjustStockLevels(Order $order, callable $callback): void
+    protected function adjustStockLevels(Order $order, callable $mutate, ?callable $afterEach = null): void
     {
         $order->loadMissing('products.product.stockProduct');
 
@@ -144,7 +152,7 @@ class OrderStatusTransitionService
                 continue;
             }
 
-            DB::transaction(function () use ($product, $quantity, $callback): void {
+            DB::transaction(function () use ($product, $quantity, $mutate): void {
                 $stockProduct = StockProduct::query()
                     ->whereKey($product->stockProduct->getKey())
                     ->lockForUpdate()
@@ -154,10 +162,14 @@ class OrderStatusTransitionService
                     return;
                 }
 
-                $callback($stockProduct, $quantity);
+                $mutate($stockProduct, $quantity);
 
                 $stockProduct->save();
             });
+
+            if ($afterEach) {
+                $afterEach($orderProduct, $quantity);
+            }
         }
     }
 
@@ -306,6 +318,30 @@ class OrderStatusTransitionService
             ->event($event)
             ->withProperties($properties)
             ->log($description);
+    }
+
+    private function notifyStockReduced(Order $order, ?int $causerId, string $productName, int $quantity): void
+    {
+        $notification = Notification::make()
+            ->title(__('Stock reduced'))
+            ->body(__(':product reduced by :quantity for order :order', [
+                'product' => $productName,
+                'quantity' => $quantity,
+                'order' => $order->generated_custom_order_id ?? "#{$order->id}",
+            ]))
+            ->success();
+
+        if ($causerId) {
+            $causer = User::find($causerId);
+
+            if ($causer) {
+                $notification->sendToDatabase($causer);
+            }
+        }
+
+        if (auth()->check()) {
+            $notification->send();
+        }
     }
 
     protected function recalculateFreeStock(StockProduct $stockProduct): void

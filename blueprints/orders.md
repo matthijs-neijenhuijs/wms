@@ -1395,3 +1395,88 @@ two updated fixtures' existing tests pass unchanged, the full suite passes
 (one unrelated pre-existing failure in `ExampleTest`, confirmed via `git
 stash` to predate this work), `vendor/bin/pint --dirty --format agent` and
 `vendor/bin/phpstan analyse` are both clean.
+
+---
+
+## 9. New Work — Notify on Stock Reduction (Per Product Line)
+
+### 9.1 Rule
+
+Whenever `OrderStatusTransitionService::reduceStock()` physically decrements
+a product's `on_stock_quantity`, the user who triggered the order's status
+change gets an instant notification per product line (e.g. "Basic T-Shirt
+reduced by 2 for order ORDERMAIN261F"), not one aggregate message per order.
+Scope is deliberately narrow: only stock reduction — not picklist generation,
+stock reservation, or the cancellation stock-release — per an explicit,
+confirmed decision, since the request's own wording and example ("product is
+reduced with one") was specific to this one step.
+
+### 9.2 Channel
+
+Both channels, since `App\Listeners\ProcessOrderStatusTransition` (which runs
+this whole pipeline) is `ShouldQueue`/`ShouldQueueAfterCommit`:
+
+- **Database notification** (`Notification::make()->sendToDatabase($causer)`)
+  — durable regardless of queue driver, shown via Filament's notification
+  bell. Required enabling `->databaseNotifications()` on
+  `App\Providers\Filament\AdminPanelProvider` (it wasn't on before this).
+- **Flash/toast** (`Notification::make()->send()`) — only fires when
+  `auth()->check()` is true (a live session), giving instant feedback today
+  while `QUEUE_CONNECTION=sync`. Under a real async queue this branch simply
+  wouldn't fire (no session in a worker process) — the database notification
+  is what makes this reliable regardless of queue driver.
+
+### 9.3 Threading the causer through a queued listener
+
+`ProcessOrderStatusTransition` can't reliably read `auth()->user()` itself
+once a real queue is in use — the causer is captured at **dispatch time**,
+inside the same request that changed the order's status, and carried on the
+event:
+
+- `Modules\Orders\Events\OrderStatusChanged` gained a fourth constructor
+  property, `public ?int $causerId = null`.
+- `Modules\Orders\Observers\OrderObserver::updated()` now dispatches with
+  `is_int($causerId) ? $causerId : null` (`auth()->id()` is typed
+  `int|string|null` by the framework; this app's IDs are always integers).
+- `App\Listeners\ProcessOrderStatusTransition::handle()` forwards
+  `$event->causerId` into `OrderStatusTransitionService::process()`, which
+  now accepts a fourth `?int $causerId = null` parameter and forwards it only
+  to `reduceStock()` (the other three steps don't need it, since they don't
+  notify).
+
+### 9.4 Per-product-line delivery
+
+`OrderStatusTransitionService::adjustStockLevels()` (private-to-the-service,
+only ever called from `reduceStock()`) gained an optional third parameter,
+`?callable $afterEach = null`, invoked with `(OrderProduct $orderProduct, int
+$quantity)` **after** that product's `DB::transaction()`/`lockForUpdate()`
+commits successfully — so a notification is never sent for a change that
+rolled back. `reduceStock()` passes a closure here that calls a new private
+`notifyStockReduced(Order $order, ?int $causerId, string $productName, int
+$quantity)`, using `OrderProduct::$name` (the existing denormalized snapshot
+field) rather than reaching through the `product` relation.
+
+**Consistency check**: the notification fires once per `OrderProduct` line
+that `adjustStockLevels()` actually mutates — lines with no matching
+`Product`/`StockProduct` or zero quantity are skipped exactly as they already
+were, so notification count always matches actual stock changes, never a
+phantom notification for a skipped line.
+
+### 9.5 Tests
+
+`tests/Feature/StockReducedNotificationTest.php`: a single-product-line
+reduction with an authenticated causer creates exactly one `notifications`
+row with the product name and quantity in its body; a two-product-line
+reduction creates exactly two rows, one per line (the key discriminator for
+"per line, not aggregate"); a reduction with no causer and no authenticated
+session still reduces stock correctly but creates zero notification rows.
+Flash/toast delivery isn't asserted in an automated test (no testable
+Livewire component invokes this code path) — verified manually in the
+browser instead.
+
+**Implementation status**: implemented and verified — 3 new tests pass, the
+existing `OrderStatusTransitionTest` regression suite passes unchanged (its
+tests never pass a causer, exercising the `causerId = null` no-op path),
+`vendor/bin/pint --dirty --format agent` and `vendor/bin/phpstan analyse` are
+both clean. Manual browser verification (toast + notification bell) is a
+user follow-up, not run as part of this pass.

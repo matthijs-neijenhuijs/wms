@@ -47,6 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->databaseNotifications()
             ->assets([
                 Js::make('onscan', base_path('node_modules/onscan.js/onscan.min.js')),
             ])
