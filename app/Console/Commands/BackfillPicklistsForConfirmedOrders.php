@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Listeners\CreatePicklistForConfirmedOrder;
+use App\Services\OrderStatusTransitionService;
 use Illuminate\Console\Command;
-use Modules\Orders\Events\OrderConfirmed;
 use Modules\Orders\Models\Order;
 use Modules\Picklists\Models\Picklist;
 
@@ -31,7 +30,7 @@ class BackfillPicklistsForConfirmedOrders extends Command
      */
     public function handle(): int
     {
-        $listener = app(CreatePicklistForConfirmedOrder::class);
+        $transitionService = app(OrderStatusTransitionService::class);
         $orderId = $this->option('order-id');
 
         $query = Order::query()
@@ -60,7 +59,7 @@ class BackfillPicklistsForConfirmedOrders extends Command
                 continue;
             }
 
-            $listener->handle(new OrderConfirmed($order));
+            $transitionService->generatePicklist($order);
             $created++;
             $this->line("Processed order #{$order->id}");
         }

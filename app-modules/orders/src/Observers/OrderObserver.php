@@ -6,6 +6,7 @@ namespace Modules\Orders\Observers;
 
 use App\Models\Warehouse;
 use Modules\Orders\Events\OrderStatusChanged;
+use Modules\Orders\Exceptions\OrderStatusLockedException;
 use Modules\Orders\Models\Order;
 use Modules\Orders\Models\OrderStatus;
 
@@ -45,6 +46,30 @@ class OrderObserver
 
         $order->generated_year_order_id ??= $nextGeneratedYearOrderId;
         $order->generated_custom_order_id ??= "ORDER{$prefix}{$year}{$order->generated_year_order_id}";
+    }
+
+    /**
+     * Handle the Order "updating" event.
+     */
+    public function updating(Order $order): void
+    {
+        if (! $order->isDirty('order_statuses_id')) {
+            return;
+        }
+
+        $originalStatusId = $order->getOriginal('order_statuses_id');
+
+        if (! $originalStatusId) {
+            return;
+        }
+
+        $originalStatus = OrderStatus::query()->find($originalStatusId);
+
+        if ($originalStatus instanceof OrderStatus && ! $originalStatus->canChangeStatus()) {
+            throw new OrderStatusLockedException(
+                "Order #{$order->id}'s status cannot be changed: its current status ({$originalStatus->name}) is a final state (delivered, cancelled, or completed)."
+            );
+        }
     }
 
     /**

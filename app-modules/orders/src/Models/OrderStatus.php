@@ -76,10 +76,11 @@ class OrderStatus extends Model
      */
     public function canEditOrder(): bool
     {
-        // Once on hold, delivered, or cancelled, orders cannot be edited
+        // Once on hold, delivered, cancelled, or completed, orders cannot be edited
         return ! $this->on_hold
             && ! $this->delivered
-            && ! $this->cancelled;
+            && ! $this->cancelled
+            && ! $this->completed;
     }
 
     /**
@@ -92,12 +93,12 @@ class OrderStatus extends Model
     }
 
     /**
-     * Determine if products can be added/removed for orders with this status
+     * Determine if products can be added/edited/removed for orders with this status
      */
     public function canModifyProducts(): bool
     {
-        // Same as edit logic - cannot modify products once shipped/delivered/cancelled
-        return $this->canEditOrder();
+        // Order products can only be modified while the order is still a concept
+        return (bool) $this->concepted;
     }
 
     /**
@@ -105,8 +106,8 @@ class OrderStatus extends Model
      */
     public function canChangeStatus(): bool
     {
-        // Once delivered or cancelled, status cannot be changed
-        return ! $this->delivered && ! $this->cancelled;
+        // Once delivered, cancelled, or completed, status cannot be changed
+        return ! $this->delivered && ! $this->cancelled && ! $this->completed;
     }
 
     /**
@@ -130,7 +131,7 @@ class OrderStatus extends Model
      */
     public function isFinalState(): bool
     {
-        return $this->delivered || $this->cancelled;
+        return $this->delivered || $this->cancelled || $this->completed;
     }
 
     /**

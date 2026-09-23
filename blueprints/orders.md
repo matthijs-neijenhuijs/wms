@@ -131,17 +131,55 @@ navigation group, icon `Heroicon::OutlinedShoppingCart`, sub-navigation
   `EditOrder` (disables whole schema when `!canEditOrder()`), `ManageOrderActivities`
   (history, via `App\Filament\Resources\ActivityLogs\ActivityLogResource`).
 
-**Order status transition service (existing, will be extended in §3)**:
-`App\Services\OrderStatusTransitionService` — orchestrates
-`generatePicklist()`, `reserveStock()`, `reduceStock()`, `releaseReservedStock()`,
-`refreshReservedStock(Order $order)`, `calculateReservedQuantity(int $productId)`,
-`recalculateFreeStock(StockProduct $stockProduct)`, `syncOrderFlags()`, all
-triggered from `Modules\Orders\Events\OrderStatusChanged` (dispatched by
-`Modules\Orders\Observers\OrderObserver::updated()` when `order_statuses_id`
-changes) via `App\Listeners\ProcessOrderStatusTransition`. Stock mutations use
-`DB::transaction()` + `StockProduct::query()->lockForUpdate()`. Workflow steps are
-logged via `activity('order_workflow')->event(...)->log(...)` with duplicate-guard
-checks.
+**Order status change pipeline (existing — the canonical extension point for
+all future status-triggered behavior)**:
+
+`Modules\Orders\Observers\OrderObserver::updated()` dispatches
+`Modules\Orders\Events\OrderStatusChanged` (carrying `Order $order,
+?OrderStatus $previousStatus, ?OrderStatus $newStatus`) whenever
+`$order->wasChanged('order_statuses_id')`. It implements
+`ShouldDispatchAfterCommit`, so it never fires inside an open transaction.
+Registered once, in `Modules\Orders\Providers\OrdersServiceProvider::boot()`:
+`Event::listen(OrderStatusChanged::class, ProcessOrderStatusTransition::class)`.
+
+`App\Listeners\ProcessOrderStatusTransition` (`ShouldQueue`,
+`ShouldQueueAfterCommit`) is the single subscriber. It guards against a stale
+status (`$event->newStatus?->getKey() !== $order->order_statuses_id`) in case
+the order changed again before the queued job ran, then delegates to
+`App\Services\OrderStatusTransitionService::process($order, $previousStatus,
+$newStatus)`.
+
+`OrderStatusTransitionService::process()` is where every status-triggered
+side effect lives today, each gated on a boolean flag transitioning from
+`false`/absent to `true` on the new `OrderStatus` (never on the status name):
+`generatePicklist()` (flag `generate_picklist`), `reserveStock()` (flag
+`reserve_stock`), `reduceStock()` (flag `reduce_stock`), plus
+`releaseReservedStock()` on transition into `cancelled`, and
+`syncOrderFlags()` which mirrors `completed`/`on_hold`/`delivered`/`cancelled`
+onto the `Order` row itself via `saveQuietly()`. Every step calls
+`logWorkflowStep()`, which writes to `activity('order_workflow')` with a
+duplicate-guard existence check (safe against the listener redelivering).
+Stock mutations use `DB::transaction()` + `StockProduct::query()->lockForUpdate()`.
+
+**Extension rule for future status-triggered behavior**: do not add a new
+Laravel event/listener pair for a new trigger. Instead: (1) add a new boolean
+flag to the `order_statuses` table + `OrderStatus` (matching the existing
+`generate_picklist`/`reserve_stock`/etc. pattern, configurable per warehouse
+via `OrderStatusResource`'s `Fieldset('Status Flags')`), and (2) add a new
+step to `OrderStatusTransitionService::process()`, gated the same way as the
+existing steps (`$newStatus->your_flag && ! ($previousStatus &&
+$previousStatus->your_flag)`). This keeps exactly one dispatch path
+(`OrderStatusChanged`) and one place (`OrderStatusTransitionService`) that
+knows what a status change does, instead of a parallel pipeline per feature.
+
+**Removed dead event seam**: `Modules\Orders\Events\OrderConfirmed` and
+`App\Listeners\CreatePicklistForConfirmedOrder` used to exist alongside this
+pipeline (registered via `Event::listen()` in `OrdersServiceProvider`) but
+`OrderConfirmed::dispatch()` was never called anywhere — the only caller was
+`app:backfill-picklists-for-confirmed-orders`, and it called the listener's
+`->handle()` method directly, bypassing the event system entirely. Removed
+both classes and the registration; the backfill command now calls
+`OrderStatusTransitionService::generatePicklist()` directly.
 
 ---
 
@@ -1093,3 +1131,267 @@ fixture convention as `tests/Feature/OrderStatusTransitionTest.php` and the new
 - No changes to `OrderObserver`, `OrderStatusTransitionService`, or any
   Filament resource — this work only adds a new route, request, controller
   method, and service that all go through the existing, unmodified pipeline.
+
+---
+
+## 6. New Work — Reserve Stock on Order Line-Item Changes
+
+### 6.1 Problem
+
+`OrderStatusTransitionService::reserveStock()` keeps a product's
+`StockProduct.reserved_quantity` correct when an *order's status* changes
+into a `reserve_stock = true` status, but `Modules\Orders\Observers\OrderProductObserver`
+had no logic at all — adding, editing (quantity or product), or removing an
+`OrderProduct` on an order that is *already* in a `reserve_stock` status
+never updated `reserved_quantity`. Confirmed by direct read: all five
+lifecycle methods on `OrderProductObserver` were empty stubs.
+
+Considered and explicitly declined for the same pass: keeping `Picklist`/
+`PicklistProduct` rows in sync with line-item changes after a picklist has
+already been generated (picklists stay a point-in-time snapshot), and
+auto-adjusting `on_stock_quantity` after `reduceStock()` has already run
+(`reduceStock()`'s existing `if ($order->picked) { return; }` guard already
+prevents re-processing, which is the correct behavior — physical stock
+corrections after picking are a manual operation, not an automatic one).
+
+### 6.2 Fix
+
+`Modules\Orders\Observers\OrderProductObserver` now injects
+`App\Services\OrderStatusTransitionService` via the constructor and
+implements `created()`, `updated()`, and `deleted()`:
+
+- `created()`: refresh reservation for the new line's `product_id`.
+- `updated()`: only act if `wasChanged(['product_id', 'quantity'])`. Refresh
+  reservation for the previous `product_id` (via `getPrevious()['product_id']`,
+  matching the convention already used in `OrderObserver::updated()`); if
+  `product_id` itself changed, also refresh the new `product_id` (a line item
+  switching products must release the old product's reservation and reserve
+  the new one).
+- `deleted()`: refresh reservation for the line's `product_id` (still
+  readable on the in-memory model even though the row is now gone from the
+  database).
+- `restored`/`forceDeleted` stay no-ops — `OrderProduct` has no `SoftDeletes`
+  trait, so these never fire.
+
+A private helper, `refreshIfReserved(OrderProduct $orderProduct, ?int
+$productId)`, does the gated work: it checks
+`Order::query()->whereKey($orderProduct->order_id)->whereHas('orderStatus',
+fn ($q) => $q->where('reserve_stock', true))->exists()` before calling
+`OrderStatusTransitionService::refreshReservedStockForProductIds([$productId])`.
+
+**Rule (canonical, reused, not re-derived)**: the only source of truth for a
+product's reserved quantity stays `OrderStatusTransitionService::calculateReservedQuantity()`.
+This change never writes to `reserved_quantity` directly — it only decides
+*when* to ask that method to recompute, mirroring the existing direct-call
+pattern already used by `App\Services\PurchaseOrderImportService::import()`
+(no new event/listener pair).
+
+**Consistency check**: `calculateReservedQuantity()` recomputes the full
+total from current DB state every time (`order_products` joined to
+`orders`/`order_statuses` where `reserve_stock = true`, `picked = false`,
+`cancelled = false`), so calling it after any single line-item mutation
+always converges to the correct total — it's not an increment that can drift
+out of sync. For a product with no purchase orders, `reserved_quantity` ends
+up exactly equal to the sum of `quantity` across all qualifying order lines,
+the same boundary case already covered by `tests/Feature/OrderStatusTransitionTest.php`.
+
+**Performance note**: the `whereHas('orderStatus', ...)` guard is a cheap,
+indexed existence check that avoids locking `StockProduct` for products on
+orders that aren't in a `reserve_stock` status — an optimization, not a
+correctness requirement (the recompute is correct regardless of which order
+triggered it).
+
+No migration, no Filament UI change, no authorization change.
+
+### 6.3 Tests
+
+`tests/Feature/OrderProductReservationTest.php` covers: adding a line item to
+a `reserve_stock` order increases `reserved_quantity`; changing quantity up
+and down recalculates it both ways; swapping a line's `product_id` moves the
+reservation from the old product to the new one; deleting a line item drops
+the reservation to zero; and the same create/update/delete sequence on a
+non-`reserve_stock` order never touches `reserved_quantity` (negative case).
+
+**Implementation status**: implemented and verified — 5 tests pass, and
+`tests/Feature/OrderStatusTransitionTest.php` passes unchanged (regression).
+
+---
+
+## 7. New Work — Order Status Terminal-State & Configuration Rules
+
+### 7.1 Problem
+
+`OrderStatus::canChangeStatus()` and `isFinalState()` existed but were **dead
+code** — confirmed by grep, never called anywhere except within
+`OrderStatus.php` itself. Only `canEditOrder()` was actually wired up (in
+`Modules\Orders\Filament\Resources\Orders\Pages\EditOrder`, disabling the
+whole form once `on_hold`/`delivered`/`cancelled`). There was also no
+validation on which boolean flags could coexist on a single `OrderStatus`
+row — nothing stopped, for example, a status with both `completed = true` and
+`generate_picklist = true`.
+
+### 7.2 Resolved rules
+
+- **`generate_picklist` requires `reserve_stock`**: a status cannot have
+  `generate_picklist = true` unless it also has `reserve_stock = true` — a
+  same-row flag-combination rule, enforced at `OrderStatus` config time
+  (Filament form validation), not as a runtime order-transition guard.
+- **`completed` excludes the three workflow flags**: a status cannot have
+  `completed = true` alongside `generate_picklist`, `reserve_stock`, or
+  `reduce_stock = true` — same-row rule, same enforcement point.
+- **`completed` is now a full terminal state**, joining `delivered`/
+  `cancelled` in `isFinalState()`, `canChangeStatus()`, **and**
+  `canEditOrder()`/`isLocked()` (a completed order's whole edit form locks,
+  exactly like a delivered/cancelled one does today).
+- **`canChangeStatus()` is now an enforced, model-layer guard**, not dead
+  code — this is the single choke point for every write path (Filament,
+  future API status updates, Artisan, Tinker), not just one Filament page.
+  "An order can't be cancelled once delivered" falls out of this general
+  terminal-state guard as a natural special case; it has no separate,
+  bespoke rule.
+
+**Out of scope**: locking status assignment at *order creation* time (e.g.
+inserting a brand-new order directly into a `completed` status) — only
+transitions on an already-existing order are guarded.
+
+### 7.3 Model changes
+
+`Modules\Orders\Models\OrderStatus` — `canEditOrder()`, `canChangeStatus()`,
+and `isFinalState()` all now also check `$this->completed` alongside the
+existing `on_hold`/`delivered`/`cancelled` checks. `canModifyProducts()` and
+`isLocked()` already delegate to `canEditOrder()`, so both pick up the change
+automatically.
+
+### 7.4 Transition guard
+
+New exception `Modules\Orders\Exceptions\OrderStatusLockedException extends
+RuntimeException`.
+
+`Modules\Orders\Observers\OrderObserver::updating()` (new method): if
+`$order->isDirty('order_statuses_id')` and the **original** status (via
+`$order->getOriginal('order_statuses_id')`) is not null and
+`! $originalStatus->canChangeStatus()`, throws `OrderStatusLockedException`
+before the write happens. `EditOrder.php`'s existing `canEditOrder()`-driven
+whole-form disable remains the primary, friendly UX guard — the form is
+already fully disabled before a user could attempt this through the UI — so
+this observer guard is a defense-in-depth backstop and is allowed to surface
+as a raw exception rather than a form error.
+
+Boundary case that must not regress: creating an order with
+`order_statuses_id = null` and then immediately updating it to any status
+(the create-then-update sequence documented in §5.1 for the E-commerce API)
+still succeeds, since `getOriginal('order_statuses_id')` is `null` in that
+case and the guard returns early.
+
+### 7.5 Filament config validation
+
+`GeneratePicklistToggle` and `CompletedToggle` (both in
+`Modules\Orders\Filament\Resources\OrderStatuses\Inputs`) each gained a
+closure-based cross-field `->rules([...])` entry using
+`Filament\Schemas\Components\Utilities\Get` to read sibling toggle values —
+the current Filament v4 pattern for cross-field form validation (verified via
+`search-docs`: https://filamentphp.com/docs/4.x/forms/validation#custom-rules).
+Both toggles live in the same `Fieldset::make('Status Flags')` in
+`Schemas/OrderStatusForm.php`, so no layout change was needed.
+
+**Note (pre-existing, unrelated gap found during testing, not fixed as part
+of this work)**: `Modules\Orders\Filament\Resources\OrderStatuses\Pages\CreateOrderStatus`
+has no `mutateFormDataBeforeCreate()` to set `warehouse_id` from
+`Filament::getTenant()`, unlike `CreateOrder`/`CreatePurchaseOrder` which
+both do this explicitly. Creating a **new** `OrderStatus` through the
+Filament UI today fails a NOT NULL constraint on `warehouse_id`. This was
+worked around in tests by exercising the validation rules through
+`EditOrderStatus` against an `OrderStatus` created directly via Eloquent,
+rather than through the `Create` page — it did not need fixing to complete
+this pass, but should be fixed separately.
+
+### 7.6 Tests
+
+`tests/Feature/OrderStatusFinalStateTest.php`: `completed = true` is now
+final/locks edit/blocks status change; a non-terminal status still allows
+both; updating `order_statuses_id` away from a `delivered`, `cancelled`, or
+`completed` original status throws `OrderStatusLockedException` and persists
+nothing (three discriminating cases); updating away from a non-terminal
+status still succeeds; creating an order with no status then assigning one
+still succeeds (boundary case).
+
+`tests/Feature/OrderStatusResourceValidationTest.php` (via
+`Livewire::test(EditOrderStatus::class, ...)`): `generate_picklist = true`
+without `reserve_stock` is rejected, with it is accepted; `completed = true`
+combined with each of `generate_picklist`/`reserve_stock`/`reduce_stock` is
+rejected (dataset test, one case per flag), and `completed = true` with all
+three disabled is accepted.
+
+**Implementation status**: implemented and verified — 7 + 6 tests pass across
+both files, `tests/Feature/OrderStatusTransitionTest.php` passes unchanged
+(regression), `vendor/bin/pint --dirty --format agent` and `vendor/bin/phpstan
+analyse` are both clean.
+
+---
+
+## 8. New Work — Order Products Can Only Be Modified on Concept Orders
+
+### 8.1 Rule
+
+Adding, editing, or removing an order's line items (`OrderProduct` rows) is
+only allowed while the order's current status has `concepted = true`. This
+replaces the previous, broader rule where `OrderStatus::canModifyProducts()`
+delegated to `canEditOrder()` (allowed on any non-locked status — not
+`on_hold`/`delivered`/`cancelled`/`completed`). It's a same-attribute rename
+in effect: `canModifyProducts()` now returns `(bool) $this->concepted`
+directly, decoupled from `canEditOrder()`.
+
+An order with no status assigned yet (`order_statuses_id = null`,
+`orderStatus` relation `null`) still allows product modification — matches
+the existing Filament UI fallback (`?? true` in `OrderProductRelationManager`)
+and the E-commerce API's create-then-assign-status lifecycle (§5.1/§5.5),
+where line items are added before the order's final status is set.
+
+### 8.2 Enforcement
+
+**UI**: `Modules\Orders\Filament\Resources\Orders\RelationManagers\OrderProductRelationManager`
+already gates its `CreateAction`/`EditAction`/`DeleteAction` visibility on
+`$this->getOwnerRecord()->orderStatus?->canModifyProducts() ?? true` — no
+code change needed there, it picks up the new, narrower `canModifyProducts()`
+automatically.
+
+**Model layer (defense in depth)**: new exception
+`Modules\Orders\Exceptions\OrderProductsLockedException extends RuntimeException`.
+`Modules\Orders\Observers\OrderProductObserver` gained `creating()`,
+`updating()`, and `deleting()` methods, all delegating to a private
+`guardCanModifyProducts(OrderProduct $orderProduct)`: it loads the owning
+`Order` with its `orderStatus`, and if the status exists and
+`! $orderStatus->canModifyProducts()`, throws before the write happens. This
+is the same defense-in-depth pattern as `OrderObserver::updating()`'s
+`OrderStatusLockedException` guard (§7.4) — it fires for every write path,
+not just the Filament relation manager, and normal UI usage should never
+reach it since the actions are already hidden by then.
+
+**Consistency check**: verified the two existing write paths that create
+`OrderProduct` rows programmatically are unaffected — `OrderCreationService::create()`
+(§5.5) creates line items while the order's `order_statuses_id` is still
+`null` (before the post-transaction status assignment), so the guard's "no
+status yet → allowed" branch applies; nothing else in application code writes
+`OrderProduct` rows outside the relation manager and this service.
+
+### 8.3 Tests
+
+`tests/Feature/OrderProductConceptGuardTest.php`: `OrderStatus::canModifyProducts()`
+returns true only for `concepted = true`; creating a line item on a concept
+order succeeds, on a non-concept order throws `OrderProductsLockedException`
+and persists nothing; editing and deleting an existing line item on an order
+whose status is (or becomes) non-concept both throw and leave the row
+unchanged; creating a line item on an order with no status yet still
+succeeds.
+
+Updated existing fixtures that create `OrderProduct` rows to add
+`'concepted' => true` to their `OrderStatus` setup, since they predate this
+rule and were not previously exercising it:
+`tests/Feature/OrderProductReservationTest.php` and
+`tests/Feature/BackfillPicklistsForConfirmedOrdersTest.php`.
+
+**Implementation status**: implemented and verified — 6 new tests pass, the
+two updated fixtures' existing tests pass unchanged, the full suite passes
+(one unrelated pre-existing failure in `ExampleTest`, confirmed via `git
+stash` to predate this work), `vendor/bin/pint --dirty --format agent` and
+`vendor/bin/phpstan analyse` are both clean.
