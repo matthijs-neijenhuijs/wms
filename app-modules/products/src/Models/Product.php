@@ -10,11 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Modules\Brands\Models\Brand;
 use Modules\Settings\Models\Attribute;
 use Modules\Settings\Models\VatRate;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -118,5 +120,25 @@ class Product extends Model
     public function stockProduct(): HasOne
     {
         return $this->hasOne(StockProduct::class);
+    }
+
+    /**
+     * Activity log entries for this product's `StockProduct` row, surfaced on
+     * the "Stock History" tab. `StockProduct`'s own changes are logged under
+     * `subject_type = StockProduct`, not `Product`, so this is a distinct
+     * relation from `activitiesAsSubject()`.
+     *
+     * @return HasManyThrough<Activity, StockProduct, $this>
+     */
+    public function stockActivities(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Activity::class,
+            StockProduct::class,
+            'product_id',
+            'subject_id',
+            'id',
+            'id',
+        )->where('subject_type', StockProduct::class);
     }
 }

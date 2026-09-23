@@ -8,19 +8,19 @@ use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Modules\Products\Filament\Resources\Products\ProductResource;
 
-class ManageProductActivities extends ManageRelatedRecords
+class ManageStockActivities extends ManageRelatedRecords
 {
     protected static string $resource = ProductResource::class;
 
-    protected static string $relationship = 'activitiesAsSubject';
+    protected static string $relationship = 'stockActivities';
 
     protected static ?string $relatedResource = ActivityLogResource::class;
 
-    protected static ?string $navigationLabel = 'History';
+    protected static ?string $navigationLabel = 'Stock History';
 
-    protected static ?string $breadcrumb = 'History';
+    protected static ?string $breadcrumb = 'Stock History';
 
-    protected static ?string $title = 'History';
+    protected static ?string $title = 'Stock History';
 
     public static function getNavigationIcon(): string|\BackedEnum|null
     {

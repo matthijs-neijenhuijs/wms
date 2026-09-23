@@ -17,3 +17,15 @@ cascade, timestamps; unique per warehouse: `reference_code`, `name`). Resource
 `Modules\Brands\Filament\Resources\Brands\BrandResource` — `$navigationGroup = 'Settings'`,
 no icon; fields Active/ReferenceCode/Name/Description; plain CRUD, no
 sortable/searchable columns, no `->unique()` validation.
+
+## Implemented — Activity Log History Tab
+
+`Brand` has no `LogsActivity` and `BrandResource` has no History tab today.
+Add the pattern from [`wms.md`](wms.md) §2: `getActivitylogOptions()` →
+`useLogName('brand')->logFillable()->logOnlyDirty()->dontLogEmptyChanges()`.
+`warehouse_id` is a direct FK, so no tenant-scoping special case is needed.
+
+Add `Pages\ManageBrandActivities` mirroring `ManageOrderActivities`'s
+already-fixed shape, and wire `BrandResource::getRecordSubNavigation()` →
+`[EditBrand::class, ManageBrandActivities::class]` plus the `'history'`
+route in `getPages()`.

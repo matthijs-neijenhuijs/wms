@@ -6,6 +6,8 @@ namespace Modules\Settings\Filament\Resources\ApiKeys;
 
 use App\Models\ApiKey;
 use BackedEnum;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -13,6 +15,7 @@ use Filament\Tables\Table;
 use Modules\Settings\Filament\Resources\ApiKeys\Pages\CreateApiKey;
 use Modules\Settings\Filament\Resources\ApiKeys\Pages\EditApiKey;
 use Modules\Settings\Filament\Resources\ApiKeys\Pages\ListApiKeys;
+use Modules\Settings\Filament\Resources\ApiKeys\Pages\ManageApiKeyActivities;
 use Modules\Settings\Filament\Resources\ApiKeys\Schemas\ApiKeyForm;
 use Modules\Settings\Filament\Resources\ApiKeys\Tables\ApiKeysTable;
 use UnitEnum;
@@ -28,6 +31,16 @@ class ApiKeyResource extends Resource
     protected static ?string $navigationLabel = 'API Keys';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            EditApiKey::class,
+            ManageApiKeyActivities::class,
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -52,6 +65,7 @@ class ApiKeyResource extends Resource
             'index' => ListApiKeys::route('/'),
             'create' => CreateApiKey::route('/create'),
             'edit' => EditApiKey::route('/{record}/edit'),
+            'history' => ManageApiKeyActivities::route('/{record}/history'),
         ];
     }
 }

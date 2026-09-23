@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Modules\Clients\Filament\Resources\Clients\Pages;
+namespace Modules\Settings\Filament\Resources\ApiKeys\Pages;
 
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Modules\Clients\Filament\Resources\Clients\ClientResource;
+use Modules\Settings\Filament\Resources\ApiKeys\ApiKeyResource;
 
-class ManageClientActivities extends ManageRelatedRecords
+class ManageApiKeyActivities extends ManageRelatedRecords
 {
-    protected static string $resource = ClientResource::class;
+    protected static string $resource = ApiKeyResource::class;
 
     protected static string $relationship = 'activitiesAsSubject';
 

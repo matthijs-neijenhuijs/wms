@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Brands\Filament\Resources\Brands;
 
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Brands\Filament\Resources\Brands\Pages\CreateBrand;
 use Modules\Brands\Filament\Resources\Brands\Pages\EditBrand;
 use Modules\Brands\Filament\Resources\Brands\Pages\ListBrands;
+use Modules\Brands\Filament\Resources\Brands\Pages\ManageBrandActivities;
 use Modules\Brands\Filament\Resources\Brands\Schemas\BrandForm;
 use Modules\Brands\Filament\Resources\Brands\Tables\BrandsTable;
 use Modules\Brands\Models\Brand;
@@ -20,6 +23,16 @@ class BrandResource extends Resource
     protected static ?string $model = Brand::class;
 
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            EditBrand::class,
+            ManageBrandActivities::class,
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -44,6 +57,7 @@ class BrandResource extends Resource
             'index' => ListBrands::route('/'),
             'create' => CreateBrand::route('/create'),
             'edit' => EditBrand::route('/{record}/edit'),
+            'history' => ManageBrandActivities::route('/{record}/history'),
         ];
     }
 }

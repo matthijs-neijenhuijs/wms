@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Modules\Clients\Filament\Resources\Clients\Pages;
+namespace Modules\Brands\Filament\Resources\Brands\Pages;
 
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Modules\Clients\Filament\Resources\Clients\ClientResource;
+use Modules\Brands\Filament\Resources\Brands\BrandResource;
 
-class ManageClientActivities extends ManageRelatedRecords
+class ManageBrandActivities extends ManageRelatedRecords
 {
-    protected static string $resource = ClientResource::class;
+    protected static string $resource = BrandResource::class;
 
     protected static string $relationship = 'activitiesAsSubject';
 

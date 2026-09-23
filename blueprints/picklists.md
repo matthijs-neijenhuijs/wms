@@ -70,3 +70,21 @@ picklist scan progress. **The Purchase Order work in [`orders.md`](orders.md)
 deliberately does something different** (scan completion *does* drive
 `processed` + stock) per the user's explicit decision — this is a known, accepted
 asymmetry between the two features, not an oversight.
+
+## Implemented — Activity Log History Tab
+
+`Picklist` has no `LogsActivity` and `PicklistResource` has no History tab
+today — despite already being listed as a loggable subject type in
+`ActivityLogResource::scopeEloquentQueryToTenant()` (a pre-existing
+inconsistency this resolves). Add the pattern from [`wms.md`](wms.md) §2:
+`getActivitylogOptions()` → `useLogName('picklist')->logFillable()->logOnlyDirty()->dontLogEmptyChanges()`.
+`warehouse_id` is a direct FK, already in the tenant-scoping list, so no
+scoping change is needed.
+
+Add `Pages\ManagePicklistActivities` mirroring `ManageOrderActivities`'s
+already-fixed shape, and wire `PicklistResource::getRecordSubNavigation()` →
+`[ViewPicklist::class, ManagePicklistActivities::class]` (no Edit page exists
+for Picklists, so `ViewPicklist` is the companion "General" tab) plus the
+`'history'` route in `getPages()`. `PicklistProduct`/`PicklistFailedProduct`
+don't get their own tab, consistent with the one-tab-per-top-level-resource
+rule in §2.

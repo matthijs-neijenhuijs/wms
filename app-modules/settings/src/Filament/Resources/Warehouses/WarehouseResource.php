@@ -6,6 +6,8 @@ namespace Modules\Settings\Filament\Resources\Warehouses;
 
 use App\Models\Subdomain;
 use App\Models\Warehouse;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Settings\Filament\Resources\Warehouses\Pages\CreateWarehouse;
 use Modules\Settings\Filament\Resources\Warehouses\Pages\EditWarehouse;
 use Modules\Settings\Filament\Resources\Warehouses\Pages\ListWarehouses;
+use Modules\Settings\Filament\Resources\Warehouses\Pages\ManageWarehouseActivities;
 use Modules\Settings\Filament\Resources\Warehouses\Schemas\WarehouseForm;
 use Modules\Settings\Filament\Resources\Warehouses\Tables\WarehousesTable;
 use UnitEnum;
@@ -30,6 +33,16 @@ class WarehouseResource extends Resource
     protected static ?string $pluralModelLabel = 'Warehouses';
 
     protected static bool $isScopedToTenant = false;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            EditWarehouse::class,
+            ManageWarehouseActivities::class,
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -83,6 +96,7 @@ class WarehouseResource extends Resource
             'index' => ListWarehouses::route('/'),
             'create' => CreateWarehouse::route('/create'),
             'edit' => EditWarehouse::route('/{record}/edit'),
+            'history' => ManageWarehouseActivities::route('/{record}/history'),
         ];
     }
 }

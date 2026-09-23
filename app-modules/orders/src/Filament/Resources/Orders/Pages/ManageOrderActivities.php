@@ -12,7 +12,7 @@ class ManageOrderActivities extends ManageRelatedRecords
 {
     protected static string $resource = OrderResource::class;
 
-    protected static string $relationship = 'activities';
+    protected static string $relationship = 'activitiesAsSubject';
 
     protected static ?string $relatedResource = ActivityLogResource::class;
 

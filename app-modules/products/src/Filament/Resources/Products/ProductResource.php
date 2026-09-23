@@ -16,6 +16,7 @@ use Modules\Products\Filament\Resources\Products\Pages\EditProduct;
 use Modules\Products\Filament\Resources\Products\Pages\EditProductStock;
 use Modules\Products\Filament\Resources\Products\Pages\ListProducts;
 use Modules\Products\Filament\Resources\Products\Pages\ManageProductActivities;
+use Modules\Products\Filament\Resources\Products\Pages\ManageStockActivities;
 use Modules\Products\Filament\Resources\Products\Schemas\ProductForm;
 use Modules\Products\Filament\Resources\Products\Tables\ProductsTable;
 use Modules\Products\Models\Product;
@@ -34,6 +35,7 @@ class ProductResource extends Resource
             EditProduct::class,
             EditProductStock::class,
             ManageProductActivities::class,
+            ManageStockActivities::class,
         ]);
     }
 
@@ -62,6 +64,7 @@ class ProductResource extends Resource
             'edit' => EditProduct::route('/{record}/edit'),
             'edit-stock' => EditProductStock::route('/{record}/edit/stock'),
             'history' => ManageProductActivities::route('/{record}/history'),
+            'stock-history' => ManageStockActivities::route('/{record}/stock-history'),
         ];
     }
 }

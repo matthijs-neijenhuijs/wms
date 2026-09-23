@@ -9,6 +9,8 @@ use Database\Factories\ApiKeyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class ApiKey extends Model
 {
@@ -16,6 +18,8 @@ class ApiKey extends Model
 
     /** @use HasFactory<ApiKeyFactory> */
     use HasFactory;
+
+    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -32,6 +36,29 @@ class ApiKey extends Model
         'allowed_ips',
     ];
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('api_key')
+            ->logOnly(['name', 'is_active', 'last_used_at', 'expires_at', 'allowed_ips'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->setDescriptionForEvent(fn (string $eventName): string => "API key {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->name ?: "API key #{$this->getKey()}");
+    }
+
     protected function casts(): array
     {
         return [
@@ -40,13 +67,5 @@ class ApiKey extends Model
             'expires_at' => 'datetime',
             'allowed_ips' => 'array',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Warehouse, $this>
-     */
-    public function warehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class);
     }
 }

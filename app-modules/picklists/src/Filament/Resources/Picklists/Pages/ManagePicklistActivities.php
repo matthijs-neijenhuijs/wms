@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Modules\Clients\Filament\Resources\Clients\Pages;
+namespace Modules\Picklists\Filament\Resources\Picklists\Pages;
 
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Modules\Clients\Filament\Resources\Clients\ClientResource;
+use Modules\Picklists\Filament\Resources\Picklists\PicklistResource;
 
-class ManageClientActivities extends ManageRelatedRecords
+class ManagePicklistActivities extends ManageRelatedRecords
 {
-    protected static string $resource = ClientResource::class;
+    protected static string $resource = PicklistResource::class;
 
     protected static string $relationship = 'activitiesAsSubject';
 

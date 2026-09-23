@@ -10,10 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Orders\Models\Order;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Picklist extends Model
 {
     use BelongsToWarehouse;
+    use LogsActivity;
 
     protected $fillable = ['id', 'order_id', 'warehouse_id', 'completed', 'comments', 'generated_custom_picklist_id', 'back_order'];
 
@@ -78,5 +81,20 @@ class Picklist extends Model
         }
 
         return $array;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('picklist')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Picklist {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->generated_custom_picklist_id ?: "Picklist #{$this->getKey()}");
     }
 }

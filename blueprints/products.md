@@ -34,8 +34,16 @@ see [`brands.md`](brands.md)), `vatRate(): BelongsTo` (`Modules\Settings\Models\
 see [`settings.md`](settings.md)), `productAttributes(): HasMany`,
 `attributes(): BelongsToMany` (pivot `product_attributes`), `stockProduct(): HasOne`.
 
+**Fixed — History tab was broken**: `ProductResource`'s History tab
+(`Pages\ManageProductActivities`) set `$relationship = 'activities'`, but
+`Product` only has `LogsActivity`, which provides `activitiesAsSubject()`,
+not `activities()` — visiting the tab threw `BadMethodCallException`. Fixed
+to `$relationship = 'activitiesAsSubject'`. See [`wms.md`](wms.md) §2 for the
+full pattern and the shared regression test (`tests/Feature/ActivityLogHistoryTabTest.php`)
+that covers this.
+
 **Resource: `Modules\Products\Filament\Resources\Products\ProductResource`** — no
-navigation group, icon `Heroicon::OutlinedPhoto`, sub-navigation (General/Stock/History).
+navigation group, icon `Heroicon::OutlinedPhoto`, sub-navigation (General/Stock/History/Stock History).
 - Form (`ProductForm`, one `Section` columns=2): `ActiveToggle`, `ReferenceCodeInput`,
   `BarcodeInput`, `NameInput` (all required `TextInput`/`Toggle`), `VatRateSelect`
   (`->relationship('vatRate','name')`, not required), `BrandSelect` (same shape),
@@ -77,3 +85,16 @@ column — scoped transitively through `product_id → products.warehouse_id`.
 accessor** — it must be explicitly recalculated and saved by application code
 (see canonical formula above). Reservation/deferral logic against incoming
 Purchase Orders is documented in [`orders.md`](orders.md).
+
+**Implemented — Stock History tab**: `StockProduct`'s own activity log
+(`subject_type = StockProduct`) is distinct from `Product`'s
+(`subject_type = Product`) — visiting Product's own History tab never showed
+stock quantity changes. Added `Product::stockActivities(): HasManyThrough`
+(`Product` → `StockProduct` → `Spatie\Activitylog\Models\Activity`, filtered
+to `subject_type = StockProduct`) and a new
+`Pages\ManageStockActivities` page (same `ManageRelatedRecords` shape as
+[`wms.md`](wms.md) §2, `$relationship = 'stockActivities'`), wired as a
+fourth `ProductResource` sub-navigation tab ("Stock History") and
+`'stock-history' => ManageStockActivities::route('/{record}/stock-history')`.
+No `ActivityLogResource` tenant-scoping change was needed —
+`StockProduct` was already scoped there via `whereHas('product', ...)`.

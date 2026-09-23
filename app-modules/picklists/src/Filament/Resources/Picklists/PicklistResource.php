@@ -6,6 +6,8 @@ namespace Modules\Picklists\Filament\Resources\Picklists;
 
 use BackedEnum;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Picklists\Filament\Infolists\Components\FailedProductsTable;
 use Modules\Picklists\Filament\Infolists\Components\ProductsTable;
 use Modules\Picklists\Filament\Resources\Picklists\Pages\ListPicklists;
+use Modules\Picklists\Filament\Resources\Picklists\Pages\ManagePicklistActivities;
 use Modules\Picklists\Filament\Resources\Picklists\Pages\ViewPicklist;
 use Modules\Picklists\Filament\Resources\Picklists\Schemas\PicklistForm;
 use Modules\Picklists\Filament\Resources\Picklists\Tables\PicklistsTable;
@@ -25,6 +28,16 @@ class PicklistResource extends Resource
     protected static ?string $model = Picklist::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewPicklist::class,
+            ManagePicklistActivities::class,
+        ]);
+    }
 
     public static function canCreate(): bool
     {
@@ -115,6 +128,7 @@ class PicklistResource extends Resource
         return [
             'index' => ListPicklists::route('/'),
             'view' => ViewPicklist::route('/{record}'),
+            'history' => ManagePicklistActivities::route('/{record}/history'),
         ];
     }
 }

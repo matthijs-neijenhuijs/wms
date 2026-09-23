@@ -22,11 +22,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasEmailAuthentication, HasTenants, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -128,6 +132,32 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->warehouses()->whereKey($tenant)->exists();
     }
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantScope);
+
+        static::creating(function (User $user): void {
+            if (! $user->subdomain_id && app()->has('current_subdomain')) {
+                $user->subdomain_id = app('current_subdomain')->id;
+            }
+        });
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('user')
+            ->logOnly(['name', 'email'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->setDescriptionForEvent(fn (string $eventName): string => "User {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->name ?: $this->email ?: "User #{$this->getKey()}");
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -142,16 +172,5 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'app_authentication_recovery_codes' => 'encrypted:array',
             'has_email_authentication' => 'boolean',
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope(new TenantScope);
-
-        static::creating(function (User $user): void {
-            if (! $user->subdomain_id && app()->has('current_subdomain')) {
-                $user->subdomain_id = app('current_subdomain')->id;
-            }
-        });
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Users\Filament\Resources\Users;
 
 use App\Models\Subdomain;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Users\Filament\Resources\Users\Pages\CreateUser;
 use Modules\Users\Filament\Resources\Users\Pages\EditUser;
 use Modules\Users\Filament\Resources\Users\Pages\ListUsers;
+use Modules\Users\Filament\Resources\Users\Pages\ManageUserActivities;
 use Modules\Users\Filament\Resources\Users\Schemas\UserForm;
 use Modules\Users\Filament\Resources\Users\Tables\UsersTable;
 use Modules\Users\Models\User;
@@ -28,6 +31,16 @@ class UserResource extends Resource
     protected static ?string $pluralModelLabel = 'Users';
 
     protected static bool $isScopedToTenant = false;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            EditUser::class,
+            ManageUserActivities::class,
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -65,6 +78,7 @@ class UserResource extends Resource
             'index' => ListUsers::route('/'),
             'create' => CreateUser::route('/create'),
             'edit' => EditUser::route('/{record}/edit'),
+            'history' => ManageUserActivities::route('/{record}/history'),
         ];
     }
 

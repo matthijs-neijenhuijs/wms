@@ -10,10 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Products\Models\Product;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class VatRate extends Model
 {
     use BelongsToWarehouse;
+    use LogsActivity;
 
     protected $table = 'vat_rates';
 
@@ -41,5 +44,20 @@ class VatRate extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('vat_rate')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->setDescriptionForEvent(fn (string $eventName): string => "VAT rate {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->name ?: "VAT rate #{$this->getKey()}");
     }
 }

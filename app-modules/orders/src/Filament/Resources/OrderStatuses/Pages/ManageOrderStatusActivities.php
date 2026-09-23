@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Modules\Clients\Filament\Resources\Clients\Pages;
+namespace Modules\Orders\Filament\Resources\OrderStatuses\Pages;
 
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Modules\Clients\Filament\Resources\Clients\ClientResource;
+use Modules\Orders\Filament\Resources\OrderStatuses\OrderStatusResource;
 
-class ManageClientActivities extends ManageRelatedRecords
+class ManageOrderStatusActivities extends ManageRelatedRecords
 {
-    protected static string $resource = ClientResource::class;
+    protected static string $resource = OrderStatusResource::class;
 
     protected static string $relationship = 'activitiesAsSubject';
 

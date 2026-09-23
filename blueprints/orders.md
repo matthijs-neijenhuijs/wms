@@ -90,6 +90,23 @@ set-null, `name`, `quantity` bigInteger nullable, `weight` bigInteger nullable,
 timestamps). Relations: `order()`, `product()` (see [`products.md`](products.md)),
 `vatRate()` (see [`settings.md`](settings.md)).
 
+**Fixed — History tab was broken**: `OrderResource`'s History tab
+(`Pages\ManageOrderActivities`) set `$relationship = 'activities'`, but
+`Order` only has `LogsActivity`, which provides `activitiesAsSubject()`, not
+`activities()` — visiting the tab threw `BadMethodCallException`. Fixed to
+`$relationship = 'activitiesAsSubject'`. See [`wms.md`](wms.md) §2 for the
+full pattern and the shared regression test (`tests/Feature/ActivityLogHistoryTabTest.php`)
+that covers this.
+
+**Implemented — Activity Log History Tab for `OrderStatus`**: `OrderStatus` has
+no `LogsActivity` and `OrderStatusResource` has no History tab today. Add
+`LogsActivity` + `getActivitylogOptions()` (`useLogName('order_status')->logFillable()->logOnlyDirty()->dontLogEmptyChanges()`,
+`warehouse_id` has a direct FK so no tenant-scoping special case is needed —
+see [`wms.md`](wms.md) §2). Add `Pages\ManageOrderStatusActivities`
+(same shape as `ManageOrderActivities`, already-fixed relationship name) and
+wire `getRecordSubNavigation()` → `[EditOrderStatus::class, ManageOrderStatusActivities::class]`
+plus the `'history'` route in `getPages()`.
+
 **Resource: `Modules\Orders\Filament\Resources\Orders\OrderResource`** — no
 navigation group, icon `Heroicon::OutlinedShoppingCart`, sub-navigation
 (General/History). `canDelete()` → `$record->orderStatus?->canDeleteOrder() ?? true`.
@@ -603,9 +620,10 @@ the row-highlight behavior. Reuse the existing row id convention
 (`#purchase-order-product-row-{id}`, already present in the static table markup
 per the exploration report) so the highlight script can target it.
 
-No other Filament resource files need to change. `PurchaseOrderResource`'s
-`infolist()`/table/form stay as-is — the existing `ProcessedEntry`/`CompletedEntry`
-already display the two booleans this plan now actually drives.
+Aside from the History tab (§3.9a below), no other Filament resource files
+need to change. `PurchaseOrderResource`'s `infolist()`/table/form stay as-is —
+the existing `ProcessedEntry`/`CompletedEntry` already display the two
+booleans this plan now actually drives.
 
 ### 3.8 Authorization
 
@@ -681,6 +699,20 @@ consistency case from §3.5):
 imported rows matched to a known product now also populate `product_id` (not just
 `product_title`), and that unmatched ("Unknown product") rows keep `product_id`
 null.
+
+### 3.9a Implemented — Activity Log History Tab for Purchase Orders
+
+`PurchaseOrder` already has `LogsActivity` (§3.4 above) — only the Filament
+side is missing. Add `Pages\ManagePurchaseOrderActivities` (same shape as
+`ManageOrderActivities`, with the relationship bug already fixed —
+`$relationship = 'activitiesAsSubject'`, see [`wms.md`](wms.md) §2) and wire
+`PurchaseOrderResource::getRecordSubNavigation()` →
+`[ViewPurchaseOrder::class, ManagePurchaseOrderActivities::class]` (no Edit
+page exists for Purchase Orders, so `ViewPurchaseOrder` is the companion
+"General" tab, not `EditPurchaseOrder`), plus the `'history'` route in
+`getPages()`. `PurchaseOrder` already appears in
+`ActivityLogResource::scopeEloquentQueryToTenant()`'s subject list, so no
+tenant-scoping change is needed for this one.
 
 ---
 

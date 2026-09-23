@@ -10,9 +10,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Orders\Models\OrderStatus;
 use Modules\Users\Models\User;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Warehouse extends Model
 {
+    use LogsActivity;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -47,6 +51,21 @@ class Warehouse extends Model
     public function completedPicklistOrderStatus(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class, 'order_statuses_id_completed_picklist');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('warehouse')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Warehouse {$eventName}");
+    }
+
+    public function getActivityLogTitle(): string
+    {
+        return (string) ($this->name ?: "Warehouse #{$this->getKey()}");
     }
 
     protected static function booted(): void

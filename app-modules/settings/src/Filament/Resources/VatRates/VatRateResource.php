@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Settings\Filament\Resources\VatRates;
 
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Settings\Filament\Resources\VatRates\Pages\CreateVatRate;
 use Modules\Settings\Filament\Resources\VatRates\Pages\EditVatRate;
 use Modules\Settings\Filament\Resources\VatRates\Pages\ListVatRates;
+use Modules\Settings\Filament\Resources\VatRates\Pages\ManageVatRateActivities;
 use Modules\Settings\Filament\Resources\VatRates\Schemas\VatRateForm;
 use Modules\Settings\Filament\Resources\VatRates\Tables\VatRatesTable;
 use Modules\Settings\Models\VatRate;
@@ -22,6 +25,16 @@ class VatRateResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            EditVatRate::class,
+            ManageVatRateActivities::class,
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -46,6 +59,7 @@ class VatRateResource extends Resource
             'index' => ListVatRates::route('/'),
             'create' => CreateVatRate::route('/create'),
             'edit' => EditVatRate::route('/{record}/edit'),
+            'history' => ManageVatRateActivities::route('/{record}/history'),
         ];
     }
 }

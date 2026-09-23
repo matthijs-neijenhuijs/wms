@@ -35,3 +35,22 @@ MFA contracts. Relations: `subdomain(): BelongsTo`, `warehouses(): BelongsToMany
   `UpdatedAtColumn`.
 - Actions: `EditAction` only on row (no row `DeleteAction`); `CreateAction` header;
   `DeleteAction` header on Edit page; `BulkActionGroup([DeleteBulkAction])`.
+
+## Implemented — Activity Log History Tab
+
+`User` has no `LogsActivity` and `UserResource` has no History tab today. Add
+the pattern from [`wms.md`](wms.md) §2: `getActivitylogOptions()` →
+`useLogName('user')->logOnly(['name', 'email'])->logOnlyDirty()->dontLogEmptyChanges()`
+— **excludes `password`**, per the project's activity-log privacy rule (never
+log passwords). `email_verified_at`/MFA columns (`app_authentication_secret`,
+`app_authentication_recovery_codes`) aren't fillable, so they're never logged
+regardless.
+
+Tenant-scoping special case: `User` has no `warehouse_id` (it's scoped via
+`subdomain_id` + the `user_warehouses` many-to-many) — see §2's `User` branch
+in `ActivityLogResource::scopeEloquentQueryToTenant()`.
+
+Add `Pages\ManageUserActivities` mirroring `ManageOrderActivities`'s
+already-fixed shape, and wire `UserResource::getRecordSubNavigation()` →
+`[EditUser::class, ManageUserActivities::class]` plus the `'history'` route
+in `getPages()`.

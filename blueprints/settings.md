@@ -72,3 +72,27 @@ unique constraint on the pair** — duplicates possible, flag only). There is no
 separate `AttributeResource`; individual attributes are managed exclusively via
 `Modules\Settings\Filament\Resources\AttributeGroups\RelationManagers\AttributesRelationManager`
 under `AttributeGroupResource` (`$navigationGroup = 'Settings'`).
+
+## Implemented — Activity Log History Tab
+
+None of `Warehouse`, `ApiKey`, `VatRate`, or `AttributeGroup` currently has
+`LogsActivity` or a History tab. Add the pattern from [`wms.md`](wms.md) §2
+to all four:
+
+- **`Warehouse`**: `getActivitylogOptions()` → `useLogName('warehouse')->logFillable()->logOnlyDirty()->dontLogEmptyChanges()`.
+  Tenant-scoping special case: the subject *is* the tenant (see §2's
+  `Warehouse` branch), not something that belongs to it.
+- **`ApiKey`**: `getActivitylogOptions()` → `useLogName('api_key')->logOnly(['name', 'is_active', 'last_used_at', 'expires_at', 'allowed_ips'])->logOnlyDirty()->dontLogEmptyChanges()`
+  — **excludes `key_hash`**, per the project's activity-log privacy rule
+  (never log secrets/tokens).
+- **`VatRate`**: `getActivitylogOptions()` → `useLogName('vat_rate')->logFillable()->logOnlyDirty()->dontLogEmptyChanges()`.
+- **`AttributeGroup`**: `getActivitylogOptions()` → `useLogName('attribute_group')->logFillable()->logOnlyDirty()->dontLogEmptyChanges()`.
+  Tenant-scoping special case: `warehouse_id` is nullable (global groups
+  allowed) — see §2's `AttributeGroup` branch (`orWhereNull('warehouse_id')`).
+
+For each: add `Manage{Model}Activities` (`ManageWarehouseActivities`,
+`ManageApiKeyActivities`, `ManageVatRateActivities`,
+`ManageAttributeGroupActivities`) mirroring `ManageOrderActivities`'s
+already-fixed shape, and wire each Resource's `getRecordSubNavigation()` →
+`[Edit{Model}::class, Manage{Model}Activities::class]` plus the `'history'`
+route in `getPages()`.

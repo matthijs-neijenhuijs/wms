@@ -55,3 +55,12 @@ request body — it never reads `Client::clientDeliveryAddress()`/
 `clientBillAddress()`. The "copy the client's selected address onto the
 order" rule described above is the intended/correct behavior, not something
 either code path currently implements.
+
+**Fixed — History tab was broken**: `ClientResource` already had a
+History tab (`Pages\ManageClientActivities`, registered at
+`ClientResource.php:57-65`) but it set `$relationship = 'activities'`.
+`Client` only has `LogsActivity`, which provides `activitiesAsSubject()`, not
+`activities()` — visiting the tab threw `BadMethodCallException`. Fixed to
+`$relationship = 'activitiesAsSubject'`. See [`wms.md`](wms.md) §2 for the
+full pattern and the shared regression test (`tests/Feature/ActivityLogHistoryTabTest.php`)
+that covers this.

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Filament\Resources\OrderStatuses;
 
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Orders\Filament\Resources\OrderStatuses\Pages\CreateOrderStatus;
 use Modules\Orders\Filament\Resources\OrderStatuses\Pages\EditOrderStatus;
 use Modules\Orders\Filament\Resources\OrderStatuses\Pages\ListOrderStatuses;
+use Modules\Orders\Filament\Resources\OrderStatuses\Pages\ManageOrderStatusActivities;
 use Modules\Orders\Filament\Resources\OrderStatuses\Schemas\OrderStatusForm;
 use Modules\Orders\Filament\Resources\OrderStatuses\Tables\OrderStatusesTable;
 use Modules\Orders\Models\OrderStatus;
@@ -26,6 +29,16 @@ class OrderStatusResource extends Resource
     protected static ?string $navigationLabel = null;
 
     protected static ?string $pluralModelLabel = null;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            EditOrderStatus::class,
+            ManageOrderStatusActivities::class,
+        ]);
+    }
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
@@ -65,6 +78,7 @@ class OrderStatusResource extends Resource
             'index' => ListOrderStatuses::route('/'),
             'create' => CreateOrderStatus::route('/create'),
             'edit' => EditOrderStatus::route('/{record}/edit'),
+            'history' => ManageOrderStatusActivities::route('/{record}/history'),
         ];
     }
 }
