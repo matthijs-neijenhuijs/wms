@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Users\Filament\Resources\Users;
 
 use App\Models\Subdomain;
-use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -15,6 +14,7 @@ use Modules\Users\Filament\Resources\Users\Pages\EditUser;
 use Modules\Users\Filament\Resources\Users\Pages\ListUsers;
 use Modules\Users\Filament\Resources\Users\Schemas\UserForm;
 use Modules\Users\Filament\Resources\Users\Tables\UsersTable;
+use Modules\Users\Models\User;
 use UnitEnum;
 
 class UserResource extends Resource
@@ -54,6 +54,20 @@ class UserResource extends Resource
         return $query->whereRaw('subdomain_id = ?', [$currentSubdomain->getKey()]);
     }
 
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'edit' => EditUser::route('/{record}/edit'),
+        ];
+    }
+
     private static function resolveSubdomainFromHost(): ?Subdomain
     {
         $host = request()->getHost();
@@ -66,21 +80,5 @@ class UserResource extends Resource
         }
 
         return Subdomain::query()->where('subdomain', $subdomain)->first();
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListUsers::route('/'),
-            'create' => CreateUser::route('/create'),
-            'edit' => EditUser::route('/{record}/edit'),
-        ];
     }
 }

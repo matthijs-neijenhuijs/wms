@@ -12,8 +12,6 @@ class OrderStatusSelect
     {
         return Select::make('order_statuses_id')
             ->relationship('orderStatus', 'name')
-            ->required()
-            ->searchable()
-            ->preload();
+            ->required();
     }
 }

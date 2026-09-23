@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\Client;
-use App\Models\ClientAddresses;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Clients\Models\Client;
+use Modules\Clients\Models\ClientAddresses;
 
 /** @mixin Client */
 class ClientResource extends JsonResource

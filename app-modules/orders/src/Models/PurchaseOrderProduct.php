@@ -6,6 +6,7 @@ namespace Modules\Orders\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Products\Models\Product;
 
 class PurchaseOrderProduct extends Model
 {
@@ -16,6 +17,7 @@ class PurchaseOrderProduct extends Model
      */
     protected $fillable = [
         'purchase_order_id',
+        'product_id',
         'show_for_supplier',
         'barcode',
         'reference_code',
@@ -25,6 +27,9 @@ class PurchaseOrderProduct extends Model
         'scanned',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -55,6 +60,17 @@ class PurchaseOrderProduct extends Model
         return $this->belongsTo(PurchaseOrder::class);
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

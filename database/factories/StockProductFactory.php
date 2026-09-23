@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Brand;
-use App\Models\Product;
-use App\Models\StockProduct;
 use App\Models\Subdomain;
-use App\Models\VatRate;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Modules\Brands\Models\Brand;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
+use Modules\Settings\Models\VatRate;
 
 /**
  * @extends Factory<StockProduct>

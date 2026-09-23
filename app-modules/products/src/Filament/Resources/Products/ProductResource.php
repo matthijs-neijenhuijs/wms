@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Products\Filament\Resources\Products;
 
-use App\Models\Product;
 use BackedEnum;
 use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
@@ -19,6 +18,7 @@ use Modules\Products\Filament\Resources\Products\Pages\ListProducts;
 use Modules\Products\Filament\Resources\Products\Pages\ManageProductActivities;
 use Modules\Products\Filament\Resources\Products\Schemas\ProductForm;
 use Modules\Products\Filament\Resources\Products\Tables\ProductsTable;
+use Modules\Products\Models\Product;
 
 class ProductResource extends Resource
 {

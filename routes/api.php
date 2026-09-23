@@ -12,5 +12,5 @@ Route::middleware('api.key')
     ->group(function () {
         Route::apiResource('products', ProductController::class)->only(['index', 'show']);
         Route::apiResource('clients', ClientController::class)->only(['index', 'show']);
-        Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+        Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
     });

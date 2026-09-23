@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Models;
 
-use App\Models\Client;
 use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Clients\Models\Client;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -43,11 +43,15 @@ class Order extends Model
         'delivery_region',
         'delivery_city',
         'delivery_country',
-        'telephone',
+        'telephone_number',
         'email',
         'comments',
+        'delivery_date',
     ];
 
+    /**
+     * @return array{filterableAttributes: list<string>, sortableAttributes: list<string>, searchableAttributes: list<string>}
+     */
     public static function getSearchableSettings(): array
     {
         return [
@@ -119,6 +123,9 @@ class Order extends Model
         return (string) ($this->generated_custom_order_id ?: $this->custom_order_id ?: "Order #{$this->getKey()}");
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function toSearchableArray(): array
     {
         return [

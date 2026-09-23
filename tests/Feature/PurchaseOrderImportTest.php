@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Models\Product;
-use App\Models\PurchaseOrder;
 use App\Models\Subdomain;
 use App\Models\Warehouse;
 use App\Services\PurchaseOrderImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Modules\Orders\Models\PurchaseOrder;
+use Modules\Products\Models\Product;
 
 uses(RefreshDatabase::class);
 
@@ -26,7 +26,7 @@ it('imports purchase order products from a csv file with barcode and quantity da
         'currency' => 'EUR',
     ]);
 
-    Product::query()->create([
+    $product = Product::query()->create([
         'warehouse_id' => $warehouse->id,
         'active' => true,
         'reference_code' => 'REF-PO-001',
@@ -58,6 +58,7 @@ it('imports purchase order products from a csv file with barcode and quantity da
 
     $this->assertDatabaseHas('purchase_orders_products', [
         'purchase_order_id' => $purchaseOrder->id,
+        'product_id' => $product->id,
         'barcode' => '1234567890123',
         'reference_code' => 'REF-PO-001',
         'product_title' => 'Imported Product',
@@ -65,6 +66,7 @@ it('imports purchase order products from a csv file with barcode and quantity da
 
     $this->assertDatabaseHas('purchase_orders_products', [
         'purchase_order_id' => $purchaseOrder->id,
+        'product_id' => null,
         'barcode' => '9999999999999',
         'product_title' => 'Unknown product',
     ]);

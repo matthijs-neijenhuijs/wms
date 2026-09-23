@@ -9,11 +9,11 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Settings\Filament\Resources\AttributeGroups\Columns\AttributeNameColumn;
+use Modules\Settings\Filament\Resources\AttributeGroups\Inputs\AttributeNameInput;
 
 class AttributesRelationManager extends RelationManager
 {
@@ -23,9 +23,7 @@ class AttributesRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                AttributeNameInput::make(),
             ]);
     }
 
@@ -34,8 +32,7 @@ class AttributesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
+                AttributeNameColumn::make(),
             ])
             ->filters([
                 //

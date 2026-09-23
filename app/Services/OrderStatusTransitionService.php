@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Order;
-use App\Models\OrderProduct;
-use App\Models\Picklist;
-use App\Models\PicklistProduct;
-use App\Models\Product;
-use App\Models\StockProduct;
 use Illuminate\Support\Facades\DB;
+use Modules\Orders\Models\Order;
+use Modules\Orders\Models\OrderProduct;
 use Modules\Orders\Models\OrderStatus;
+use Modules\Picklists\Models\Picklist;
+use Modules\Picklists\Models\PicklistProduct;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
 use Spatie\Activitylog\Models\Activity;
 
 class OrderStatusTransitionService
@@ -168,9 +168,22 @@ class OrderStatusTransitionService
         $productIds = $order->products
             ->pluck('product_id')
             ->filter()
-            ->unique();
+            ->unique()
+            ->all();
 
-        foreach ($productIds as $productId) {
+        $this->refreshReservedStockForProductIds($productIds);
+    }
+
+    /**
+     * Recalculate reserved/free stock for the given products, e.g. after a
+     * purchase order is imported or fully scanned (no Order context available
+     * in that case, unlike refreshReservedStock() above).
+     *
+     * @param  array<int, int|string>  $productIds
+     */
+    public function refreshReservedStockForProductIds(array $productIds): void
+    {
+        foreach (array_unique(array_filter($productIds)) as $productId) {
             DB::transaction(function () use ($productId): void {
                 $stockProduct = StockProduct::query()
                     ->where('product_id', $productId)
@@ -199,18 +212,81 @@ class OrderStatusTransitionService
         ])->saveQuietly();
     }
 
+    /**
+     * Reserved quantity for a product, deferring demand that is covered by an
+     * incoming (not-yet-processed) purchase order due to arrive before the
+     * order's own delivery date - per the domain rule that a client order's
+     * stock does not need to be reserved until the purchase order it depends
+     * on arrives. Orders are served earliest-delivery-date-first; demand not
+     * covered by current stock nor a timely incoming batch is still reserved,
+     * which keeps this a no-op versus a plain SUM() for products with no
+     * purchase orders at all.
+     */
     protected function calculateReservedQuantity(int $productId): int
     {
-        return (int) DB::table('order_products')
+        $orderLines = DB::table('order_products')
             ->join('orders', 'orders.id', '=', 'order_products.order_id')
             ->join('order_statuses', 'order_statuses.id', '=', 'orders.order_statuses_id')
             ->where('order_products.product_id', $productId)
             ->where('order_statuses.reserve_stock', true)
             ->where('orders.picked', false)
             ->where('orders.cancelled', false)
-            ->sum('order_products.quantity');
+            ->orderBy('orders.delivery_date')
+            ->get(['order_products.quantity', 'orders.delivery_date']);
+
+        $remainingStock = (int) (StockProduct::where('product_id', $productId)->value('on_stock_quantity') ?? 0);
+
+        $incomingBatches = DB::table('purchase_orders_products')
+            ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_orders_products.purchase_order_id')
+            ->where('purchase_orders_products.product_id', $productId)
+            ->where('purchase_orders.processed', false)
+            ->select('purchase_orders.expected_delivery_date')
+            ->get()
+            ->groupBy('expected_delivery_date')
+            ->map(fn ($rows) => $rows->count())
+            ->sortKeys()
+            ->map(fn (int $qty, string $date): object => (object) [
+                'expected_delivery_date' => $date,
+                'remaining' => $qty,
+            ])
+            ->values();
+
+        $reserved = 0;
+
+        foreach ($orderLines as $line) {
+            $quantity = (int) $line->quantity;
+
+            $fromStock = min($quantity, $remainingStock);
+            $remainingStock -= $fromStock;
+            $reserved += $fromStock;
+
+            $needed = $quantity - $fromStock;
+
+            if ($needed > 0) {
+                foreach ($incomingBatches as $batch) {
+                    if ($needed <= 0) {
+                        break;
+                    }
+
+                    if ($batch->remaining <= 0 || $batch->expected_delivery_date > $line->delivery_date) {
+                        continue;
+                    }
+
+                    $take = min($needed, $batch->remaining);
+                    $batch->remaining -= $take;
+                    $needed -= $take;
+                }
+            }
+
+            $reserved += $needed;
+        }
+
+        return $reserved;
     }
 
+    /**
+     * @param  array<string, mixed>  $properties
+     */
     protected function logWorkflowStep(Order $order, string $event, string $description, array $properties = []): void
     {
         $alreadyLogged = Activity::query()

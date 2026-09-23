@@ -19,7 +19,6 @@
         "laravel/ai": "^0.2.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "modules/ai": "*",
         "modules/brands": "*",
         "modules/clients": "*",
         "modules/orders": "*",
@@ -28,7 +27,6 @@
         "modules/products": "*",
         "modules/settings": "*",
         "modules/users": "*",
-        "openwms/filament-dynamic-ai-charts": "dev-main",
         "rebing/graphql-laravel": "^9.10",
         "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-pdf": "^2.2",
@@ -37,6 +35,7 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.7",
         "fakerphp/faker": "^1.23",
+        "filament/blueprint": "^1.4",
         "larastan/larastan": "^3.0",
         "laravel/boost": "^2.7",
         "laravel/pail": "^1.2.2",
@@ -94,18 +93,9 @@
     },
     "repositories": [
         {
-            "type": "path",
-            "url": "packages/filament-dynamic-ai-charts",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/filament-ai-autosuggest-field",
-            "options": {
-                "symlink": true
-            }
+            "name": "filament",
+            "type": "composer",
+            "url": "https://packages.filamentphp.com/composer"
         },
         {
             "type": "path",

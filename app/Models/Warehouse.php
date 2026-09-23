@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Orders\Models\OrderStatus;
+use Modules\Users\Models\User;
 
 class Warehouse extends Model
 {

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Picklists\Filament\Resources\Picklists\Pages;
 
-use App\Models\Picklist;
-use App\Models\PicklistFailedProduct;
-use App\Models\PicklistProduct;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Livewire\Attributes\On;
 use Modules\Picklists\Filament\Resources\Picklists\PicklistResource;
+use Modules\Picklists\Models\Picklist;
+use Modules\Picklists\Models\PicklistFailedProduct;
+use Modules\Picklists\Models\PicklistProduct;
 
 class ViewPicklist extends ViewRecord
 {

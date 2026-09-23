@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Observers;
 
-use App\Models\Order;
 use App\Models\Warehouse;
 use Modules\Orders\Events\OrderStatusChanged;
+use Modules\Orders\Models\Order;
 use Modules\Orders\Models\OrderStatus;
 
 class OrderObserver

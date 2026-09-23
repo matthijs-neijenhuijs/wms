@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Orders\Observers;
 
-use App\Models\PurchaseOrder;
 use App\Models\Warehouse;
+use Modules\Orders\Models\PurchaseOrder;
 
 class PurchaseOrderObserver
 {

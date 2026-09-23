@@ -1,6 +1,7 @@
 {
     "agents": [
-        "copilot"
+        "copilot",
+        "claude_code"
     ],
     "cloud": false,
     "guidelines": true,
@@ -11,7 +12,8 @@
         "alizharb/filament-activity-log",
         "internachi/modular",
         "spatie/laravel-activitylog",
-        "spatie/laravel-pdf"
+        "spatie/laravel-pdf",
+        "filament/blueprint"
     ],
     "sail": false,
     "skills": [
@@ -20,7 +22,11 @@
         "laravel-best-practices",
         "testing-best-practices",
         "tailwindcss-development",
+        "filament-development",
         "modular",
-        "laravel-pdf"
+        "laravel-pdf",
+        "filament-security-audit",
+        "planning-filament",
+        "reviewing-filament-plans"
     ]
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Clients\Filament\Resources\Clients;
 
-use App\Models\Client;
 use BackedEnum;
 use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
@@ -18,6 +17,7 @@ use Modules\Clients\Filament\Resources\Clients\Pages\ListClients;
 use Modules\Clients\Filament\Resources\Clients\Pages\ManageClientActivities;
 use Modules\Clients\Filament\Resources\Clients\Schemas\ClientForm;
 use Modules\Clients\Filament\Resources\Clients\Tables\ClientsTable;
+use Modules\Clients\Models\Client;
 
 class ClientResource extends Resource
 {

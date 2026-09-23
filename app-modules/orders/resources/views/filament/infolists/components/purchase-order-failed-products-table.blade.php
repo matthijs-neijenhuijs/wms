@@ -15,7 +15,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($getState() as $failedProduct)
+                            @forelse(($getState() ?? []) as $failedProduct)
                                 <tr class="fi-ta-row" wire:key="purchase-order-failed-product-{{ $failedProduct->id }}-{{ $failedProduct->total_quantity_scanned }}">
                                     <td class="fi-ta-cell">
                                         <div class="fi-ta-col">

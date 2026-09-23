@@ -6,13 +6,13 @@ namespace Modules\Orders\Providers;
 
 use App\Listeners\CreatePicklistForConfirmedOrder;
 use App\Listeners\ProcessOrderStatusTransition;
-use App\Models\Order;
-use App\Models\OrderProduct;
-use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Modules\Orders\Events\OrderConfirmed;
 use Modules\Orders\Events\OrderStatusChanged;
+use Modules\Orders\Models\Order;
+use Modules\Orders\Models\OrderProduct;
+use Modules\Orders\Models\PurchaseOrder;
 use Modules\Orders\Observers\OrderObserver;
 use Modules\Orders\Observers\OrderProductObserver;
 use Modules\Orders\Observers\PurchaseOrderObserver;

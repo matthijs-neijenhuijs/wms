@@ -4,95 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
-use App\Models\DynamicAiChart;
-use App\Models\User;
-use App\Models\Warehouse;
-use DomainException;
-use Filament\Actions\Action;
-use Filament\Facades\Filament;
-use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
-use OpenWms\FilamentDynamicAiCharts\Exceptions\AiChartClarificationException;
-use OpenWms\FilamentDynamicAiCharts\Filament\Widgets\AiChartChatWidget;
-use OpenWms\FilamentDynamicAiCharts\Filament\Widgets\DynamicAiChartWidget;
-use OpenWms\FilamentDynamicAiCharts\Services\AiCharts\DynamicChartGenerator;
 
 class Dashboard extends BaseDashboard
 {
     protected static ?string $title = 'Dynamic Dashboard';
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Action::make('askAiForChart')
-                ->label('Ask AI for chart')
-                ->icon('heroicon-o-sparkles')
-                ->schema([
-                    Textarea::make('question')
-                        ->label('Question')
-                        ->rows(4)
-                        ->required()
-                        ->maxLength(2000),
-                ])
-                ->action(function (array $data, DynamicChartGenerator $generator): void {
-                    $user = auth()->user();
-
-                    if (! $user instanceof User) {
-                        Notification::make()
-                            ->title('You must be logged in to generate charts.')
-                            ->danger()
-                            ->send();
-
-                        return;
-                    }
-
-                    $warehouse = Filament::getTenant();
-
-                    if (! $warehouse instanceof Warehouse) {
-                        Notification::make()
-                            ->title('No active warehouse found.')
-                            ->danger()
-                            ->send();
-
-                        return;
-                    }
-
-                    try {
-                        $chart = $generator->createFromQuestion(
-                            question: (string) $data['question'],
-                            user: $user,
-                            warehouse: $warehouse,
-                        );
-
-                        Notification::make()
-                            ->title('Chart created: '.$chart->title)
-                            ->success()
-                            ->send();
-                    } catch (AiChartClarificationException $exception) {
-                        Notification::make()
-                            ->title('Need more information')
-                            ->body($exception->clarificationQuestion)
-                            ->warning()
-                            ->persistent()
-                            ->send();
-                    } catch (DomainException $exception) {
-                        Notification::make()
-                            ->title($exception->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                }),
-            Action::make('manageAiCharts')
-                ->label('Manage AI charts')
-                ->icon('heroicon-o-chart-bar')
-                ->url(fn (): string => url('/')),
-        ];
-    }
 
     /**
      * @return array<class-string<Widget> | WidgetConfiguration>
@@ -113,24 +33,9 @@ class Dashboard extends BaseDashboard
             },
         ));
 
-        $widgets = [
-            AiChartChatWidget::class,
+        return [
             ...$parentWidgets,
         ];
-
-        $charts = DynamicAiChart::query()
-            ->orderByDesc('score')
-            ->latest()
-            ->limit(12)
-            ->get();
-
-        foreach ($charts as $chart) {
-            $widgets[] = DynamicAiChartWidget::make([
-                'chartId' => $chart->id,
-            ]);
-        }
-
-        return $widgets;
     }
 
     /**
