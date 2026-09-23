@@ -99,7 +99,11 @@ class FilamentServiceProvider extends ServiceProvider
 
         TextInput::configureUsing(function (TextInput $input): void {
             $input
-                ->maxLength(255)
+                // Numeric fields are excluded: Filament turns maxLength() into a
+                // max_digits validation rule for numeric inputs, and max_digits
+                // rejects any non-digit character (including the decimal point),
+                // so it would reject every decimal value (e.g. a price of 19.99).
+                ->maxLength(fn (TextInput $component): ?int => $component->isNumeric() ? null : 255)
                 ->trim(); /* https://filamentphp.com/docs/4.x/forms/text-input#trimming-whitespace */
         });
 
