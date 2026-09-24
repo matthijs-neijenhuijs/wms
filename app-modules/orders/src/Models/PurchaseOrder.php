@@ -9,6 +9,8 @@ use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -22,10 +24,10 @@ class PurchaseOrder extends Model
      */
     protected $fillable = [
         'warehouse_id',
-        'completed',
-        'processed',
+        'status',
         'comments',
         'expected_delivery_date',
+        'received_date',
         'generated_year_purchase_order_id',
         'generated_custom_purchase_order_id',
     ];
@@ -50,9 +52,35 @@ class PurchaseOrder extends Model
         return $this->products()->where('scanned', false)->doesntExist();
     }
 
-    public function canMarkReceived(): bool
+    public function canTransitionTo(PurchaseOrderStatus $target): bool
     {
-        return $this->processed && ! $this->completed;
+        return in_array($target, $this->status->allowedNextStatuses(), true);
+    }
+
+    /**
+     * Deferral-eligible incoming quantity for a product, grouped by expected
+     * delivery date. Shared by OrderStatusTransitionService::calculateReservedQuantity()
+     * and the "incoming stock" UI on the product/stock side.
+     *
+     * @return Collection<int, PurchaseOrderIncomingBatch>
+     */
+    public static function incomingBatchesForProduct(int $productId): Collection
+    {
+        return DB::table('purchase_orders_products')
+            ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_orders_products.purchase_order_id')
+            ->where('purchase_orders_products.product_id', $productId)
+            ->whereIn('purchase_orders.status', [
+                PurchaseOrderStatus::Purchased->value,
+                PurchaseOrderStatus::Received->value,
+                PurchaseOrderStatus::Scanned->value,
+            ])
+            ->select('purchase_orders.expected_delivery_date')
+            ->get()
+            ->groupBy('expected_delivery_date')
+            ->map(fn (Collection $rows): int => $rows->count())
+            ->sortKeys()
+            ->map(fn (int $qty, string $date): PurchaseOrderIncomingBatch => new PurchaseOrderIncomingBatch($date, $qty))
+            ->values();
     }
 
     /**
@@ -63,8 +91,7 @@ class PurchaseOrder extends Model
         return [
             'filterableAttributes' => [
                 'warehouse_id',
-                'completed',
-                'processed',
+                'status',
             ],
             'sortableAttributes' => [
                 'created_at',
@@ -112,8 +139,7 @@ class PurchaseOrder extends Model
             'warehouse_id' => $this->warehouse_id,
             'generated_custom_purchase_order_id' => $this->generated_custom_purchase_order_id,
             'expected_delivery_date' => $this->expected_delivery_date?->toDateString(),
-            'completed' => (bool) $this->completed,
-            'processed' => (bool) $this->processed,
+            'status' => $this->status->value,
             'comments' => $this->comments,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
@@ -124,8 +150,8 @@ class PurchaseOrder extends Model
     {
         return [
             'expected_delivery_date' => 'date',
-            'completed' => 'boolean',
-            'processed' => 'boolean',
+            'received_date' => 'date',
+            'status' => PurchaseOrderStatus::class,
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

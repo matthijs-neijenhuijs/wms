@@ -11,6 +11,7 @@ use Modules\Orders\Models\OrderProduct;
 use Modules\Orders\Models\OrderStatus;
 use Modules\Orders\Models\PurchaseOrder;
 use Modules\Orders\Models\PurchaseOrderProduct;
+use Modules\Orders\Models\PurchaseOrderStatus;
 use Modules\Products\Models\Product;
 use Modules\Products\Models\StockProduct;
 
@@ -87,10 +88,16 @@ function createReservingOrder(Warehouse $warehouse, Product $product, int $quant
     return $order->fresh();
 }
 
-function createIncomingPurchaseOrder(Warehouse $warehouse, Product $product, int $quantity, string $expectedDeliveryDate): PurchaseOrder
-{
+function createIncomingPurchaseOrder(
+    Warehouse $warehouse,
+    Product $product,
+    int $quantity,
+    string $expectedDeliveryDate,
+    PurchaseOrderStatus $status = PurchaseOrderStatus::Purchased,
+): PurchaseOrder {
     $purchaseOrder = PurchaseOrder::query()->create([
         'warehouse_id' => $warehouse->id,
+        'status' => $status,
         'expected_delivery_date' => $expectedDeliveryDate,
     ]);
 
@@ -121,7 +128,7 @@ it('defers a client order\'s demand when a timely incoming purchase order covers
     expect($stockProduct->free_on_stock_quantity)->toBe(0);
 });
 
-it('reserves the deferred demand once the covering purchase order is fully scanned', function () {
+it('leaves stock and reservations unchanged once the covering purchase order is fully scanned but not yet processed', function () {
     $warehouse = createStockDeferralWarehouse();
     [$product, $stockProduct] = createDeferralProduct($warehouse, onStockQuantity: 0);
 
@@ -132,12 +139,35 @@ it('reserves the deferred demand once the covering purchase order is fully scann
         ->where('purchase_order_id', $purchaseOrder->id)
         ->update(['scanned' => true]);
 
-    app(PurchaseOrderProcessingService::class)->processScanCompletion($purchaseOrder->fresh());
+    app(PurchaseOrderProcessingService::class)->evaluateScanCompletion($purchaseOrder->fresh());
 
     $stockProduct->refresh();
     $purchaseOrder->refresh();
 
-    expect($purchaseOrder->processed)->toBeTrue();
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Scanned);
+    expect($stockProduct->on_stock_quantity)->toBe(0);
+    expect($stockProduct->reserved_quantity)->toBe(0);
+    expect($stockProduct->free_on_stock_quantity)->toBe(0);
+});
+
+it('increases stock and converts the deferred reservation once markProcessed is called', function () {
+    $warehouse = createStockDeferralWarehouse();
+    [$product, $stockProduct] = createDeferralProduct($warehouse, onStockQuantity: 0);
+
+    $purchaseOrder = createIncomingPurchaseOrder($warehouse, $product, quantity: 10, expectedDeliveryDate: '2026-10-15');
+    createReservingOrder($warehouse, $product, quantity: 10, deliveryDate: '2026-11-01');
+
+    PurchaseOrderProduct::query()
+        ->where('purchase_order_id', $purchaseOrder->id)
+        ->update(['scanned' => true]);
+
+    app(PurchaseOrderProcessingService::class)->evaluateScanCompletion($purchaseOrder->fresh());
+    app(PurchaseOrderProcessingService::class)->markProcessed($purchaseOrder->fresh());
+
+    $stockProduct->refresh();
+    $purchaseOrder->refresh();
+
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Processed);
     expect($stockProduct->on_stock_quantity)->toBe(10);
     expect($stockProduct->reserved_quantity)->toBe(10);
     expect($stockProduct->free_on_stock_quantity)->toBe(0);
@@ -173,5 +203,49 @@ it('matches the legacy plain-sum reservation when no purchase orders exist for t
     $stockProduct->refresh();
 
     expect($stockProduct->reserved_quantity)->toBe(5);
+    expect($stockProduct->free_on_stock_quantity)->toBe(0);
+});
+
+it('contributes nothing to deferral while a purchase order is still in concept status', function () {
+    $warehouse = createStockDeferralWarehouse();
+    [$product, $stockProduct] = createDeferralProduct($warehouse, onStockQuantity: 0);
+
+    createIncomingPurchaseOrder($warehouse, $product, quantity: 10, expectedDeliveryDate: '2026-10-15', status: PurchaseOrderStatus::Concept);
+    createReservingOrder($warehouse, $product, quantity: 10, deliveryDate: '2026-11-01');
+
+    $stockProduct->refresh();
+
+    expect($stockProduct->reserved_quantity)->toBe(10);
+    expect($stockProduct->free_on_stock_quantity)->toBe(0);
+});
+
+it('excludes a processed purchase order from the deferral batch query to avoid double-counting stock', function () {
+    $warehouse = createStockDeferralWarehouse();
+    [$product, $stockProduct] = createDeferralProduct($warehouse, onStockQuantity: 0);
+
+    createIncomingPurchaseOrder($warehouse, $product, quantity: 10, expectedDeliveryDate: '2026-10-15', status: PurchaseOrderStatus::Processed);
+    createReservingOrder($warehouse, $product, quantity: 10, deliveryDate: '2026-11-01');
+
+    $stockProduct->refresh();
+
+    expect($stockProduct->reserved_quantity)->toBe(10);
+    expect($stockProduct->free_on_stock_quantity)->toBe(0);
+});
+
+it('refreshes reserved quantity back up once a purchased purchase order is cancelled', function () {
+    $warehouse = createStockDeferralWarehouse();
+    [$product, $stockProduct] = createDeferralProduct($warehouse, onStockQuantity: 0);
+
+    $purchaseOrder = createIncomingPurchaseOrder($warehouse, $product, quantity: 10, expectedDeliveryDate: '2026-10-15');
+    createReservingOrder($warehouse, $product, quantity: 10, deliveryDate: '2026-11-01');
+
+    $stockProduct->refresh();
+    expect($stockProduct->reserved_quantity)->toBe(0);
+
+    app(PurchaseOrderProcessingService::class)->cancel($purchaseOrder->fresh());
+
+    $stockProduct->refresh();
+
+    expect($stockProduct->reserved_quantity)->toBe(10);
     expect($stockProduct->free_on_stock_quantity)->toBe(0);
 });

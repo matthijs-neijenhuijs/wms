@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Modules\Orders\Models\Order;
 use Modules\Orders\Models\OrderProduct;
 use Modules\Orders\Models\OrderStatus;
+use Modules\Orders\Models\PurchaseOrder;
+use Modules\Orders\Models\PurchaseOrderIncomingBatch;
 use Modules\Picklists\Models\Picklist;
 use Modules\Picklists\Models\PicklistProduct;
 use Modules\Products\Models\Product;
@@ -115,6 +117,7 @@ class OrderStatusTransitionService
             function (OrderProduct $orderProduct, int $quantity) use ($order, $causerId): void {
                 $this->notifyStockReduced($order, $causerId, $orderProduct->name, $quantity);
             },
+            $causerId,
         );
 
         $order->forceFill([
@@ -133,7 +136,7 @@ class OrderStatusTransitionService
         $this->logWorkflowStep($order, 'stock_released', 'Reserved stock released for cancelled order');
     }
 
-    protected function adjustStockLevels(Order $order, callable $mutate, ?callable $afterEach = null): void
+    protected function adjustStockLevels(Order $order, callable $mutate, ?callable $afterEach = null, ?int $causerId = null): void
     {
         $order->loadMissing('products.product.stockProduct');
 
@@ -152,7 +155,7 @@ class OrderStatusTransitionService
                 continue;
             }
 
-            DB::transaction(function () use ($product, $quantity, $mutate): void {
+            DB::transaction(function () use ($product, $quantity, $mutate, $order, $causerId): void {
                 $stockProduct = StockProduct::query()
                     ->whereKey($product->stockProduct->getKey())
                     ->lockForUpdate()
@@ -162,9 +165,22 @@ class OrderStatusTransitionService
                     return;
                 }
 
+                $quantityBefore = $stockProduct->on_stock_quantity;
+
                 $mutate($stockProduct, $quantity);
 
-                $stockProduct->save();
+                activity()->withoutLogging(fn () => $stockProduct->save());
+
+                StockMutationLogger::log(
+                    $stockProduct,
+                    $quantityBefore,
+                    $causerId,
+                    "Stock reduced by order {$order->generated_custom_order_id}",
+                    [
+                        'order_id' => $order->getKey(),
+                        'order_reference' => $order->generated_custom_order_id,
+                    ],
+                );
             });
 
             if ($afterEach) {
@@ -248,20 +264,11 @@ class OrderStatusTransitionService
 
         $remainingStock = (int) (StockProduct::where('product_id', $productId)->value('on_stock_quantity') ?? 0);
 
-        $incomingBatches = DB::table('purchase_orders_products')
-            ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_orders_products.purchase_order_id')
-            ->where('purchase_orders_products.product_id', $productId)
-            ->where('purchase_orders.processed', false)
-            ->select('purchase_orders.expected_delivery_date')
-            ->get()
-            ->groupBy('expected_delivery_date')
-            ->map(fn ($rows) => $rows->count())
-            ->sortKeys()
-            ->map(fn (int $qty, string $date): object => (object) [
-                'expected_delivery_date' => $date,
-                'remaining' => $qty,
-            ])
-            ->values();
+        $incomingBatches = PurchaseOrder::incomingBatchesForProduct($productId)
+            ->map(fn (PurchaseOrderIncomingBatch $batch): object => (object) [
+                'expected_delivery_date' => $batch->expected_delivery_date,
+                'remaining' => $batch->quantity,
+            ]);
 
         $reserved = 0;
 
@@ -344,7 +351,7 @@ class OrderStatusTransitionService
         }
     }
 
-    protected function recalculateFreeStock(StockProduct $stockProduct): void
+    public function recalculateFreeStock(StockProduct $stockProduct): void
     {
         $stockProduct->free_on_stock_quantity = max(
             0,

@@ -12,7 +12,7 @@ use Modules\Clients\Filament\Resources\Clients\ClientResource;
 use Modules\Clients\Filament\Resources\Clients\Pages\ManageClientActivities;
 use Modules\Orders\Filament\Resources\Orders\OrderResource;
 use Modules\Orders\Filament\Resources\Orders\Pages\ManageOrderActivities;
-use Modules\Products\Filament\Resources\Products\Pages\ManageProductActivities;
+use Modules\Products\Filament\Resources\Products\Pages\ManageProductHistory;
 use Modules\Products\Filament\Resources\Products\ProductResource;
 use Spatie\Activitylog\Models\Activity;
 
@@ -40,10 +40,11 @@ it('registers history pages for audited resources', function () {
     expect(ClientResource::getPages())->toHaveKey('history');
     expect(OrderResource::getPages())->toHaveKey('history');
     expect(ProductResource::getPages())->toHaveKey('history');
+    expect(ProductResource::getPages())->not->toHaveKey('stock-history');
 
     expect(ManageClientActivities::getRelatedResource())->toBe(ActivityLogResource::class);
     expect(ManageOrderActivities::getRelatedResource())->toBe(ActivityLogResource::class);
-    expect(ManageProductActivities::getRelatedResource())->toBe(ActivityLogResource::class);
+    expect(method_exists(ManageProductHistory::class, 'getRelatedResource'))->toBeFalse();
 
     expect(ClientResource::getRelations())->not->toContain(HistoryRelationManager::class);
     expect(OrderResource::getRelations())->not->toContain(HistoryRelationManager::class);

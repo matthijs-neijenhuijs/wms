@@ -15,8 +15,7 @@ use Modules\Products\Filament\Resources\Products\Pages\CreateProduct;
 use Modules\Products\Filament\Resources\Products\Pages\EditProduct;
 use Modules\Products\Filament\Resources\Products\Pages\EditProductStock;
 use Modules\Products\Filament\Resources\Products\Pages\ListProducts;
-use Modules\Products\Filament\Resources\Products\Pages\ManageProductActivities;
-use Modules\Products\Filament\Resources\Products\Pages\ManageStockActivities;
+use Modules\Products\Filament\Resources\Products\Pages\ManageProductHistory;
 use Modules\Products\Filament\Resources\Products\Schemas\ProductForm;
 use Modules\Products\Filament\Resources\Products\Tables\ProductsTable;
 use Modules\Products\Models\Product;
@@ -34,8 +33,7 @@ class ProductResource extends Resource
         return $page->generateNavigationItems([
             EditProduct::class,
             EditProductStock::class,
-            ManageProductActivities::class,
-            ManageStockActivities::class,
+            ManageProductHistory::class,
         ]);
     }
 
@@ -63,8 +61,7 @@ class ProductResource extends Resource
             'create' => CreateProduct::route('/create'),
             'edit' => EditProduct::route('/{record}/edit'),
             'edit-stock' => EditProductStock::route('/{record}/edit/stock'),
-            'history' => ManageProductActivities::route('/{record}/history'),
-            'stock-history' => ManageStockActivities::route('/{record}/stock-history'),
+            'history' => ManageProductHistory::route('/{record}/history'),
         ];
     }
 }

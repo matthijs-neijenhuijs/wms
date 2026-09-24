@@ -16,14 +16,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Orders\Filament\Infolists\Components\PurchaseOrderFailedProductsTable;
 use Modules\Orders\Filament\Infolists\Components\PurchaseOrderProductsTable;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\CommentsEntry;
-use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\CompletedEntry;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\CreatedAtEntry;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\ExpectedDeliveryDateEntry;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\GeneratedCustomPurchaseOrderIdEntry;
-use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\ProcessedEntry;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\ProductsCountEntry;
+use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\ReceivedDateEntry;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\ScannedCountEntry;
+use Modules\Orders\Filament\Resources\PurchaseOrders\Entries\StatusEntry;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
+use Modules\Orders\Filament\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Pages\ManagePurchaseOrderActivities;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
@@ -43,6 +44,7 @@ class PurchaseOrderResource extends Resource
     {
         return $page->generateNavigationItems([
             ViewPurchaseOrder::class,
+            EditPurchaseOrder::class,
             ManagePurchaseOrderActivities::class,
         ]);
     }
@@ -59,11 +61,11 @@ class PurchaseOrderResource extends Resource
                 Section::make(__('Purchase Order'))
                     ->schema([
                         GeneratedCustomPurchaseOrderIdEntry::make(),
+                        StatusEntry::make(),
                         ProductsCountEntry::make(),
                         ScannedCountEntry::make(),
                         ExpectedDeliveryDateEntry::make(),
-                        ProcessedEntry::make(),
-                        CompletedEntry::make(),
+                        ReceivedDateEntry::make(),
                         CreatedAtEntry::make(),
                         CommentsEntry::make(),
                     ])
@@ -112,6 +114,7 @@ class PurchaseOrderResource extends Resource
             'index' => ListPurchaseOrders::route('/'),
             'create' => CreatePurchaseOrder::route('/create'),
             'view' => ViewPurchaseOrder::route('/{record}'),
+            'edit' => EditPurchaseOrder::route('/{record}/edit'),
             'history' => ManagePurchaseOrderActivities::route('/{record}/history'),
         ];
     }
