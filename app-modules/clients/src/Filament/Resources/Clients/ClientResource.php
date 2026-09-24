@@ -15,6 +15,7 @@ use Modules\Clients\Filament\Resources\Clients\Pages\CreateClient;
 use Modules\Clients\Filament\Resources\Clients\Pages\EditClient;
 use Modules\Clients\Filament\Resources\Clients\Pages\ListClients;
 use Modules\Clients\Filament\Resources\Clients\Pages\ManageClientActivities;
+use Modules\Clients\Filament\Resources\Clients\Pages\ManageClientOrders;
 use Modules\Clients\Filament\Resources\Clients\Schemas\ClientForm;
 use Modules\Clients\Filament\Resources\Clients\Tables\ClientsTable;
 use Modules\Clients\Models\Client;
@@ -33,6 +34,7 @@ class ClientResource extends Resource
     {
         return $page->generateNavigationItems([
             EditClient::class,
+            ManageClientOrders::class,
             ManageClientActivities::class,
         ]);
     }
@@ -60,6 +62,7 @@ class ClientResource extends Resource
             'index' => ListClients::route('/'),
             'create' => CreateClient::route('/create'),
             'edit' => EditClient::route('/{record}/edit'),
+            'orders' => ManageClientOrders::route('/{record}/orders'),
             'history' => ManageClientActivities::route('/{record}/history'),
         ];
     }
