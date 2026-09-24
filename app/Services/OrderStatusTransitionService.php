@@ -115,6 +115,7 @@ class OrderStatusTransitionService
             function (OrderProduct $orderProduct, int $quantity) use ($order, $causerId): void {
                 $this->notifyStockReduced($order, $causerId, $orderProduct->name, $quantity);
             },
+            $causerId,
         );
 
         $order->forceFill([
@@ -133,7 +134,7 @@ class OrderStatusTransitionService
         $this->logWorkflowStep($order, 'stock_released', 'Reserved stock released for cancelled order');
     }
 
-    protected function adjustStockLevels(Order $order, callable $mutate, ?callable $afterEach = null): void
+    protected function adjustStockLevels(Order $order, callable $mutate, ?callable $afterEach = null, ?int $causerId = null): void
     {
         $order->loadMissing('products.product.stockProduct');
 
@@ -152,7 +153,7 @@ class OrderStatusTransitionService
                 continue;
             }
 
-            DB::transaction(function () use ($product, $quantity, $mutate): void {
+            DB::transaction(function () use ($product, $quantity, $mutate, $order, $causerId): void {
                 $stockProduct = StockProduct::query()
                     ->whereKey($product->stockProduct->getKey())
                     ->lockForUpdate()
@@ -162,9 +163,22 @@ class OrderStatusTransitionService
                     return;
                 }
 
+                $quantityBefore = $stockProduct->on_stock_quantity;
+
                 $mutate($stockProduct, $quantity);
 
-                $stockProduct->save();
+                activity()->withoutLogging(fn () => $stockProduct->save());
+
+                StockMutationLogger::log(
+                    $stockProduct,
+                    $quantityBefore,
+                    $causerId,
+                    "Stock reduced by order {$order->generated_custom_order_id}",
+                    [
+                        'order_id' => $order->getKey(),
+                        'order_reference' => $order->generated_custom_order_id,
+                    ],
+                );
             });
 
             if ($afterEach) {
@@ -344,7 +358,7 @@ class OrderStatusTransitionService
         }
     }
 
-    protected function recalculateFreeStock(StockProduct $stockProduct): void
+    public function recalculateFreeStock(StockProduct $stockProduct): void
     {
         $stockProduct->free_on_stock_quantity = max(
             0,

@@ -589,7 +589,7 @@ class TenantSeeder extends Seeder
                     ],
                     [
                         'client_id' => $client2->id,
-                        'order_statuses_id' => $statusConfirmedId,
+                        'order_statuses_id' => $statusNew->id,
                         'discount' => 5.00,
                         'invoice_name' => $client2->company ?? $deliveryAddress2->name,
                         'invoice_address' => $deliveryAddress2->address,
@@ -609,25 +609,28 @@ class TenantSeeder extends Seeder
                     ]
                 );
 
-                // Add multiple products to order 2
-                if ($products->count() > 0) {
+                // Add multiple products to order 2. Products can only be modified while
+                // an order is in a concept status, so only run this once per order: skip
+                // it entirely (including the status transition) once the product exists.
+                if ($products->count() > 0 && ! OrderProduct::query()->where('order_id', $order2->id)->exists()) {
                     $product = $products->first();
-                    OrderProduct::query()->firstOrCreate(
-                        [
-                            'order_id' => $order2->id,
-                            'product_id' => $product->id,
-                        ],
-                        [
-                            'vat_rate_id' => $product->vat_rate_id,
-                            'vat_rate' => $product->vatRate->rate ?? 21,
-                            'name' => $product->name,
-                            'quantity' => 5,
-                            'price' => $product->price,
-                            'weight' => 1000,
-                            'reference_code' => $product->reference_code,
-                            'barcode' => $product->barcode,
-                        ]
-                    );
+
+                    $order2->update(['order_statuses_id' => $statusNew->id]);
+
+                    OrderProduct::query()->create([
+                        'order_id' => $order2->id,
+                        'product_id' => $product->id,
+                        'vat_rate_id' => $product->vat_rate_id,
+                        'vat_rate' => $product->vatRate->rate ?? 21,
+                        'name' => $product->name,
+                        'quantity' => 5,
+                        'price' => $product->price,
+                        'weight' => 1000,
+                        'reference_code' => $product->reference_code,
+                        'barcode' => $product->barcode,
+                    ]);
+
+                    $order2->update(['order_statuses_id' => $statusConfirmedId]);
                 }
             }
         }
@@ -650,7 +653,7 @@ class TenantSeeder extends Seeder
                     ],
                     [
                         'client_id' => $client3->id,
-                        'order_statuses_id' => $statusProcessingId,
+                        'order_statuses_id' => $statusNew->id,
                         'discount' => 0,
                         'invoice_name' => $deliveryAddress3->name,
                         'invoice_address' => $deliveryAddress3->address,
@@ -670,25 +673,28 @@ class TenantSeeder extends Seeder
                     ]
                 );
 
-                // Add product to order 3
-                if ($products->count() > 0) {
+                // Add product to order 3. Products can only be modified while an order
+                // is in a concept status, so only run this once per order: skip it
+                // entirely (including the status transition) once the product exists.
+                if ($products->count() > 0 && ! OrderProduct::query()->where('order_id', $order3->id)->exists()) {
                     $product = $products->first();
-                    OrderProduct::query()->firstOrCreate(
-                        [
-                            'order_id' => $order3->id,
-                            'product_id' => $product->id,
-                        ],
-                        [
-                            'vat_rate_id' => $product->vat_rate_id,
-                            'vat_rate' => $product->vatRate->rate ?? 21,
-                            'name' => $product->name,
-                            'quantity' => 1,
-                            'price' => $product->price,
-                            'weight' => 200,
-                            'reference_code' => $product->reference_code,
-                            'barcode' => $product->barcode,
-                        ]
-                    );
+
+                    $order3->update(['order_statuses_id' => $statusNew->id]);
+
+                    OrderProduct::query()->create([
+                        'order_id' => $order3->id,
+                        'product_id' => $product->id,
+                        'vat_rate_id' => $product->vat_rate_id,
+                        'vat_rate' => $product->vatRate->rate ?? 21,
+                        'name' => $product->name,
+                        'quantity' => 1,
+                        'price' => $product->price,
+                        'weight' => 200,
+                        'reference_code' => $product->reference_code,
+                        'barcode' => $product->barcode,
+                    ]);
+
+                    $order3->update(['order_statuses_id' => $statusProcessingId]);
                 }
             }
         }
@@ -701,7 +707,7 @@ class TenantSeeder extends Seeder
             ],
             [
                 'client_id' => $client1->id,
-                'order_statuses_id' => $statusDeliveredId,
+                'order_statuses_id' => $statusNew->id,
                 'discount' => 0,
                 'invoice_name' => $client1->company ?? $deliveryAddress1->name,
                 'invoice_address' => $deliveryAddress1->address,
@@ -722,25 +728,28 @@ class TenantSeeder extends Seeder
             ]
         );
 
-        // Add products to order 4
-        if ($products->count() > 0) {
+        // Add products to order 4. Products can only be modified while an order is in
+        // a concept status, so only run this once per order: skip it entirely
+        // (including the status transition) once the product exists.
+        if ($products->count() > 0 && ! OrderProduct::query()->where('order_id', $order4->id)->exists()) {
             $product = $products->first();
-            OrderProduct::query()->firstOrCreate(
-                [
-                    'order_id' => $order4->id,
-                    'product_id' => $product->id,
-                ],
-                [
-                    'vat_rate_id' => $product->vat_rate_id,
-                    'vat_rate' => $product->vatRate->rate ?? 21,
-                    'name' => $product->name,
-                    'quantity' => 3,
-                    'price' => $product->price,
-                    'weight' => 600,
-                    'reference_code' => $product->reference_code,
-                    'barcode' => $product->barcode,
-                ]
-            );
+
+            $order4->update(['order_statuses_id' => $statusNew->id]);
+
+            OrderProduct::query()->create([
+                'order_id' => $order4->id,
+                'product_id' => $product->id,
+                'vat_rate_id' => $product->vat_rate_id,
+                'vat_rate' => $product->vatRate->rate ?? 21,
+                'name' => $product->name,
+                'quantity' => 3,
+                'price' => $product->price,
+                'weight' => 600,
+                'reference_code' => $product->reference_code,
+                'barcode' => $product->barcode,
+            ]);
+
+            $order4->update(['order_statuses_id' => $statusDeliveredId]);
         }
     }
 

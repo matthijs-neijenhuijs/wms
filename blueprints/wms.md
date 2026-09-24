@@ -110,10 +110,15 @@ asserts it renders).
 
 **Exception — `StockProduct`**: its activity is logged under
 `subject_type = StockProduct`, a different subject than `Product`, so
-`Product`'s own History tab never showed stock quantity changes. This is
-surfaced separately via a dedicated "Stock History" tab on `ProductResource`
-using a `Product::stockActivities(): HasManyThrough` relation — see
-[`products.md`](products.md).
+`Product`'s own History tab never showed stock quantity changes by default.
+`Product`'s History tab is the one resource-wide exception to the
+"`ManageRelatedRecords` page per relationship" pattern above: its
+`Pages\ManageProductHistory` combines both subject types into a single table
+via a manually-built `Activity` query (no relationship spans both), reusing
+`Product::stockActivities(): HasManyThrough` for the StockProduct side — see
+[`products.md`](products.md) "Combined History tab" and
+[`orders.md`](orders.md) §10 for how stock-quantity rows there are attributed
+back to the Order/Purchase Order that caused them.
 
 **Model side** — add to any model that should have a History tab:
 ```php

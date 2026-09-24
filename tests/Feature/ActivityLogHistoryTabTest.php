@@ -20,8 +20,7 @@ use Modules\Orders\Models\OrderStatus;
 use Modules\Orders\Models\PurchaseOrder;
 use Modules\Picklists\Filament\Resources\Picklists\Pages\ManagePicklistActivities;
 use Modules\Picklists\Models\Picklist;
-use Modules\Products\Filament\Resources\Products\Pages\ManageProductActivities;
-use Modules\Products\Filament\Resources\Products\Pages\ManageStockActivities;
+use Modules\Products\Filament\Resources\Products\Pages\ManageProductHistory;
 use Modules\Products\Models\Product;
 use Modules\Products\Models\StockProduct;
 use Modules\Settings\Filament\Resources\ApiKeys\Pages\ManageApiKeyActivities;
@@ -77,7 +76,7 @@ it('renders the History tab without error for every audited resource', function 
     'Order' => [ManageOrderActivities::class, fn (Warehouse $warehouse) => Order::query()->create([
         'warehouse_id' => $warehouse->id,
     ])],
-    'Product' => [ManageProductActivities::class, fn (Warehouse $warehouse) => Product::query()->create([
+    'Product' => [ManageProductHistory::class, fn (Warehouse $warehouse) => Product::query()->create([
         'warehouse_id' => $warehouse->id,
         'active' => true,
         'reference_code' => 'REF-001',
@@ -126,7 +125,7 @@ it('renders the History tab without error for every audited resource', function 
         'name' => 'Concept',
         'color' => '#ffffff',
     ])],
-    'StockProduct (via Product Stock History tab)' => [ManageStockActivities::class, function (Warehouse $warehouse) {
+    'Product with stock (via combined History tab)' => [ManageProductHistory::class, function (Warehouse $warehouse) {
         $product = Product::query()->create([
             'warehouse_id' => $warehouse->id,
             'active' => true,
@@ -149,8 +148,12 @@ it('renders the History tab without error for every audited resource', function 
     }],
 ]);
 
-it('surfaces StockProduct activity on the Stock History tab, separately from Product activity', function () {
+it('combines Product and StockProduct activity into one History tab, newest first', function () {
     [, $warehouse] = createActivityLogHistoryContext();
+
+    // activity_log.created_at is second-precision; without spacing these out,
+    // ties would make the "newest first" order below non-deterministic.
+    $this->travelTo(now());
 
     $product = Product::query()->create([
         'warehouse_id' => $warehouse->id,
@@ -161,6 +164,9 @@ it('surfaces StockProduct activity on the Stock History tab, separately from Pro
         'name' => 'Stock Demo Product Two',
         'description' => 'Demo description',
     ]);
+    // Product's own "created" activity now exists.
+
+    $this->travelTo(now()->addSecond());
 
     $stockProduct = StockProduct::query()->create([
         'product_id' => $product->id,
@@ -169,17 +175,38 @@ it('surfaces StockProduct activity on the Stock History tab, separately from Pro
         'reserved_on_picklists' => 0,
         'free_on_stock_quantity' => 5,
     ]);
+    // StockProduct's own "created" activity now exists.
+
+    $this->travelTo(now()->addSecond());
 
     $stockProduct->update(['on_stock_quantity' => 10, 'free_on_stock_quantity' => 10]);
+    // StockProduct's "updated" activity now exists.
+
+    $this->travelTo(now()->addSecond());
+
+    $product->update(['name' => 'Renamed Product']);
+    // Product's "updated" activity now exists — newest so far.
 
     $stockActivities = $product->fresh()->stockActivities;
 
     expect($stockActivities)->toHaveCount(2) // created + updated
         ->and($stockActivities->pluck('subject_type')->unique()->all())->toBe([StockProduct::class])
-        ->and($product->fresh()->activitiesAsSubject()->count())->toBe(1); // only Product's own "created" event
+        ->and($product->fresh()->activitiesAsSubject()->count())->toBe(2); // Product's own created + updated
 
-    Livewire::test(ManageStockActivities::class, ['record' => $product->getKey()])
+    $productActivities = $product->fresh()->activitiesAsSubject;
+    $combined = $stockActivities->concat($productActivities)->sortByDesc('id')->values();
+
+    // Every table in this app is configured with ->deferLoading() globally
+    // (see App\Providers\FilamentServiceProvider), so a plain Livewire::test()
+    // snapshot never executes the wire:init follow-up request that actually
+    // loads rows — asserting on the table's own query results is the direct,
+    // reliable way to verify the combined/ordered dataset instead.
+    $livewire = Livewire::test(ManageProductHistory::class, ['record' => $product->getKey()])
         ->assertOk();
+
+    $renderedIds = $livewire->instance()->getTable()->getRecords()->pluck('id')->values();
+
+    expect($renderedIds->all())->toBe($combined->pluck('id')->all());
 });
 
 it('excludes the api key hash from logged attribute changes', function () {

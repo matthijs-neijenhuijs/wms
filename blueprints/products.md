@@ -35,15 +35,16 @@ see [`settings.md`](settings.md)), `productAttributes(): HasMany`,
 `attributes(): BelongsToMany` (pivot `product_attributes`), `stockProduct(): HasOne`.
 
 **Fixed — History tab was broken**: `ProductResource`'s History tab
-(`Pages\ManageProductActivities`) set `$relationship = 'activities'`, but
+originally (`Pages\ManageProductActivities`) set `$relationship = 'activities'`, but
 `Product` only has `LogsActivity`, which provides `activitiesAsSubject()`,
 not `activities()` — visiting the tab threw `BadMethodCallException`. Fixed
 to `$relationship = 'activitiesAsSubject'`. See [`wms.md`](wms.md) §2 for the
 full pattern and the shared regression test (`tests/Feature/ActivityLogHistoryTabTest.php`)
-that covers this.
+that covers this. This page has since been replaced by the combined
+`Pages\ManageProductHistory` — see "Combined History tab" below.
 
 **Resource: `Modules\Products\Filament\Resources\Products\ProductResource`** — no
-navigation group, icon `Heroicon::OutlinedPhoto`, sub-navigation (General/Stock/History/Stock History).
+navigation group, icon `Heroicon::OutlinedPhoto`, sub-navigation (General/Stock/History).
 - Form (`ProductForm`, one `Section` columns=2): `ActiveToggle`, `ReferenceCodeInput`,
   `BarcodeInput`, `NameInput` (all required `TextInput`/`Toggle`), `VatRateSelect`
   (`->relationship('vatRate','name')`, not required), `BrandSelect` (same shape),
@@ -86,15 +87,35 @@ accessor** — it must be explicitly recalculated and saved by application code
 (see canonical formula above). Reservation/deferral logic against incoming
 Purchase Orders is documented in [`orders.md`](orders.md).
 
-**Implemented — Stock History tab**: `StockProduct`'s own activity log
-(`subject_type = StockProduct`) is distinct from `Product`'s
+**Implemented, then combined — Stock History tab**: `StockProduct`'s own
+activity log (`subject_type = StockProduct`) is distinct from `Product`'s
 (`subject_type = Product`) — visiting Product's own History tab never showed
-stock quantity changes. Added `Product::stockActivities(): HasManyThrough`
-(`Product` → `StockProduct` → `Spatie\Activitylog\Models\Activity`, filtered
-to `subject_type = StockProduct`) and a new
-`Pages\ManageStockActivities` page (same `ManageRelatedRecords` shape as
-[`wms.md`](wms.md) §2, `$relationship = 'stockActivities'`), wired as a
-fourth `ProductResource` sub-navigation tab ("Stock History") and
-`'stock-history' => ManageStockActivities::route('/{record}/stock-history')`.
-No `ActivityLogResource` tenant-scoping change was needed —
+stock quantity changes. A `Product::stockActivities(): HasManyThrough`
+relation (`Product` → `StockProduct` → `Spatie\Activitylog\Models\Activity`,
+filtered to `subject_type = StockProduct`) was added, initially wired to its
+own separate "Stock History" sub-navigation tab (`Pages\ManageStockActivities`,
+same `ManageRelatedRecords` shape as [`wms.md`](wms.md) §2). That tab has
+since been merged into Product's main History tab — see "Combined History
+tab" below; `stockActivities()` itself is unchanged and still used by that
+combined page. No `ActivityLogResource` tenant-scoping change was needed —
 `StockProduct` was already scoped there via `whereHas('product', ...)`.
+
+**Combined History tab**: `Pages\ManageProductHistory` replaces both
+`ManageProductActivities` and `ManageStockActivities` with a single "History"
+tab showing both a Product's own field changes and its `StockProduct`'s
+quantity changes together, newest first. There is no single Eloquent
+relationship spanning both `subject_type` values, so unlike every other
+module's History tab (which are all `ManageRelatedRecords` pages per
+[`wms.md`](wms.md) §2), this is the one exception: it implements
+`Filament\Tables\Contracts\HasTable` + `InteractsWithRecord` directly (the
+same composition `ListRecords`/`EditRecord` are built from) with a manually
+combined `Activity::query()->where(subject=Product)->orWhere(subject=StockProduct)`,
+reusing `AlizHarb\ActivityLog\Resources\ActivityLogs\Tables\ActivityLogTable::configure()`
+for its base columns/filters/actions.
+
+For stock-quantity rows specifically, three extra columns
+(`App\Filament\Resources\ActivityLogs\Columns\StockMutationColumns`) show a
+increase/decrease direction icon, the signed quantity delta, and a link to
+the Order or Purchase Order that caused the change. This requires the
+mutation to actually be attributable, which the raw `StockProduct` dirty-diff
+log never was (see [`orders.md`](orders.md) "Stock mutation attribution").
