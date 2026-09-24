@@ -10,6 +10,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Columns\ExpectedDeliveryDateColumn;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Columns\GeneratedCustomPurchaseOrderIdColumn;
+use Modules\Orders\Filament\Resources\PurchaseOrders\Columns\StatusColumn;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Columns\TotalProductsColumn;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Columns\TotalScannedColumn;
 
@@ -20,6 +21,7 @@ class PurchaseOrdersTable
         return $table
             ->columns([
                 GeneratedCustomPurchaseOrderIdColumn::make(),
+                StatusColumn::make(),
                 TotalProductsColumn::make(),
                 TotalScannedColumn::make(),
                 ExpectedDeliveryDateColumn::make(),

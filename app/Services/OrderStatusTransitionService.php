@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Modules\Orders\Models\Order;
 use Modules\Orders\Models\OrderProduct;
 use Modules\Orders\Models\OrderStatus;
+use Modules\Orders\Models\PurchaseOrder;
+use Modules\Orders\Models\PurchaseOrderIncomingBatch;
 use Modules\Picklists\Models\Picklist;
 use Modules\Picklists\Models\PicklistProduct;
 use Modules\Products\Models\Product;
@@ -262,20 +264,11 @@ class OrderStatusTransitionService
 
         $remainingStock = (int) (StockProduct::where('product_id', $productId)->value('on_stock_quantity') ?? 0);
 
-        $incomingBatches = DB::table('purchase_orders_products')
-            ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_orders_products.purchase_order_id')
-            ->where('purchase_orders_products.product_id', $productId)
-            ->where('purchase_orders.processed', false)
-            ->select('purchase_orders.expected_delivery_date')
-            ->get()
-            ->groupBy('expected_delivery_date')
-            ->map(fn ($rows) => $rows->count())
-            ->sortKeys()
-            ->map(fn (int $qty, string $date): object => (object) [
-                'expected_delivery_date' => $date,
-                'remaining' => $qty,
-            ])
-            ->values();
+        $incomingBatches = PurchaseOrder::incomingBatchesForProduct($productId)
+            ->map(fn (PurchaseOrderIncomingBatch $batch): object => (object) [
+                'expected_delivery_date' => $batch->expected_delivery_date,
+                'remaining' => $batch->quantity,
+            ]);
 
         $reserved = 0;
 

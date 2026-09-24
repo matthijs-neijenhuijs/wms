@@ -8,6 +8,7 @@ use App\Services\PurchaseOrderImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Modules\Orders\Models\PurchaseOrder;
+use Modules\Orders\Models\PurchaseOrderStatus;
 use Modules\Products\Models\Product;
 
 uses(RefreshDatabase::class);
@@ -52,8 +53,7 @@ it('imports purchase order products from a csv file with barcode and quantity da
 
     $purchaseOrder->refresh();
 
-    expect($purchaseOrder->processed)->toBeFalse();
-    expect($purchaseOrder->completed)->toBeFalse();
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Concept);
     expect($purchaseOrder->products()->count())->toBe(3);
 
     $this->assertDatabaseHas('purchase_orders_products', [

@@ -6,11 +6,12 @@ namespace Modules\Orders\Filament\Resources\PurchaseOrders\Entries;
 
 use Filament\Infolists\Components\TextEntry;
 
-class ProcessedEntry
+class StatusEntry
 {
     public static function make(): TextEntry
     {
-        return TextEntry::make('processed')
-            ->formatStateUsing(fn (bool|int|null $state): string => $state ? __('Yes') : __('No'));
+        return TextEntry::make('status')
+            ->label(__('Status'))
+            ->badge();
     }
 }

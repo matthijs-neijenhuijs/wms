@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Modules\Orders\Observers;
 
 use App\Models\Warehouse;
+use Modules\Orders\Exceptions\PurchaseOrderStatusLockedException;
 use Modules\Orders\Models\PurchaseOrder;
+use Modules\Orders\Models\PurchaseOrderStatus;
 
 class PurchaseOrderObserver
 {
@@ -43,5 +45,26 @@ class PurchaseOrderObserver
 
         $purchaseOrder->generated_year_purchase_order_id ??= $nextGeneratedYearPurchaseOrderId;
         $purchaseOrder->generated_custom_purchase_order_id ??= "PURCHASEORDER{$prefix}{$year}{$purchaseOrder->generated_year_purchase_order_id}";
+    }
+
+    /**
+     * Handle the PurchaseOrder "updating" event.
+     */
+    public function updating(PurchaseOrder $purchaseOrder): void
+    {
+        if (! $purchaseOrder->isDirty('status')) {
+            return;
+        }
+
+        $originalValue = $purchaseOrder->getOriginal('status');
+        $originalStatus = $originalValue instanceof PurchaseOrderStatus
+            ? $originalValue
+            : PurchaseOrderStatus::from((string) $originalValue);
+
+        if (! in_array($purchaseOrder->status, $originalStatus->allowedNextStatuses(), true)) {
+            throw new PurchaseOrderStatusLockedException(
+                "Purchase order #{$purchaseOrder->id}'s status cannot move from {$originalStatus->value} to {$purchaseOrder->status->value}."
+            );
+        }
     }
 }

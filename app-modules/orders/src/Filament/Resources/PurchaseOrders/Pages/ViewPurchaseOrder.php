@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace Modules\Orders\Filament\Resources\PurchaseOrders\Pages;
 
 use App\Services\PurchaseOrderProcessingService;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 use Livewire\Attributes\On;
+use Modules\Orders\Filament\Resources\PurchaseOrders\Inputs\ExpectedDeliveryDateInput;
 use Modules\Orders\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
 use Modules\Orders\Models\PurchaseOrder;
 use Modules\Orders\Models\PurchaseOrderFailedProduct;
 use Modules\Orders\Models\PurchaseOrderProduct;
+use Modules\Orders\Models\PurchaseOrderStatus;
 
 class ViewPurchaseOrder extends ViewRecord
 {
@@ -80,15 +83,10 @@ class ViewPurchaseOrder extends ViewRecord
         $freshPurchaseOrder = $purchaseOrder->fresh();
 
         if ($freshPurchaseOrder->isFullyScanned()) {
-            $causerId = auth()->id();
-
-            app(PurchaseOrderProcessingService::class)->processScanCompletion(
-                $freshPurchaseOrder,
-                is_int($causerId) ? $causerId : null,
-            );
+            app(PurchaseOrderProcessingService::class)->evaluateScanCompletion($freshPurchaseOrder);
 
             Notification::make()
-                ->title(__('Purchase order fully scanned — stock updated'))
+                ->title(__('Purchase order fully scanned'))
                 ->success()
                 ->send();
         }
@@ -100,19 +98,81 @@ class ViewPurchaseOrder extends ViewRecord
         $purchaseOrder = $this->getRecord();
 
         return [
+            Action::make('markPurchased')
+                ->label(__('Mark Purchased'))
+                ->icon(Heroicon::Truck)
+                ->color('warning')
+                ->visible(fn (): bool => $purchaseOrder->canTransitionTo(PurchaseOrderStatus::Purchased))
+                ->schema([
+                    ExpectedDeliveryDateInput::make()
+                        ->required()
+                        ->default($purchaseOrder->expected_delivery_date),
+                ])
+                ->action(function (array $data) use ($purchaseOrder): void {
+                    app(PurchaseOrderProcessingService::class)->markPurchased(
+                        $purchaseOrder,
+                        Carbon::parse($data['expected_delivery_date']),
+                    );
+                    $purchaseOrder->refresh();
+
+                    Notification::make()
+                        ->title(__('Purchase order marked as purchased'))
+                        ->success()
+                        ->send();
+                }),
+
             Action::make('markReceived')
                 ->label(__('Mark Received'))
                 ->icon(Heroicon::CheckCircle)
                 ->color('success')
-                ->visible(fn (): bool => $purchaseOrder->canMarkReceived())
+                ->visible(fn (): bool => $purchaseOrder->canTransitionTo(PurchaseOrderStatus::Received))
                 ->requiresConfirmation()
-                ->modalDescription(__('Are you sure you want to mark this purchase order as received? This does not change stock.'))
+                ->modalDescription(__('Are you sure you want to mark this purchase order as received? This does not change stock, and does not set the Received Date — set that on the Edit page if needed.'))
                 ->action(function () use ($purchaseOrder): void {
                     app(PurchaseOrderProcessingService::class)->markReceived($purchaseOrder);
                     $purchaseOrder->refresh();
 
                     Notification::make()
                         ->title(__('Purchase order marked as received'))
+                        ->success()
+                        ->send();
+                }),
+
+            Action::make('markProcessed')
+                ->label(__('Mark Processed'))
+                ->icon(Heroicon::CheckBadge)
+                ->color('success')
+                ->visible(fn (): bool => $purchaseOrder->canTransitionTo(PurchaseOrderStatus::Processed))
+                ->requiresConfirmation()
+                ->modalDescription(__('Are you sure you want to mark this purchase order as processed? This will increase on-hand stock for every scanned line item.'))
+                ->action(function () use ($purchaseOrder): void {
+                    $causerId = auth()->id();
+
+                    app(PurchaseOrderProcessingService::class)->markProcessed(
+                        $purchaseOrder,
+                        is_int($causerId) ? $causerId : null,
+                    );
+                    $purchaseOrder->refresh();
+
+                    Notification::make()
+                        ->title(__('Purchase order processed — stock updated'))
+                        ->success()
+                        ->send();
+                }),
+
+            Action::make('cancel')
+                ->label(__('Cancel'))
+                ->icon(Heroicon::XCircle)
+                ->color('danger')
+                ->visible(fn (): bool => $purchaseOrder->canTransitionTo(PurchaseOrderStatus::Cancelled))
+                ->requiresConfirmation()
+                ->modalDescription(__('Are you sure you want to cancel this purchase order? This cannot be undone.'))
+                ->action(function () use ($purchaseOrder): void {
+                    app(PurchaseOrderProcessingService::class)->cancel($purchaseOrder);
+                    $purchaseOrder->refresh();
+
+                    Notification::make()
+                        ->title(__('Purchase order cancelled'))
                         ->success()
                         ->send();
                 }),

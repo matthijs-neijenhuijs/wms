@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Modules\Orders\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
 use Modules\Orders\Models\PurchaseOrder;
+use Modules\Orders\Models\PurchaseOrderStatus;
 
 class CreatePurchaseOrder extends CreateRecord
 {
@@ -27,8 +28,7 @@ class CreatePurchaseOrder extends CreateRecord
         unset($data['import_file']);
 
         $data['warehouse_id'] = Filament::getTenant()?->getKey();
-        $data['processed'] = false;
-        $data['completed'] = false;
+        $data['status'] = PurchaseOrderStatus::Concept->value;
 
         return $data;
     }

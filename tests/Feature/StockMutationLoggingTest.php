@@ -12,6 +12,7 @@ use Modules\Orders\Models\OrderProduct;
 use Modules\Orders\Models\OrderStatus;
 use Modules\Orders\Models\PurchaseOrder;
 use Modules\Orders\Models\PurchaseOrderProduct;
+use Modules\Orders\Models\PurchaseOrderStatus;
 use Modules\Products\Models\Product;
 use Modules\Products\Models\StockProduct;
 use Modules\Users\Models\User;
@@ -83,7 +84,11 @@ it('logs one purchase-order-attributed stock_product activity when a purchase or
         'reserved_on_picklists' => 0, 'free_on_stock_quantity' => 2,
     ]);
 
-    $purchaseOrder = PurchaseOrder::query()->create(['warehouse_id' => $warehouse->id, 'expected_delivery_date' => now()->addDay()->toDateString()]);
+    $purchaseOrder = PurchaseOrder::query()->create([
+        'warehouse_id' => $warehouse->id,
+        'status' => PurchaseOrderStatus::Scanned,
+        'expected_delivery_date' => now()->addDay()->toDateString(),
+    ]);
     for ($i = 0; $i < 5; $i++) {
         PurchaseOrderProduct::query()->create([
             'purchase_order_id' => $purchaseOrder->id, 'product_id' => $product->id,
@@ -92,7 +97,7 @@ it('logs one purchase-order-attributed stock_product activity when a purchase or
         ]);
     }
 
-    app(PurchaseOrderProcessingService::class)->processScanCompletion($purchaseOrder->fresh(), causerId: $user->id);
+    app(PurchaseOrderProcessingService::class)->markProcessed($purchaseOrder->fresh(), causerId: $user->id);
 
     $stockProduct->refresh();
     expect($stockProduct->on_stock_quantity)->toBe(7);

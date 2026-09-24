@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Subdomain;
 use App\Models\Warehouse;
+use App\Services\PurchaseOrderProcessingService;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -11,13 +12,14 @@ use Modules\Orders\Filament\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
 use Modules\Orders\Models\PurchaseOrder;
 use Modules\Orders\Models\PurchaseOrderFailedProduct;
 use Modules\Orders\Models\PurchaseOrderProduct;
+use Modules\Orders\Models\PurchaseOrderStatus;
 use Modules\Products\Models\Product;
 use Modules\Products\Models\StockProduct;
 use Modules\Users\Models\User;
 
 uses(RefreshDatabase::class);
 
-function createPurchaseOrderScanningContext(int $onStockQuantity = 5): array
+function createPurchaseOrderScanningContext(int $onStockQuantity = 5, PurchaseOrderStatus $status = PurchaseOrderStatus::Received): array
 {
     $subdomain = Subdomain::query()->create([
         'subdomain' => 'po-scanning',
@@ -62,6 +64,7 @@ function createPurchaseOrderScanningContext(int $onStockQuantity = 5): array
 
     $purchaseOrder = PurchaseOrder::query()->create([
         'warehouse_id' => $warehouse->id,
+        'status' => $status,
         'expected_delivery_date' => now()->addDay()->toDateString(),
     ]);
 
@@ -136,7 +139,7 @@ it('records a failed scan when a barcode is scanned twice', function () {
     expect($failedProduct->product_title)->toBe($product->name);
 });
 
-it('marks the purchase order processed and increases stock once all rows are scanned', function () {
+it('marks the purchase order status as scanned without touching stock once all rows are scanned', function () {
     [$user, , $product, $stockProduct, $purchaseOrder] = createPurchaseOrderScanningContext(onStockQuantity: 5);
 
     PurchaseOrderProduct::query()->create([
@@ -166,8 +169,8 @@ it('marks the purchase order processed and increases stock once all rows are sca
     $purchaseOrder->refresh();
     $stockProduct->refresh();
 
-    expect($purchaseOrder->processed)->toBeTrue();
-    expect($stockProduct->on_stock_quantity)->toBe(7);
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Scanned);
+    expect($stockProduct->on_stock_quantity)->toBe(5);
 });
 
 it('counts an unmatched product row toward full-scan completion without affecting stock', function () {
@@ -199,6 +202,53 @@ it('counts an unmatched product row toward full-scan completion without affectin
     $purchaseOrder->refresh();
     $stockProduct->refresh();
 
-    expect($purchaseOrder->processed)->toBeTrue();
-    expect($stockProduct->on_stock_quantity)->toBe(6);
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Scanned);
+    expect($stockProduct->on_stock_quantity)->toBe(5);
+});
+
+it('transitions directly from purchased to scanned without requiring received first', function () {
+    [$user, , $product, , $purchaseOrder] = createPurchaseOrderScanningContext(status: PurchaseOrderStatus::Purchased);
+
+    PurchaseOrderProduct::query()->create([
+        'purchase_order_id' => $purchaseOrder->id,
+        'product_id' => $product->id,
+        'barcode' => $product->barcode,
+        'reference_code' => $product->reference_code,
+        'product_title' => $product->name,
+        'scanned' => false,
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getKey()])
+        ->call('scanProductBarcode', $product->barcode);
+
+    expect($purchaseOrder->fresh()->status)->toBe(PurchaseOrderStatus::Scanned);
+});
+
+it('only increases stock once markProcessed is called after scanning completes', function () {
+    [$user, , $product, $stockProduct, $purchaseOrder] = createPurchaseOrderScanningContext(onStockQuantity: 5);
+
+    PurchaseOrderProduct::query()->create([
+        'purchase_order_id' => $purchaseOrder->id,
+        'product_id' => $product->id,
+        'barcode' => $product->barcode,
+        'reference_code' => $product->reference_code,
+        'product_title' => $product->name,
+        'scanned' => false,
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getKey()])
+        ->call('scanProductBarcode', $product->barcode);
+
+    $purchaseOrder->refresh();
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Scanned);
+    expect($stockProduct->fresh()->on_stock_quantity)->toBe(5);
+
+    app(PurchaseOrderProcessingService::class)->markProcessed($purchaseOrder, $user->id);
+
+    expect($purchaseOrder->fresh()->status)->toBe(PurchaseOrderStatus::Processed);
+    expect($stockProduct->fresh()->on_stock_quantity)->toBe(6);
 });

@@ -19,10 +19,10 @@ class PurchaseOrderResource extends JsonResource
         return [
             'id' => $this->id,
             'warehouse_id' => $this->warehouse_id,
-            'completed' => $this->completed,
-            'processed' => $this->processed,
+            'status' => $this->status,
             'comments' => $this->comments,
             'expected_delivery_date' => $this->expected_delivery_date,
+            'received_date' => $this->received_date,
             'generated_year_purchase_order_id' => $this->generated_year_purchase_order_id,
             'generated_custom_purchase_order_id' => $this->generated_custom_purchase_order_id,
             'created_at' => $this->created_at,
