@@ -6,10 +6,10 @@ namespace Modules\Orders\Filament\Resources\PurchaseOrders\Inputs;
 
 use Filament\Forms\Components\DatePicker;
 
-class ExpectedDeliveryDateInput
+class ReceivedDateInput
 {
     public static function make(): DatePicker
     {
-        return DatePicker::make('expected_delivery_date');
+        return DatePicker::make('received_date');
     }
 }

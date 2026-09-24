@@ -10,12 +10,15 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Modules\Orders\Filament\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
 use Modules\Orders\Models\PurchaseOrder;
+use Modules\Orders\Models\PurchaseOrderStatus;
+use Modules\Products\Models\Product;
+use Modules\Products\Models\StockProduct;
 use Modules\Users\Models\User;
 
 uses(RefreshDatabase::class);
 
 /**
- * @return array{0: User, 1: PurchaseOrder}
+ * @return array{0: User, 1: PurchaseOrder, 2: StockProduct}
  */
 function createMarkReceivedContext(): array
 {
@@ -42,41 +45,63 @@ function createMarkReceivedContext(): array
     test()->actingAs($user);
     Filament::setTenant($warehouse);
 
+    $product = Product::query()->create([
+        'warehouse_id' => $warehouse->id,
+        'active' => true,
+        'reference_code' => 'REF-001',
+        'product_code' => 'PROD-001',
+        'barcode' => '1111111111111',
+        'name' => 'Demo Product',
+        'description' => 'Demo description',
+    ]);
+
+    $stockProduct = StockProduct::query()->create([
+        'product_id' => $product->id,
+        'on_stock_quantity' => 3,
+        'reserved_quantity' => 0,
+        'reserved_on_picklists' => 0,
+        'free_on_stock_quantity' => 3,
+    ]);
+
     $purchaseOrder = PurchaseOrder::query()->create([
         'warehouse_id' => $warehouse->id,
+        'status' => PurchaseOrderStatus::Concept,
         'expected_delivery_date' => now()->addDay()->toDateString(),
     ]);
 
-    return [$user, $purchaseOrder];
+    return [$user, $purchaseOrder, $stockProduct];
 }
 
-it('cannot be marked received before it has been processed', function () {
+it('cannot be marked received before it has been purchased', function () {
     [, $purchaseOrder] = createMarkReceivedContext();
 
-    expect($purchaseOrder->canMarkReceived())->toBeFalse();
+    expect($purchaseOrder->canTransitionTo(PurchaseOrderStatus::Received))->toBeFalse();
 });
 
-it('can be marked received once processed, and not again after completion', function () {
+it('can be marked received once purchased, and not again after', function () {
     [, $purchaseOrder] = createMarkReceivedContext();
 
-    $purchaseOrder->update(['processed' => true]);
-    expect($purchaseOrder->fresh()->canMarkReceived())->toBeTrue();
+    app(PurchaseOrderProcessingService::class)->markPurchased($purchaseOrder, now()->addWeek());
+    expect($purchaseOrder->fresh()->canTransitionTo(PurchaseOrderStatus::Received))->toBeTrue();
 
-    $purchaseOrder->update(['completed' => true]);
-    expect($purchaseOrder->fresh()->canMarkReceived())->toBeFalse();
+    app(PurchaseOrderProcessingService::class)->markReceived($purchaseOrder->fresh());
+    expect($purchaseOrder->fresh()->canTransitionTo(PurchaseOrderStatus::Received))->toBeFalse();
 });
 
-it('marks the purchase order completed without touching stock', function () {
-    [, $purchaseOrder] = createMarkReceivedContext();
+it('marking received does not touch stock or set received_date', function () {
+    [, $purchaseOrder, $stockProduct] = createMarkReceivedContext();
 
-    $purchaseOrder->update(['processed' => true]);
+    app(PurchaseOrderProcessingService::class)->markPurchased($purchaseOrder, now()->addWeek());
+    app(PurchaseOrderProcessingService::class)->markReceived($purchaseOrder->fresh());
 
-    app(PurchaseOrderProcessingService::class)->markReceived($purchaseOrder);
+    $purchaseOrder->refresh();
 
-    expect($purchaseOrder->fresh()->completed)->toBeTrue();
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Received);
+    expect($purchaseOrder->received_date)->toBeNull();
+    expect($stockProduct->fresh()->on_stock_quantity)->toBe(3);
 });
 
-it('hides the Mark Received action until the purchase order is processed', function () {
+it('hides the Mark Received action until the purchase order is purchased', function () {
     [$user, $purchaseOrder] = createMarkReceivedContext();
 
     $this->actingAs($user);
@@ -84,7 +109,7 @@ it('hides the Mark Received action until the purchase order is processed', funct
     Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getKey()])
         ->assertActionHidden('markReceived');
 
-    $purchaseOrder->update(['processed' => true]);
+    app(PurchaseOrderProcessingService::class)->markPurchased($purchaseOrder, now()->addWeek());
 
     Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getKey()])
         ->assertActionVisible('markReceived');
