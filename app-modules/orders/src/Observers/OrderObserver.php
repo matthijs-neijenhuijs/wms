@@ -36,10 +36,12 @@ class OrderObserver
         $prefix = strtoupper(substr((string) $warehouse->name, 0, 4));
         $year = now()->format('y');
 
+        // Scoped by prefix+year, not warehouse_id: generated_custom_order_id is
+        // globally unique, and different warehouses can share the same 4-character
+        // prefix (e.g. "phae1" and "phae2" both prefix to "PHAE").
         $maxGeneratedYearOrderId = Order::query()
             ->withoutGlobalScopes()
-            ->where('warehouse_id', $order->warehouse_id)
-            ->whereYear('created_at', now()->year)
+            ->where('generated_custom_order_id', 'like', "ORDER{$prefix}{$year}%")
             ->max('generated_year_order_id');
 
         $nextGeneratedYearOrderId = ($maxGeneratedYearOrderId ?? 0) + 1;

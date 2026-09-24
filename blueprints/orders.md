@@ -1480,3 +1480,135 @@ tests never pass a causer, exercising the `causerId = null` no-op path),
 `vendor/bin/pint --dirty --format agent` and `vendor/bin/phpstan analyse` are
 both clean. Manual browser verification (toast + notification bell) is a
 user follow-up, not run as part of this pass.
+
+---
+
+## 10. New Work — Stock Mutation Attribution (Order/Purchase Order → Stock History)
+
+### 10.1 Rule
+
+A product's combined History tab (see [`products.md`](products.md) "Combined
+History tab") should show, for every physical stock-quantity change, which
+Order (sales, decreases stock) or Purchase Order (receiving, increases stock)
+caused it, and by how much. Before this, `StockProduct`'s `LogsActivity`
+dirty-diff log recorded only before/after column values with no reference to
+the triggering order — both mutation sites (`OrderStatusTransitionService::reduceStock()`
+and `App\Services\PurchaseOrderProcessingService::processScanCompletion()`)
+just called `$stockProduct->save()`. Scope is deliberately limited to
+physical stock (`on_stock_quantity`); reservation bookkeeping
+(`reserved_quantity`/`reserved_on_picklists`) is unchanged.
+
+### 10.2 `App\Services\StockMutationLogger`
+
+New static helper, `log(StockProduct $stockProduct, int $quantityBefore,
+?int $causerId, string $description, array $properties): ?Activity`. Computes
+the signed delta from `$quantityBefore` vs. the model's current
+`on_stock_quantity` (returns `null`, writes nothing, if unchanged), then
+writes one `activity('stock_product')` entry with `event('updated')` and
+`withProperties([...$properties, 'quantity_delta', 'quantity_before',
+'quantity_after', 'direction' => 'increase'|'decrease'])`. `$properties` must
+carry either `order_id`/`order_reference` or
+`purchase_order_id`/`purchase_order_reference`.
+
+- Resolves `$causerId` to a `User` model itself (`User::find($causerId)`)
+  before calling `causedBy()`, rather than passing the raw int straight
+  through: Spatie's `CauserResolver::resolveUsingId()` **throws**
+  `CouldNotLogActivity` if the id doesn't resolve to an existing row (e.g. a
+  user deleted between the request and this running, for `reduceStock()`'s
+  queued-listener path) — which would otherwise abort the whole stock
+  mutation. `causedBy(null)` is a documented no-op.
+- Deliberately omits `old`/`attributes` properties (unlike the auto dirty-diff
+  it replaces) so the vendor's "Revert" record action — which requires
+  `properties['old']` — stays hidden on these rows; reverting a stock
+  quantity outside the real mutation flow would corrupt state.
+- Keeps `event('updated')`, not a custom event string:
+  `AlizHarb\ActivityLog\Enums\ActivityLogEvent` and the activity table's
+  `event` `SelectFilter` only enumerate `created/updated/deleted/restored` —
+  a custom value would silently vanish from that filter's dropdown.
+
+### 10.3 Wiring at both mutation sites
+
+Both call sites suppress `StockProduct`'s own automatic dirty-diff log for
+this specific `save()` via `activity()->withoutLogging(fn () =>
+$stockProduct->save())` (Spatie's per-call log-suppression API), immediately
+followed by one `StockMutationLogger::log()` call:
+
+- `OrderStatusTransitionService::adjustStockLevels()` (called only from
+  `reduceStock()`) gained a fourth `?int $causerId = null` parameter,
+  threaded from `reduceStock()`'s existing `$causerId`. Description: `"Stock
+  reduced by order {$order->generated_custom_order_id}"`, properties
+  `order_id`/`order_reference`.
+- `PurchaseOrderProcessingService::processScanCompletion()` gained a second
+  `?int $causerId = null` parameter. Its one caller,
+  `Modules\Orders\Filament\Resources\PurchaseOrders\Pages\ViewPurchaseOrder::scanProductBarcode()`,
+  now passes `auth()->id()` — safe there specifically because that action
+  runs synchronously inside an authenticated Livewire request, unlike
+  `reduceStock()`'s queued-listener path. Description: `"Stock increased via
+  purchase order {$purchaseOrder->generated_custom_purchase_order_id}"`,
+  properties `purchase_order_id`/`purchase_order_reference`.
+
+**Found and fixed along the way**: `processScanCompletion()` only mutated
+`on_stock_quantity`, never recalculating `free_on_stock_quantity` itself —
+that only happened afterward, in the always-called
+`refreshReservedStockForProductIds()` (which does its own **unsuppressed**
+`$stockProduct->save()`, since it's shared reservation-bookkeeping logic used
+from several unrelated call sites). Since `free_on_stock_quantity` almost
+always changes whenever `on_stock_quantity` does, this left a second,
+causer-less, generic "updated" row immediately after every rich
+purchase-order-attributed one — confusing noise directly undermining the
+point of this feature. Fixed by making `processScanCompletion()` recalculate
+`free_on_stock_quantity` itself, inside the same suppressed save, via
+`OrderStatusTransitionService::recalculateFreeStock()` (now `public`, was
+`protected`; still the single canonical implementation of the
+`free_on_stock_quantity = max(0, on_stock_quantity - reserved_quantity -
+reserved_on_picklists)` formula — see [`products.md`](products.md)). This
+makes the state self-consistent immediately, so the later reservation-refresh
+save has nothing left to change in the common case (no other order's
+reservation is affected) and legitimately stays silent; it still logs
+normally on its own terms when a purchase order's arrival genuinely changes
+other orders' `reserved_quantity`, which is a real, separate event worth
+keeping visible.
+
+### 10.4 Combined History tab column
+
+See [`products.md`](products.md) "Combined History tab" for
+`Pages\ManageProductHistory` and
+`App\Filament\Resources\ActivityLogs\Columns\StockMutationColumns` (direction
+icon, signed delta badge, clickable order/PO reference — reads the
+`StockMutationLogger` properties above via `Activity::getProperty()`).
+
+### 10.5 Tests
+
+`tests/Feature/StockMutationLoggingTest.php`: reducing stock via a
+`reduce_stock` status transition writes exactly one `stock_product` "updated"
+activity (plus the fixture's "created" — confirming no duplicate auto-diff
+entry) with the correct causer, `order_id`/`order_reference`, signed delta,
+before/after quantities, `direction = 'decrease'`, and no `old` property;
+fully scanning a purchase order writes one activity with
+`purchase_order_id`/`purchase_order_reference`, a positive delta, and
+`direction = 'increase'`. `tests/Feature/ActivityLogHistoryTabTest.php` gained
+a test asserting the combined tab's table query returns both a Product-subject
+and a StockProduct-subject activity together, newest first (time-advanced via
+`$this->travelTo()` between steps, since `activity_log.created_at` is
+second-precision and same-second ties would make strict ordering
+non-deterministic otherwise).
+
+**Note on testing this page's rendered HTML**: every table in this app is
+configured with `->deferLoading()` globally (`App\Providers\FilamentServiceProvider`),
+so a bare `Livewire::test($page)->html()` snapshot never executes the
+`wire:init="loadTable"` follow-up request that actually populates rows — this
+is pre-existing behavior of every History tab, not specific to this page.
+Attempting to force it via `->call('loadTable')` or `->set('isTableLoaded',
+true)` hits an unrelated "Invalid Livewire snapshot structure" error on these
+record-scoped pages. The reliable way to assert on rendered row data is
+`$livewire->instance()->getTable()->getRecords()` directly, not
+`assertCanSeeTableRecords()`.
+
+**Implementation status**: implemented and verified —
+`tests/Feature/StockMutationLoggingTest.php` (2 tests),
+`tests/Feature/ActivityLogHistoryTabTest.php`, and
+`tests/Feature/ActivityLogResourceTest.php` all pass, along with the
+pre-existing `OrderStatusTransitionTest.php`, `PurchaseOrderStockDeferralTest.php`,
+and `PurchaseOrderMarkReceivedTest.php` regression suites (no behavior change
+for reservation-only paths). `vendor/bin/pint --dirty --format agent` and
+`vendor/bin/phpstan analyse` are both clean.

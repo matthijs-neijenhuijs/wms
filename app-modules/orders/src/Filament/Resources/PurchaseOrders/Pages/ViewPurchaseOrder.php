@@ -80,7 +80,12 @@ class ViewPurchaseOrder extends ViewRecord
         $freshPurchaseOrder = $purchaseOrder->fresh();
 
         if ($freshPurchaseOrder->isFullyScanned()) {
-            app(PurchaseOrderProcessingService::class)->processScanCompletion($freshPurchaseOrder);
+            $causerId = auth()->id();
+
+            app(PurchaseOrderProcessingService::class)->processScanCompletion(
+                $freshPurchaseOrder,
+                is_int($causerId) ? $causerId : null,
+            );
 
             Notification::make()
                 ->title(__('Purchase order fully scanned — stock updated'))
