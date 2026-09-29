@@ -123,6 +123,16 @@ class Product extends Model
     }
 
     /**
+     * @return BelongsToMany<StockLocation, $this, Pivot, 'pivot'>
+     */
+    public function stockLocations(): BelongsToMany
+    {
+        return $this->belongsToMany(StockLocation::class, 'stock_location_product')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+
+    /**
      * Activity log entries for this product's `StockProduct` row, surfaced on
      * the "Stock History" tab. `StockProduct`'s own changes are logged under
      * `subject_type = StockProduct`, not `Product`, so this is a distinct

@@ -78,12 +78,19 @@ class OrderStatusTransitionService
             'picklist_id' => $picklist->getKey(),
         ]);
 
+        $allocator = app(StockLocationAllocator::class);
+
         foreach ($order->products as $orderProduct) {
             $quantity = max((int) ($orderProduct->quantity ?? 0), 0);
+
+            $locationAssignments = $orderProduct->product_id
+                ? $allocator->allocate((int) $orderProduct->product_id, $quantity)
+                : array_fill(0, $quantity, null);
 
             for ($index = 0; $index < $quantity; $index++) {
                 PicklistProduct::query()->create([
                     'picklist_id' => $picklist->id,
+                    'stock_location_id' => $locationAssignments[$index] ?? null,
                     'barcode' => (string) ($orderProduct->barcode ?? ''),
                     'reference_code' => (string) ($orderProduct->reference_code ?? ''),
                     'product_title' => (string) ($orderProduct->name ?? ''),

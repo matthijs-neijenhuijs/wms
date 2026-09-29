@@ -70,11 +70,12 @@
                     <table class="fi-ta-table">
                         <thead>
                             <tr>
-                                <th class="fi-ta-header-cell !text-left" style="width: 15%; text-align: left;">Reference Code</th>
-                                <th class="fi-ta-header-cell !text-left" style="width: 35%; text-align: left;">Name</th>
-                                <th class="fi-ta-header-cell !text-left" style="width: 15%; text-align: left;">Barcode</th>
-                                <th class="fi-ta-header-cell !text-left" style="width: 20%; text-align: left;">Updated</th>
-                                <th class="fi-ta-header-cell !text-left" style="width: 15%; text-align: left;">Scanned</th>
+                                <th class="fi-ta-header-cell !text-left" style="width: 13%; text-align: left;">Location</th>
+                                <th class="fi-ta-header-cell !text-left" style="width: 13%; text-align: left;">Reference Code</th>
+                                <th class="fi-ta-header-cell !text-left" style="width: 30%; text-align: left;">Name</th>
+                                <th class="fi-ta-header-cell !text-left" style="width: 13%; text-align: left;">Barcode</th>
+                                <th class="fi-ta-header-cell !text-left" style="width: 17%; text-align: left;">Updated</th>
+                                <th class="fi-ta-header-cell !text-left" style="width: 14%; text-align: left;">Scanned</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -84,6 +85,11 @@
                                     wire:key="picklist-product-{{ $product->id }}-{{ (int) $product->scanned }}"
                                     @if($product->scanned) style="background-color: #bbf7d0;" @endif
                                 >
+                                    <td class="fi-ta-cell">
+                                        <div class="fi-ta-col">
+                                            <span class="fi-ta-text">{{ $product->stockLocation?->name ?? '—' }}</span>
+                                        </div>
+                                    </td>
                                     <td class="fi-ta-cell">
                                         <div class="fi-ta-col">
                                             <span class="fi-ta-text">{{ $product->reference_code }}</span>
@@ -124,7 +130,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="fi-ta-cell text-center text-sm text-gray-500 dark:text-gray-400">
+                                    <td colspan="6" class="fi-ta-cell text-center text-sm text-gray-500 dark:text-gray-400">
                                         <div class="fi-ta-col">
                                             <span class="fi-ta-text">No products found</span>
                                         </div>

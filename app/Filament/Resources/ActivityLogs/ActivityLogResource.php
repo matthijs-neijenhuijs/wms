@@ -17,6 +17,7 @@ use Modules\Orders\Models\OrderStatus;
 use Modules\Orders\Models\PurchaseOrder;
 use Modules\Picklists\Models\Picklist;
 use Modules\Products\Models\Product;
+use Modules\Products\Models\StockLocation;
 use Modules\Products\Models\StockProduct;
 use Modules\Settings\Models\AttributeGroup;
 use Modules\Settings\Models\VatRate;
@@ -55,6 +56,7 @@ class ActivityLogResource extends BaseActivityLogResource
                 Picklist::class,
                 Product::class,
                 PurchaseOrder::class,
+                StockLocation::class,
                 VatRate::class,
             ], function (Builder $subjectQuery) use ($tenant): void {
                 $subjectQuery->whereBelongsTo($tenant, 'warehouse');

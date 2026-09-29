@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Orders\Models\Order;
+use Modules\Products\Models\StockLocation;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -46,7 +47,15 @@ class Picklist extends Model
      */
     public function products(): HasMany
     {
-        return $this->hasMany(PicklistProduct::class)->orderBy('barcode');
+        return $this->hasMany(PicklistProduct::class)
+            ->with('stockLocation')
+            ->orderByRaw('stock_location_id is null')
+            ->orderBy(
+                StockLocation::query()
+                    ->select('rank')
+                    ->whereColumn('id', 'picklists_products.stock_location_id')
+            )
+            ->orderBy('barcode');
     }
 
     /**

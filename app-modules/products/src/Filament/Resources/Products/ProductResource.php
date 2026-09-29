@@ -16,6 +16,7 @@ use Modules\Products\Filament\Resources\Products\Pages\EditProduct;
 use Modules\Products\Filament\Resources\Products\Pages\EditProductStock;
 use Modules\Products\Filament\Resources\Products\Pages\ListProducts;
 use Modules\Products\Filament\Resources\Products\Pages\ManageProductHistory;
+use Modules\Products\Filament\Resources\Products\RelationManagers\StockLocationsRelationManager;
 use Modules\Products\Filament\Resources\Products\Schemas\ProductForm;
 use Modules\Products\Filament\Resources\Products\Tables\ProductsTable;
 use Modules\Products\Models\Product;
@@ -50,7 +51,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            StockLocationsRelationManager::class,
         ];
     }
 

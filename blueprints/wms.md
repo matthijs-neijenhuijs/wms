@@ -239,6 +239,7 @@ Each existing domain and its new work is documented in its own file:
 - [`settings.md`](settings.md) — Warehouses, Subdomains, API Keys, VAT Rates, Attributes; History tab (new work)
 - [`users.md`](users.md) — Users; History tab (new work)
 - [`products.md`](products.md) — Products, Stock; History tab bug fix
+- [`locations.md`](locations.md) — Stock Locations (nested, ranked warehouse bins) and picklist walking-order sort (new work)
 - [`brands.md`](brands.md) — Brands; History tab (new work)
 - [`clients.md`](clients.md) — Clients; History tab bug fix
 - [`orders.md`](orders.md) — Orders, Order Statuses, Purchase Orders (implemented), E-commerce Order API (planned); History tab bug fix + new work
