@@ -217,3 +217,194 @@ it('returns locations ordered by rank, including both placed and unplaced ones',
         ->and($locations->firstWhere('id', $first->id)->x)->toBeNull()
         ->and($locations->firstWhere('id', $second->id)->x)->not->toBeNull();
 });
+
+it('removes a location from the map by clearing its layout', function () {
+    [, $warehouse] = createWarehouseMapContext('remove');
+
+    $location = StockLocation::query()->create([
+        'warehouse_id' => $warehouse->id,
+        'name' => 'A-1',
+        'rank' => 1,
+        'x' => 2.0,
+        'y' => 3.0,
+        'width' => 1.5,
+        'height' => 1.0,
+    ]);
+
+    Livewire::test(WarehouseMap::class)
+        ->call('removeLocationFromMap', $location->id);
+
+    $location->refresh();
+
+    expect($location->exists)->toBeTrue()
+        ->and($location->x)->toBeNull()
+        ->and($location->y)->toBeNull()
+        ->and($location->width)->toBeNull()
+        ->and($location->height)->toBeNull();
+});
+
+it('404s when removing a location belonging to a different warehouse from the map', function () {
+    createWarehouseMapContext('remove-tenant-a');
+
+    $otherSubdomain = Subdomain::query()->create([
+        'subdomain' => 'warehouse-map-remove-tenant-b',
+        'name' => 'Warehouse Map Remove Tenant B',
+    ]);
+
+    $warehouseB = Warehouse::query()->create([
+        'subdomain_id' => $otherSubdomain->id,
+        'name' => 'Warehouse Map Remove Warehouse B',
+        'currency' => 'EUR',
+    ]);
+
+    $locationInWarehouseB = StockLocation::query()->create([
+        'warehouse_id' => $warehouseB->id,
+        'name' => 'Foreign location',
+        'rank' => 1,
+    ]);
+
+    expect(fn () => Livewire::test(WarehouseMap::class)
+        ->call('removeLocationFromMap', $locationInWarehouseB->id))
+        ->toThrow(ModelNotFoundException::class);
+});
+
+it('lists unplaced locations in the sidebar', function () {
+    [, $warehouse] = createWarehouseMapContext('sidebar');
+
+    StockLocation::query()->create([
+        'warehouse_id' => $warehouse->id,
+        'name' => 'Unplaced Shelf',
+        'rank' => 1,
+    ]);
+
+    Livewire::test(WarehouseMap::class)
+        ->assertSee('Unplaced Locations')
+        ->assertSee('Unplaced Shelf')
+        ->assertSee('Remove From Map');
+});
+
+it('updates the floor size from the map page', function () {
+    [, $warehouse] = createWarehouseMapContext('floor-size', null, null);
+
+    Livewire::test(WarehouseMap::class)
+        ->callAction('editFloorSize', data: [
+            'floor_width' => 30,
+            'floor_height' => 15,
+        ])
+        ->assertHasNoActionErrors();
+
+    $warehouse->refresh();
+
+    expect((float) $warehouse->floor_width)->toBe(30.0)
+        ->and((float) $warehouse->floor_height)->toBe(15.0);
+});
+
+it('requires both floor dimensions when editing the floor size', function () {
+    createWarehouseMapContext('floor-size-required');
+
+    Livewire::test(WarehouseMap::class)
+        ->callAction('editFloorSize', data: [
+            'floor_width' => null,
+            'floor_height' => null,
+        ])
+        ->assertHasActionErrors([
+            'floor_width' => 'required',
+            'floor_height' => 'required',
+        ]);
+});
+
+it('keeps placed locations inside the floor when it shrinks', function () {
+    [, $warehouse] = createWarehouseMapContext('floor-shrink', 20.0, 10.0);
+
+    $location = StockLocation::query()->create([
+        'warehouse_id' => $warehouse->id,
+        'name' => 'A-1',
+        'rank' => 1,
+        'x' => 15.0,
+        'y' => 8.0,
+        'width' => 4.0,
+        'height' => 6.0,
+    ]);
+
+    $unplaced = StockLocation::query()->create([
+        'warehouse_id' => $warehouse->id,
+        'name' => 'A-2',
+        'rank' => 2,
+    ]);
+
+    Livewire::test(WarehouseMap::class)
+        ->callAction('editFloorSize', data: [
+            'floor_width' => 10,
+            'floor_height' => 5,
+        ]);
+
+    $location->refresh();
+    $unplaced->refresh();
+
+    expect((float) $location->x)->toBe(6.0)
+        ->and((float) $location->y)->toBe(0.0)
+        ->and((float) $location->width)->toBe(4.0)
+        ->and((float) $location->height)->toBe(5.0)
+        ->and($unplaced->x)->toBeNull();
+});
+
+it('saves a walking route by reassigning ranks in the clicked order', function () {
+    [, $warehouse] = createWarehouseMapContext('route');
+
+    $first = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => '1', 'rank' => 1]);
+    $second = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => '2', 'rank' => 2]);
+    $third = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => '3', 'rank' => 3]);
+
+    $ranks = Livewire::test(WarehouseMap::class)
+        ->instance()
+        ->saveRoute([$first->id, $third->id, $second->id]);
+
+    expect($ranks)->toBe([$first->id => 1, $third->id => 2, $second->id => 3])
+        ->and($first->refresh()->rank)->toBe(1)
+        ->and($third->refresh()->rank)->toBe(2)
+        ->and($second->refresh()->rank)->toBe(3);
+});
+
+it('keeps locations missing from the route after it in their current order', function () {
+    [, $warehouse] = createWarehouseMapContext('route-rest');
+
+    $a = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => 'A', 'rank' => 1]);
+    $b = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => 'B', 'rank' => 2]);
+    $c = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => 'C', 'rank' => 3]);
+    $d = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => 'D', 'rank' => 4]);
+
+    Livewire::test(WarehouseMap::class)
+        ->call('saveRoute', [$d->id, $b->id]);
+
+    expect($d->refresh()->rank)->toBe(1)
+        ->and($b->refresh()->rank)->toBe(2)
+        ->and($a->refresh()->rank)->toBe(3)
+        ->and($c->refresh()->rank)->toBe(4);
+});
+
+it('rejects a route containing a location from a different warehouse without changing ranks', function () {
+    [, $warehouse] = createWarehouseMapContext('route-tenant-a');
+
+    $own = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => 'Own', 'rank' => 1]);
+    $ownSecond = StockLocation::query()->create(['warehouse_id' => $warehouse->id, 'name' => 'Own 2', 'rank' => 2]);
+
+    $otherSubdomain = Subdomain::query()->create([
+        'subdomain' => 'warehouse-map-route-tenant-b',
+        'name' => 'Warehouse Map Route Tenant B',
+    ]);
+
+    $warehouseB = Warehouse::query()->create([
+        'subdomain_id' => $otherSubdomain->id,
+        'name' => 'Warehouse Map Route Warehouse B',
+        'currency' => 'EUR',
+    ]);
+
+    $foreign = StockLocation::query()->create(['warehouse_id' => $warehouseB->id, 'name' => 'Foreign', 'rank' => 1]);
+
+    expect(fn () => Livewire::test(WarehouseMap::class)
+        ->call('saveRoute', [$ownSecond->id, $foreign->id]))
+        ->toThrow(ModelNotFoundException::class);
+
+    expect($own->refresh()->rank)->toBe(1)
+        ->and($ownSecond->refresh()->rank)->toBe(2);
+});

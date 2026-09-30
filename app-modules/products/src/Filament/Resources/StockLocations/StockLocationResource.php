@@ -18,10 +18,13 @@ use Modules\Products\Filament\Resources\StockLocations\Pages\ManageStockLocation
 use Modules\Products\Filament\Resources\StockLocations\Schemas\StockLocationForm;
 use Modules\Products\Filament\Resources\StockLocations\Tables\StockLocationsTable;
 use Modules\Products\Models\StockLocation;
+use UnitEnum;
 
 class StockLocationResource extends Resource
 {
     protected static ?string $model = StockLocation::class;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
