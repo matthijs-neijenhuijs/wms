@@ -38,6 +38,10 @@ jobs:
               run: |
                 cp .env.ci .env
 
+            - name: Configure Composer auth for Filament
+              run: |
+                composer config http-basic.packages.filamentphp.com "${{ secrets.FILAMENT_USERNAME }}" "${{ secrets.FILAMENT_LICENSE_KEY }}"
+
             - name: Install dependencies
               run: |
                 composer install -q --no-ansi \
