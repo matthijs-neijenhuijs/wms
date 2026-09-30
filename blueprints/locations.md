@@ -99,6 +99,79 @@ untouched — it's not read by the picking UI.
 (first column) reading `$product->stockLocation?->name ?? '—'` — the only
 UI surface that shows staff where to walk for each pick.
 
+## Warehouse floor map
+
+Gives Stock Locations a spatial representation: each warehouse gets a
+fixed floor size, each location gets a position/size rectangle on that
+floor, and a canvas page renders every placed location as a square
+(labelled with name + rank) connected by a line in walking-order sequence,
+so staff can see exactly where to walk and in what order.
+
+**`App\Models\Warehouse`** gained `floor_width`/`floor_height`
+(`decimal(8,2)`, nullable — null means "not yet set", the map page then
+shows a prompt to set them instead of rendering). Added to `$fillable` and
+a new `casts()` method (this model previously had none). Already covered
+by the existing `logFillable()` History tab — no activity-log changes
+needed.
+
+**`Modules\Products\Models\StockLocation`** gained `x`/`y`/`width`/`height`
+(`decimal(8,2)`, nullable each — a location is "unplaced" until a manager
+drags it onto the map; all four are always written together, never
+partially). Added to `$fillable`/`casts()`. A completed drag (move or
+resize) adds one History entry via the existing `logFillable()` config —
+acceptable since the persistence call only fires once per drag gesture
+(on release), not continuously during the drag.
+
+**`WarehouseResource`** form gained two fields, `FloorWidthInput`/
+`FloorHeightInput` (`TextInput`, nullable, `->numeric()->step(0.01)
+->minValue(0.1)`), after `CurrencySelect`. No real-world unit is enforced
+or labelled (no "m"/"ft") — the numbers only need to be internally
+consistent with the locations placed within them.
+
+**New standalone page: `App\Filament\Pages\WarehouseMap`** (top-level nav,
+no group, icon `Heroicon::OutlinedMap`) — the first `Filament\Pages\Page`
+subclass in this app that isn't `Dashboard`. **Registered via an explicit
+`->pages([WarehouseMap::class])` call in `AdminPanelProvider`, not
+`discoverPages()`** — `app/Filament/Pages/` already contains two broken,
+empty stub files (`Profile.php`, `ProfileModal.php`, pre-existing and
+unrelated to this feature) that a directory-scanning `discoverPages()`
+call would fatal-error on trying to reflect. `AdminPanelProvider` had no
+page registration of any kind before this (confirmed
+`App\Filament\Pages\Dashboard`'s widget-overriding subclass was itself
+dead code, never wired in — a separate pre-existing gap, not fixed here).
+
+Data loads through the page's own `StockLocation::query()`/`Warehouse`
+tenant accessor — both already globally scoped to the current Filament
+tenant via the existing `BelongsToWarehouse`/`WarehouseScope` machinery, so
+the map needs no manual tenant filtering, and a forged location id from
+another warehouse simply 404s through `findOrFail()`.
+
+**Editing is drag-only**: there are no numeric X/Y/Width/Height fields on
+the Stock Location form. The map's canvas is hand-written vanilla JS
+(Canvas 2D + Pointer Events — no drag/canvas library is installed in this
+app) that lets a manager drag a square to move it, drag its corner to
+resize it, or drag an unplaced location in from a sidebar list onto the
+floor; on release, it calls the page's `saveLocationLayout(int $id, float
+$x, float $y, float $width, float $height)` method directly via
+`$wire.call(...)` (Livewire 3's direct-call JS API — the first use of that
+specific pattern in this app; the existing barcode-scanner script instead
+uses the `Livewire.dispatch()`/`#[On(...)]` browser-event round-trip).
+Server-side, that method clamps width/height to a 0.1 minimum and clamps
+x/y so a square can never extend past the warehouse's floor bounds (when
+set).
+
+The map also draws the walking-order: placed squares are connected by a
+line/arrow in ascending `rank` order, with each square labelled by its
+rank number — a manager can visually sanity-check that the picking route
+this feature already computes (see "Picklist walking-order integration"
+above) matches the physical floor layout.
+
+No browser/DOM testing tool (Dusk, etc.) exists in this app, so the canvas
+drawing and drag interactions are not unit-tested — only the
+Livewire-reachable `saveLocationLayout()` method (persistence, clamping,
+tenant-scoping) and the two new Warehouse form fields are covered by
+automated tests; the drag/canvas behavior itself is verified manually.
+
 ## Known adjacent bug (found, not fixed by this work)
 
 `FailedProductsTable`/`ProductsTable`'s infolist `Entry::getState()`

@@ -27,6 +27,8 @@ class Warehouse extends Model
         'name',
         'currency',
         'order_statuses_id_completed_picklist',
+        'floor_width',
+        'floor_height',
     ];
 
     /**
@@ -77,5 +79,13 @@ class Warehouse extends Model
                 $warehouse->subdomain_id = app('current_subdomain')->id;
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'floor_width' => 'decimal:2',
+            'floor_height' => 'decimal:2',
+        ];
     }
 }

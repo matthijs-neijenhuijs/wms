@@ -29,6 +29,10 @@ class StockLocation extends Model
         'parent_id',
         'name',
         'rank',
+        'x',
+        'y',
+        'width',
+        'height',
     ];
 
     protected static function booted(): void
@@ -134,6 +138,10 @@ class StockLocation extends Model
     {
         return [
             'rank' => 'integer',
+            'x' => 'decimal:2',
+            'y' => 'decimal:2',
+            'width' => 'decimal:2',
+            'height' => 'decimal:2',
         ];
     }
 }

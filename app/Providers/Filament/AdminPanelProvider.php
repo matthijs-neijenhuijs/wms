@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use AlizHarb\ActivityLog\ActivityLogPlugin;
+use App\Filament\Pages\WarehouseMap;
 use App\Http\Middleware\IdentifySubdomain;
 use App\Models\Warehouse;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -67,6 +68,9 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+            ])
+            ->pages([
+                WarehouseMap::class,
             ])
             ->navigationGroups([
                 NavigationGroup::make()
