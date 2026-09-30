@@ -1,9 +1,12 @@
 {
     ":product reduced by :quantity for order :order": "",
     ":quantity units expected on :date": "",
+    "A location cannot be its own parent or nested under one of its own sub-locations.": "",
     "Active": "",
     "Allowed IPs": "",
-    "Are you sure you want to mark this purchase order as received? This does not change stock.": "",
+    "Are you sure you want to cancel this purchase order? This cannot be undone.": "",
+    "Are you sure you want to mark this purchase order as processed? This will increase on-hand stock for every scanned line item.": "",
+    "Are you sure you want to mark this purchase order as received? This does not change stock, and does not set the Received Date — set that on the Edit page if needed.": "",
     "Average Order Amount": "",
     "CSV Or Excel File": "",
     "Cancel": "",

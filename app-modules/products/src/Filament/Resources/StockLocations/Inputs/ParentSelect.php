@@ -24,24 +24,29 @@ class ParentSelect
                         return;
                     }
 
-                    if ((int) $value === $record->getKey()) {
-                        $fail('A location cannot be its own parent.');
-
-                        return;
-                    }
-
-                    $cursor = StockLocation::find($value);
-
-                    while ($cursor?->parent_id) {
-                        if ((int) $cursor->parent_id === $record->getKey()) {
-                            $fail('A location cannot be nested under one of its own sub-locations.');
-
-                            return;
-                        }
-
-                        $cursor = $cursor->parent;
+                    if (self::wouldCreateCycle($record, (int) $value)) {
+                        $fail(__('A location cannot be its own parent or nested under one of its own sub-locations.'));
                     }
                 },
             ]);
+    }
+
+    private static function wouldCreateCycle(StockLocation $record, int $parentId): bool
+    {
+        if ($parentId === $record->getKey()) {
+            return true;
+        }
+
+        $cursor = StockLocation::query()->find($parentId);
+
+        while ($cursor?->parent_id) {
+            if ((int) $cursor->parent_id === $record->getKey()) {
+                return true;
+            }
+
+            $cursor = $cursor->parent;
+        }
+
+        return false;
     }
 }

@@ -32,22 +32,16 @@ class StockLocationAllocator
         $assignments = [];
 
         foreach ($locations as $location) {
-            $remaining = (int) $location->quantity;
+            $remainingNeeded = $quantity - count($assignments);
 
-            while ($remaining > 0 && count($assignments) < $quantity) {
-                $assignments[] = (int) $location->stock_location_id;
-                $remaining--;
-            }
-
-            if (count($assignments) >= $quantity) {
+            if ($remainingNeeded <= 0) {
                 break;
             }
+
+            $take = min((int) $location->quantity, $remainingNeeded);
+            array_push($assignments, ...array_fill(0, $take, (int) $location->stock_location_id));
         }
 
-        while (count($assignments) < $quantity) {
-            $assignments[] = null;
-        }
-
-        return $assignments;
+        return array_pad($assignments, $quantity, null);
     }
 }
