@@ -245,6 +245,7 @@ Each existing domain and its new work is documented in its own file:
 - [`orders.md`](orders.md) — Orders, Order Statuses, Purchase Orders (implemented), E-commerce Order API (planned); History tab bug fix + new work
 - [`picklists.md`](picklists.md) — Picklists; History tab (new work)
 - [`platform.md`](platform.md) — AI persistence, cross-cutting findings
+- [`dashboard.md`](dashboard.md) — Tenant dashboard page and widgets: order/picklist backlog, monthly sales charts, low-stock and top-products tables (new work)
 
 The Purchase Order feature and the E-commerce Order Creation API — the two
 pieces of new work described in the Context above — are both documented in

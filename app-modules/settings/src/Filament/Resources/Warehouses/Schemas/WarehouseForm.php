@@ -9,6 +9,7 @@ use Modules\Settings\Filament\Resources\Warehouses\Inputs\CompletedPicklistStatu
 use Modules\Settings\Filament\Resources\Warehouses\Inputs\CurrencySelect;
 use Modules\Settings\Filament\Resources\Warehouses\Inputs\FloorHeightInput;
 use Modules\Settings\Filament\Resources\Warehouses\Inputs\FloorWidthInput;
+use Modules\Settings\Filament\Resources\Warehouses\Inputs\LowStockThresholdInput;
 use Modules\Settings\Filament\Resources\Warehouses\Inputs\NameInput;
 
 class WarehouseForm
@@ -21,6 +22,7 @@ class WarehouseForm
                 CurrencySelect::make(),
                 FloorWidthInput::make(),
                 FloorHeightInput::make(),
+                LowStockThresholdInput::make(),
                 CompletedPicklistStatusSelect::make(),
             ]);
     }

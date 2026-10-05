@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use AlizHarb\ActivityLog\ActivityLogPlugin;
+use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\WarehouseMap;
 use App\Http\Middleware\IdentifySubdomain;
 use App\Models\Warehouse;
@@ -70,6 +71,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentInfoWidget::class,
             ])
             ->pages([
+                Dashboard::class,
                 WarehouseMap::class,
             ])
             ->navigationGroups([

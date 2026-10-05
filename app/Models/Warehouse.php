@@ -29,6 +29,7 @@ class Warehouse extends Model
         'order_statuses_id_completed_picklist',
         'floor_width',
         'floor_height',
+        'low_stock_threshold',
     ];
 
     /**
@@ -86,6 +87,7 @@ class Warehouse extends Model
         return [
             'floor_width' => 'decimal:2',
             'floor_height' => 'decimal:2',
+            'low_stock_threshold' => 'integer',
         ];
     }
 }
